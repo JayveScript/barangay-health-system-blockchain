@@ -28,17 +28,21 @@ export function QrScannerTab() {
 
   const handleError = (error: unknown) => {
     console.error("QR Scanner Error:", error);
-    
-    // Most common error is NotAllowedError (camera permission denied)
+
     if (error instanceof Error) {
       if (error.name === "NotAllowedError") {
-        setError("Camera permission denied. Please allow camera access in your browser settings.");
+        setError("Camera permission denied. Please allow camera access in your browser settings and reload.");
       } else if (error.name === "NotFoundError") {
         setError("No camera device found on this device.");
+      } else if (error.name === "NotReadableError") {
+        setError("Camera is in use by another app. Please close other apps using the camera.");
+      } else if (error.name === "OverconstrainedError") {
+        setError("Camera constraints not supported. Try using a different browser.");
       } else {
-        // Suppress generic tracking errors to avoid flashing the UI
-        // We only want to show critical initialization errors
+        setError(`Camera error: ${error.message || error.name}`);
       }
+    } else {
+      setError("Unable to access camera. Make sure you are on HTTPS and have granted camera permission.");
     }
   };
 
@@ -69,10 +73,17 @@ export function QrScannerTab() {
                   }
                 }}
                 onError={handleError}
+                constraints={{
+                  facingMode: "environment",
+                }}
                 components={{
-                  finder: true, // Show the scanning reticle
+                  finder: true,
                 }}
                 sound={true}
+                styles={{
+                  container: { width: "100%", height: "100%" },
+                  video: { width: "100%", height: "100%", objectFit: "cover" },
+                }}
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center bg-emerald-50 text-emerald-600">
