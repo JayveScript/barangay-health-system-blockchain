@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         userId: user.id,
         role: user.role,
       },
-      jwtSecret,
+      process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
