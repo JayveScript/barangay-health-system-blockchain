@@ -36,7 +36,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       message: "Reset code sent successfully.",
-      code, // temporary for testing only
     });
   } catch (error) {
     console.error("FORGOT_PASSWORD_SEND_CODE_ERROR", error);
