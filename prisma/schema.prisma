@@ -395,6 +395,18 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 }
 
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  key       String   // IP address or identifier
+  attempts  Int      @default(1)
+  windowEnd DateTime // when the 15-min window expires
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key])
+  @@index([windowEnd])
+}
+
 enum QrScanAction {
   SCAN_INITIATED
   ACCESS_GRANTED
