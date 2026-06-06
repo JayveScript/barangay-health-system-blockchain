@@ -2818,4 +2818,43 @@ const [form, setForm] = useState({
                     {item.title}
                   </h4>
 
-                
+                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
+                    {item.content}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatAnnouncementDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+
+
+async function readJsonSafe(res: Response) {
+  const text = await res.text();
+
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return {
+      error:
+        "API route returned HTML instead of JSON. Check your backend route or terminal error.",
+    };
+  }
+}
