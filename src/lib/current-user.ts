@@ -38,4 +38,6 @@ export async function getCurrentResidentUser() {
   }
 
   return user;
+
+  
 }

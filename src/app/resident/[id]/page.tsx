@@ -1,4 +1,13 @@
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { prisma } from "../../../lib/prisma";
+import { getScannerUser } from "@/lib/get-scanner-user";
+import { verifyQrAccessToken } from "@/lib/qr-access";
+import { encryptQrPayload } from "@/lib/qr-encryption";
+import { logQrScanActivity } from "@/lib/qr-audit";
+import { formatWelcomeLine } from "@/lib/role-labels";
+import { SecureScanGate } from "@/components/SecureScanGate";
+import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -10,8 +19,103 @@ type PageProps = {
 export default async function PublicResidentPage({ params }: PageProps) {
   const { id } = await params;
 
-  const resident = await prisma.resident.findUnique({
-    where: { id },
+  // ── Security gate (defence-in-depth) ─────────────────────────────────────
+  // Middleware already verified the JWT and checked the role. We read the
+  // trusted headers it forwarded. If they're missing, reject immediately.
+  const scannerUser = await getScannerUser();
+  if (!scannerUser) {
+    redirect("/access-denied");
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const viewer = await prisma.user.findUnique({
+    where: { id: scannerUser.userId },
+    select: {
+      id: true,
+      fullName: true,
+      role: true,
+      barangayId: true,
+    },
+  });
+
+  if (!viewer) {
+    redirect("/access-denied");
+  }
+
+  const cookieStore = await cookies();
+  const qrAccessToken = cookieStore.get("qr_access_token")?.value;
+  const qrAccess = qrAccessToken
+    ? verifyQrAccessToken(qrAccessToken, id)
+    : null;
+
+  if (!qrAccess || qrAccess.userId !== viewer.id) {
+    const residentStub = await prisma.resident.findFirst({
+      where: {
+        id,
+        ...(viewer.role === "SUPER_ADMIN" ? {} : { barangayId: viewer.barangayId }),
+      },
+      select: { id: true, barangayId: true },
+    });
+
+    if (!residentStub) {
+      return (
+        <main className="flex min-h-[100dvh] items-center justify-center bg-[#EEF4FF] p-5">
+          <div className="rounded-3xl bg-white p-8 text-center shadow-xl">
+            <h1 className="text-xl font-black text-slate-900">Resident Not Found</h1>
+            <p className="mt-2 text-sm text-slate-500">
+              This Digital ID record does not exist.
+            </p>
+          </div>
+        </main>
+      );
+    }
+
+    if (qrAccessToken && !qrAccess) {
+      await logQrScanActivity({
+        residentId: id,
+        scannedById: viewer.id,
+        role: viewer.role,
+        action: "SESSION_EXPIRED",
+        success: false,
+        failureReason: "QR access session expired",
+      });
+    }
+
+    let qrToken: string | undefined;
+    try {
+      qrToken = encryptQrPayload({
+        residentId: residentStub.id,
+        barangayId: residentStub.barangayId,
+        issuedAt: Date.now(),
+        v: 1,
+      });
+    } catch {
+      qrToken = undefined;
+    }
+
+    await logQrScanActivity({
+      residentId: residentStub.id,
+      scannedById: viewer.id,
+      role: viewer.role,
+      action: "SCAN_INITIATED",
+      success: true,
+    });
+
+    return (
+      <SecureScanGate
+        qrToken={qrToken}
+        residentId={residentStub.id}
+        welcomeLine={formatWelcomeLine(viewer.role, viewer.fullName)}
+        role={viewer.role}
+      />
+    );
+  }
+
+  const resident = await prisma.resident.findFirst({
+    where: {
+      id,
+      ...(viewer.role === "SUPER_ADMIN" ? {} : { barangayId: viewer.barangayId }),
+    },
     select: {
       id: true,
       firstName: true,
@@ -98,7 +202,7 @@ export default async function PublicResidentPage({ params }: PageProps) {
 
   if (!resident) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#EEF4FF] p-5">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-[#EEF4FF] p-5">
         <div className="rounded-3xl bg-white p-8 text-center shadow-xl">
           <h1 className="text-xl font-black text-slate-900">
             Resident Not Found
@@ -122,7 +226,7 @@ export default async function PublicResidentPage({ params }: PageProps) {
     : "";
 
   return (
-    <main className="min-h-screen bg-[#EEF4FF] p-4">
+    <main className="min-h-[100dvh] bg-[#EEF4FF] p-4">
       <style>{`
         .tab-input { display: none; }
         .tab-panel { display: none; }
@@ -145,8 +249,8 @@ export default async function PublicResidentPage({ params }: PageProps) {
       `}</style>
 
       <div className="mx-auto max-w-4xl overflow-hidden rounded-[30px] bg-white shadow-2xl">
-        <div className="bg-gradient-to-r from-blue-950 to-blue-700 px-5 py-6 text-white">
-          <div className="flex items-center gap-4">
+        <div className="bg-gradient-to-r from-blue-950 to-blue-700 px-4 sm:px-5 py-6 text-white">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
             <img
               src="/images/davao-logo.png"
               alt="Barangay Logo"
@@ -157,11 +261,12 @@ export default async function PublicResidentPage({ params }: PageProps) {
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-100">
                 Barangay Health
               </p>
-              <h1 className="text-2xl font-black leading-tight">
+              <h1 className="text-xl sm:text-2xl font-black leading-tight">
                 Digital Resident ID
               </h1>
-              <p className="mt-1 text-sm text-blue-100">
-                Public resident verification
+              <p className="mt-1 flex items-center justify-center gap-1.5 text-sm text-blue-100 sm:justify-start">
+                <ShieldCheck className="h-4 w-4" />
+                Secure decrypted access — session active
               </p>
             </div>
           </div>
@@ -456,7 +561,7 @@ function SectionTitle({ title }: { title: string }) {
 }
 
 function TwoCols({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3">{children}</div>;
+  return <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>;
 }
 
 function Info({ label, value }: { label: string; value: unknown }) {
