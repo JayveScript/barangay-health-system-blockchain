@@ -37,8 +37,8 @@ export function QrScannerTab() {
       setError("Camera permission denied. Click the camera icon in your browser's address bar and allow access, then reload.");
     } else if (name === "NotFoundError" || message.includes("not found")) {
       setError("No camera found on this device.");
-    } else if (name === "NotReadableError") {
-      setError("Camera is in use by another app. Close other apps using the camera and reload.");
+    } else if (name === "NotReadableError" || message.includes("video source") || message.includes("Could not start")) {
+      setError("Camera is in use by another app (Teams, Zoom, another tab). Close them and reload.");
     } else if (name === "OverconstrainedError") {
       setError("Camera constraints not supported. Try a different browser.");
     } else {
@@ -74,7 +74,7 @@ export function QrScannerTab() {
                 }}
                 onError={handleError}
                 constraints={{
-                  facingMode: "environment",
+                  facingMode: { ideal: "environment" },
                 }}
                 components={{
                   finder: true,
