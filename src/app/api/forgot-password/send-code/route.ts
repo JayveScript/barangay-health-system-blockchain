@@ -19,6 +19,13 @@ export async function POST(req: Request) {
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete any existing token for this email, then store the new one
+    await prisma.passwordResetToken.deleteMany({ where: { email } });
+    await prisma.passwordResetToken.create({
+      data: { email, code, expiresAt },
+    });
 
     await transporter.sendMail({
       from: `"Barangay Health Center" <${process.env.EMAIL_USER}>`,
