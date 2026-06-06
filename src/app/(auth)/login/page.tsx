@@ -108,8 +108,8 @@ function LoginForm() {
   };
 
   return (
-    <main className="min-h-screen bg-[#EFF6FF] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+    <main className="min-h-[100dvh] bg-[#EFF6FF] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] max-w-7xl overflow-hidden rounded-[28px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10 sm:rounded-[32px]">
         <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -159,24 +159,35 @@ function LoginForm() {
           </div>
         </section>
 
-        <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:w-[40%] lg:px-10">
+        <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-6 sm:px-8 sm:py-8 lg:w-[40%] lg:px-10">
           <div className="w-full max-w-md">
-            <div className="mb-8 flex justify-center">
+            {/* Mobile-only compact branding strip */}
+            <div className="mb-4 flex items-center gap-3 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 lg:hidden">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0EA5E9] text-white shadow-sm">
+                <HeartPulse className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-sky-600">Barangay Health Center</p>
+                <p className="text-xs text-slate-500">Management System</p>
+              </div>
+            </div>
+
+            <div className="mb-6 hidden justify-center lg:flex">
               <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/30">
                 <HeartPulse className="h-10 w-10" />
               </div>
             </div>
 
             <div className="text-center">
-              <h2 className="text-5xl font-extrabold text-[#0EA5E9]">
+              <h2 className="text-4xl font-extrabold text-[#0EA5E9] sm:text-5xl">
                 Welcome
               </h2>
-              <p className="mt-3 text-lg text-slate-500">
+              <p className="mt-2 text-base text-slate-500 sm:mt-3 sm:text-lg">
                 Log in to your health center account
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-10 sm:space-y-6">
               <Input
                 label="Username or Email"
                 icon={<User className="h-5 w-5" />}
@@ -289,18 +300,4 @@ function InfoCard({
   text,
 }: {
   icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="group rounded-[24px] border border-white/20 bg-white/15 p-5 shadow-lg shadow-slate-950/20 backdrop-blur-md transition duration-300 hover:-translate-y-2 hover:border-sky-200/70 hover:bg-white/20 hover:shadow-2xl hover:shadow-sky-950/30">
-      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
-        {icon}
-      </div>
-      <h3 className="text-lg font-bold text-white drop-shadow-sm">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-white/90 drop-shadow-sm">
-        {text}
-      </p>
-    </div>
-  );
-}
+  title:

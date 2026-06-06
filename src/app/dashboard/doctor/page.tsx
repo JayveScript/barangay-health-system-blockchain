@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {
   Activity,
   BarChart3,
@@ -211,7 +212,7 @@ export default function DoctorDashboardPage() {
   const currentBarangayName = user.barangay?.name || "Assigned Barangay";
 
   return (
-    <main className="min-h-screen bg-[#EFF6FF] p-4 sm:p-6 lg:h-screen lg:overflow-hidden">
+    <main className="min-h-screen bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:h-screen lg:overflow-hidden lg:pb-6">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -425,6 +426,18 @@ export default function DoctorDashboardPage() {
           </div>
         </section>
       </div>
+
+      <MobileBottomNav
+        items={[
+          { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
+          { id: "appointments", label: "Schedule", icon: <CalendarCheck className="h-5 w-5" /> },
+          { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
+          { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+        ]}
+        active={activeTab}
+        onChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </main>
   );
 }
@@ -1850,39 +1863,4 @@ function yesNo(value: boolean | null | undefined) {
   return value ? "Yes" : "No";
 }
 
-function getResidentInitials(appointment: DoctorAppointment) {
-  const name = getResidentName(appointment);
-
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
-function formatLongDate(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-function formatTime(value: string) {
-  if (!value) return "";
-
-  const [hourRaw, minuteRaw] = value.split(":");
-
-  const date = new Date();
-  date.setHours(Number(hourRaw), Number(minuteRaw || 0), 0, 0);
-
-  return date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+function getResidentInitials(appointment: D
