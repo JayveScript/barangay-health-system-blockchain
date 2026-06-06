@@ -253,10 +253,10 @@ export async function POST(req: Request) {
 
     if (method === "PHONE") {
       await sendOtpSms(normalizedPhone, otp);
-      console.log("OTP SENT TO PHONE:", normalizedPhone);
+      console.log("OTP dispatched via PHONE");
     } else {
       await sendOtpEmail(normalizedEmail, otp);
-      console.log("OTP SENT TO EMAIL:", normalizedEmail);
+      console.log("OTP dispatched via EMAIL");
     }
 
     return NextResponse.json({
