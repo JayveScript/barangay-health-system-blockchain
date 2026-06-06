@@ -12,6 +12,7 @@ import {
   MapPin,
   Menu,
   Pill,
+  Scale,
   ShieldCheck,
   Syringe,
   UserRound,
@@ -36,9 +37,10 @@ type NurseUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
+import { BMITab } from "@/components/dashboard/BMITab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr" | "bmi">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -160,6 +162,15 @@ export default function NurseDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "bmi"}
+              icon={<Scale className="h-5 w-5" />}
+              label="BMI Records"
+              onClick={() => {
+                setActiveTab("bmi");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -194,6 +205,12 @@ export default function NurseDashboardPage() {
                 icon={<ScanLine className="h-5 w-5" />}
                 label="Scan QR"
                 onClick={() => setActiveTab("scan-qr")}
+              />
+              <SidebarButton
+                active={activeTab === "bmi"}
+                icon={<Scale className="h-5 w-5" />}
+                label="BMI Records"
+                onClick={() => setActiveTab("bmi")}
               />
             </div>
           </div>
@@ -266,6 +283,8 @@ export default function NurseDashboardPage() {
             {activeTab === "personal" && (
               <PersonalInfoTab user={user} initials={initials} />
             )}
+
+            {activeTab === "bmi" && <BMITab />}
           </div>
         </section>
       </div>
@@ -275,6 +294,7 @@ export default function NurseDashboardPage() {
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+          { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
         ]}
         active={activeTab}
         onChange={(id) => setActiveTab(id as typeof activeTab)}

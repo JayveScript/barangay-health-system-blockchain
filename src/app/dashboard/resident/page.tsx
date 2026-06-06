@@ -1603,6 +1603,24 @@ function ResidentAppointmentsTab() {
   );
 }
 
+type ResidentBMIRecord = {
+  id: string;
+  height: number;
+  weight: number;
+  bmi: number;
+  bmiCategory: string;
+  pulseRate: number;
+  createdAt: string;
+  recordedBy?: { fullName?: string | null };
+};
+
+function bmiCategoryStyle(cat: string) {
+  if (cat === "Underweight") return "bg-blue-50 border-blue-200 text-blue-700";
+  if (cat === "Normal") return "bg-emerald-50 border-emerald-200 text-emerald-700";
+  if (cat === "Overweight") return "bg-amber-50 border-amber-200 text-amber-700";
+  return "bg-red-50 border-red-200 text-red-700";
+}
+
 function ResidentMedicalHistoryTab({
   resident,
 }: {
@@ -1611,6 +1629,8 @@ function ResidentMedicalHistoryTab({
   const [appointments, setAppointments] = useState<ResidentAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bmiRecords, setBmiRecords] = useState<ResidentBMIRecord[]>([]);
+  const [bmiLoading, setBmiLoading] = useState(true);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -1648,6 +1668,22 @@ function ResidentMedicalHistoryTab({
     };
 
     fetchHistory();
+  }, []);
+
+  useEffect(() => {
+    const fetchBMI = async () => {
+      try {
+        setBmiLoading(true);
+        const res = await fetch("/api/residents/bmi");
+        const json = await res.json();
+        if (res.ok) setBmiRecords(Array.isArray(json) ? json : []);
+      } catch {
+        /* silent */
+      } finally {
+        setBmiLoading(false);
+      }
+    };
+    fetchBMI();
   }, []);
 
   const sortedAppointments = useMemo(() => {
@@ -1880,6 +1916,72 @@ function ResidentMedicalHistoryTab({
               )}
             </div>
           </div>
+        </div>
+
+        {/* BMI History */}
+        <div className="rounded-[28px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-black text-slate-900">BMI &amp; Vitals History</h3>
+              <p className="mt-1 text-sm text-slate-500">Recorded by health center staff.</p>
+            </div>
+            <span className="w-fit rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-600">
+              {bmiRecords.length} record{bmiRecords.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          {bmiLoading ? (
+            <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-5 text-sm font-semibold text-sky-600">
+              Loading BMI records...
+            </div>
+          ) : bmiRecords.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm font-semibold text-slate-500">
+              No BMI records recorded yet.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-sky-100 bg-sky-50/60">
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Date</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Height</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Weight</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">BMI</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Category</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Pulse</th>
+                    <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Recorded By</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-sky-50">
+                  {bmiRecords.map((r) => {
+                    const dt = new Date(r.createdAt);
+                    const catStyle = bmiCategoryStyle(r.bmiCategory);
+                    const pulseLabel = r.pulseRate < 60 ? "Bradycardia" : r.pulseRate <= 100 ? "Normal" : "Tachycardia";
+                    const pulseColor = r.pulseRate < 60 ? "text-blue-600" : r.pulseRate <= 100 ? "text-emerald-600" : "text-red-600";
+                    return (
+                      <tr key={r.id} className="hover:bg-sky-50/40 transition">
+                        <td className="px-4 py-3 text-xs text-slate-500">
+                          {dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                          <span className="ml-1.5 text-slate-400">{dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}</span>
+                        </td>
+                        <td className="px-4 py-3 text-slate-700">{r.height} cm</td>
+                        <td className="px-4 py-3 text-slate-700">{r.weight} kg</td>
+                        <td className="px-4 py-3 text-xl font-black text-slate-900">{r.bmi.toFixed(1)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`rounded-xl border px-3 py-1 text-xs font-bold ${catStyle}`}>{r.bmiCategory}</span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-sm font-bold ${pulseColor}`}>{r.pulseRate} bpm</span>
+                          <span className="ml-1.5 text-xs text-slate-400">({pulseLabel})</span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-500">{r.recordedBy?.fullName ?? "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </Section>
