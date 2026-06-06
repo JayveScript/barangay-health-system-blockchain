@@ -9,7 +9,16 @@ import {
 const ADMIN_USERNAME = `main_admin${BARANGAY_ADMIN_USERNAME_SUFFIX}`;
 const ADMIN_EMAIL = "main_admin@barangay.com";
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Gate with SEED_SECRET — must pass ?secret=<value> matching the env var
+  const url = new URL(req.url);
+  const provided = url.searchParams.get("secret");
+  const expected = process.env.SEED_SECRET;
+
+  if (!expected || provided !== expected) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     let barangay = await db.barangay.findFirst({
       where: { name: "Barangay Health Main Office" },
@@ -37,10 +46,6 @@ export async function GET() {
       return NextResponse.json({
         success: true,
         message: "Admin already exists.",
-        credentials: {
-          username: ADMIN_USERNAME,
-          password: "admin12345",
-        },
       });
     }
 
@@ -67,10 +72,6 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       message: "Admin created successfully.",
-      credentials: {
-        username: ADMIN_USERNAME,
-        password: "admin12345",
-      },
       adminId: admin.id,
     });
   } catch (error) {
