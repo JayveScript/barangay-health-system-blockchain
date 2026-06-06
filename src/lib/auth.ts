@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { env } from "@/lib/env";
 
 export type AuthTokenPayload = {
   userId: string;
@@ -7,8 +8,9 @@ export type AuthTokenPayload = {
 };
 
 function getJwtSecret(): string {
-  if (process.env.JWT_SECRET) {
-    return process.env.JWT_SECRET;
+  const secret = env("JWT_SECRET");
+  if (secret) {
+    return secret;
   }
 
   // Allow `next build` to finish when env vars are not set yet (e.g. first Vercel deploy).
