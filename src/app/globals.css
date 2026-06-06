@@ -6,4 +6,36 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   padding-bottom: env(safe-area-inset-bottom);
   -webkit-font-smoothing: antialiased;
-}
+}
+
+/* ── Inputs — prevent iOS auto-zoom (needs 16px) ─ */
+.input {
+  @apply w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-sky-500;
+  font-size: 16px;
+}
+input, select, textarea { font-size: 16px !important; }
+
+/* ── Touch targets ────────────────────────────── */
+button, a, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Bottom-nav spacing ───────────────────────── */
+.mobile-bottom-pad {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+.bottom-nav-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Horizontal table scroll on mobile ───────── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Scrollbars ───────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
