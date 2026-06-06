@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { env } from "@/lib/env";
 
 export const QR_ACCESS_SESSION_MINUTES = 15;
 
@@ -10,8 +11,9 @@ export type QrAccessPayload = {
 };
 
 function getJwtSecret(): string {
-  if (process.env.JWT_SECRET) {
-    return process.env.JWT_SECRET;
+  const secret = env("JWT_SECRET");
+  if (secret) {
+    return secret;
   }
 
   if (process.env.npm_lifecycle_event === "build") {
