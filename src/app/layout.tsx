@@ -1,15 +1,6 @@
 import "./globals.css";
+import type { Metadata, Viewport } from "next";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body className="bg-slate-100 text-slate-900">
-        {children}
-      </body>
-    </html>
-  );
-}
+export const metadata: Metadata = {
+  title: "Barangay Health Center Management System",
+  description: "A secure platform for managing patient records, consultations, and barangay heal

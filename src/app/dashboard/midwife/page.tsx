@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {
   Activity,
   Baby,
@@ -92,7 +93,7 @@ export default function MidwifeDashboardPage() {
   if (!user) return null;
 
   return (
-    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 sm:p-6">
+    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:pb-6">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -258,6 +259,16 @@ export default function MidwifeDashboardPage() {
           </div>
         </section>
       </div>
+
+      <MobileBottomNav
+        items={[
+          { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
+          { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+        ]}
+        active={activeTab}
+        onChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </main>
   );
 }
@@ -486,21 +497,4 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 function SummaryBox({ title, value }: { title: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[#BFDBFE] bg-gradient-to-br from-white to-[#EFF6FF] p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
-      <p className="mt-2 text-2xl font-extrabold text-slate-900">{value}</p>
-    </div>
-  );
-}
-
-function InfoBox({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-4 shadow-sm">
-      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-        {label}
-      </p>
-      <p className="text-sm font-semibold text-slate-900">{value}</p>
-    </div>
-  );
-}
+      <p className="text-xs font-semibold uppercase tracking-wide 

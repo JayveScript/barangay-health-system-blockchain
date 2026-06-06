@@ -166,6 +166,7 @@ const FALLBACK_BARANGAY_LABEL = "Assigned Barangay";
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { useSecureQrUrl } from "@/hooks/useSecureQrUrl";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export default function AdminDashboardPage() {
   const [tab, setTab] = useState<
@@ -481,8 +482,16 @@ export default function AdminDashboardPage() {
     setSecureLoading(false);
   }
 };
+  const adminBottomNavItems = [
+    { id: "overview",      label: "Overview",   icon: <Activity className="h-5 w-5" /> },
+    { id: "residents",     label: "Residents",  icon: <Users className="h-5 w-5" /> },
+    { id: "create-user",   label: "Add User",   icon: <UserPlus className="h-5 w-5" /> },
+    { id: "announcements", label: "News",       icon: <Megaphone className="h-5 w-5" /> },
+    { id: "scan-qr",       label: "Scan QR",    icon: <ScanLine className="h-5 w-5" /> },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#EFF6FF] p-4 sm:p-6 lg:h-screen lg:overflow-hidden">
+    <main className="min-h-screen bg-[#EFF6FF] p-4 pb-20 sm:p-6 lg:pb-6 lg:h-screen lg:overflow-hidden">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -722,7 +731,7 @@ export default function AdminDashboardPage() {
 
                 {tab === "overview" && (
                   <div className="space-y-5">
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 [&>*]:min-w-0">
                       <StatCard
                         icon={<Users className="h-5 w-5" />}
                         label="Total Residents"
@@ -1156,6 +1165,16 @@ export default function AdminDashboardPage() {
           onConfirm={confirmSecureAction}
         />
       )}
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav
+        items={adminBottomNavItems}
+        active={tab}
+        onChange={(id) => {
+          setTab(id as typeof tab);
+          setMobileSidebarOpen(false);
+        }}
+      />
     </main>
   );
 }
@@ -2799,43 +2818,4 @@ const [form, setForm] = useState({
                     {item.title}
                   </h4>
 
-                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
-                    {item.content}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function formatAnnouncementDate(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-
-
-async function readJsonSafe(res: Response) {
-  const text = await res.text();
-
-  try {
-    return text ? JSON.parse(text) : {};
-  } catch {
-    return {
-      error:
-        "API route returned HTML instead of JSON. Check your backend route or terminal error.",
-    };
-  }
-}
+                

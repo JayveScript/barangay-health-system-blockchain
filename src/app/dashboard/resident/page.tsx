@@ -17,7 +17,10 @@ X,
   MapPin,
   Stethoscope,
   Megaphone,
+  IdCard,
+  UserRound,
 } from "lucide-react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 type ResidentData = {
   id: string;
@@ -353,8 +356,16 @@ export default function ResidentDashboard() {
     .trim();
   const currentBarangayName = resident.barangayName || "Assigned Barangay";
 
+  const residentBottomNavItems = [
+    { id: "personal",       label: "Profile",      icon: <UserRound className="h-5 w-5" /> },
+    { id: "medical-history",label: "Medical",      icon: <Stethoscope className="h-5 w-5" /> },
+    { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
+    { id: "announcements",  label: "News",         icon: <Megaphone className="h-5 w-5" /> },
+    { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
+  ];
+
   return (
-    <main className="h-[100dvh] overflow-hidden bg-[#EFF6FF] px-4 py-6 md:px-8 lg:px-10">
+    <main className="h-[100dvh] overflow-hidden bg-[#EFF6FF] px-4 pb-[72px] py-4 md:px-8 md:py-6 lg:px-10 lg:pb-6">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -1066,6 +1077,16 @@ export default function ResidentDashboard() {
           </section>
         </div>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav
+        items={residentBottomNavItems}
+        active={sidebarTab}
+        onChange={(id) => {
+          setSidebarTab(id as typeof sidebarTab);
+          setMobileSidebarOpen(false);
+        }}
+      />
     </main>
   );
 }
@@ -2868,34 +2889,4 @@ function FamilyIcon({ className = "h-5 w-5" }: { className?: string }) {
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
       <circle cx="9" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-function LifestyleIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 20h12" />
-      <path d="M8 20V10" />
-      <path d="M16 20V4" />
-      <path d="M12 20v-6" />
-    </svg>
-  );
-}
-
-function VerifiedIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-      <path d="M12 2l2.4 2.1 3.1-.5 1.3 2.8 2.8 1.3-.5 3.1L22 12l-2.1 2.4.5 3.1-2.8 1.3-1.3 2.8-3.1-.5L12 22l-2.4-2.1-3.1.5-1.3-2.8-2.8-1.3.5-3.1L2 12l2.1-2.4-.5-3.1 2.8-1.3 1.3-2.8 3.1.5L12 2zm-1.1 13.6l5.7-5.7-1.4-1.4-4.3 4.3-2-2-1.4 1.4 3.4 3.4z" />
-    </svg>
-  );
-}
+      <path d="M16 3.13a

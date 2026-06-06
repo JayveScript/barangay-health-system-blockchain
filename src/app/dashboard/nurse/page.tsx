@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {
   Activity,
   BarChart3,
@@ -97,7 +98,7 @@ export default function NurseDashboardPage() {
   const currentBarangayName = user.barangay?.name || "Assigned Barangay";
 
   return (
-    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 sm:p-6">
+    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:pb-6">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -268,6 +269,16 @@ export default function NurseDashboardPage() {
           </div>
         </section>
       </div>
+
+      <MobileBottomNav
+        items={[
+          { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
+          { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+        ]}
+        active={activeTab}
+        onChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </main>
   );
 }
@@ -461,22 +472,4 @@ function ProgressBar({ label, value }: { label: string; value: number }) {
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-sky-200 bg-[#EFF6FF] p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-extrabold text-sky-600">{value}</p>
-    </div>
-  );
-}
-
-function SummaryBox({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-white to-[#EFF6FF] p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
-      <p className="mt-2 text-2xl font-extrabold text-slate-900">{value}</p>
-    </div>
-  );
-}
-
+      <p className="text-xs font-semibold uppe
