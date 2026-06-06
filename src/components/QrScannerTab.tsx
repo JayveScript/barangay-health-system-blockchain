@@ -29,20 +29,20 @@ export function QrScannerTab() {
   const handleError = (error: unknown) => {
     console.error("QR Scanner Error:", error);
 
-    if (error instanceof Error) {
-      if (error.name === "NotAllowedError") {
-        setError("Camera permission denied. Please allow camera access in your browser settings and reload.");
-      } else if (error.name === "NotFoundError") {
-        setError("No camera device found on this device.");
-      } else if (error.name === "NotReadableError") {
-        setError("Camera is in use by another app. Please close other apps using the camera.");
-      } else if (error.name === "OverconstrainedError") {
-        setError("Camera constraints not supported. Try using a different browser.");
-      } else {
-        setError(`Camera error: ${error.message || error.name}`);
-      }
+    // Normalize: handle Error, DOMException, and plain objects
+    const name = (error as { name?: string })?.name ?? "";
+    const message = (error as { message?: string })?.message ?? "";
+
+    if (name === "NotAllowedError" || message.includes("Permission denied") || message.includes("not allowed")) {
+      setError("Camera permission denied. Click the camera icon in your browser's address bar and allow access, then reload.");
+    } else if (name === "NotFoundError" || message.includes("not found")) {
+      setError("No camera found on this device.");
+    } else if (name === "NotReadableError") {
+      setError("Camera is in use by another app. Close other apps using the camera and reload.");
+    } else if (name === "OverconstrainedError") {
+      setError("Camera constraints not supported. Try a different browser.");
     } else {
-      setError("Unable to access camera. Make sure you are on HTTPS and have granted camera permission.");
+      setError(`Camera blocked: ${name || message || "Permission not granted. Allow camera access in your browser and reload."}`);
     }
   };
 
