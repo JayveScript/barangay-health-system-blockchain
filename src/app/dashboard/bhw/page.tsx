@@ -561,7 +561,7 @@ function LogbookTab() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
 
-  const [form, setForm] = useState({ name: "", purpose: "", visitDate: "" });
+  const [form, setForm] = useState({ name: "", purpose: "" });
 
   const fetchEntries = async () => {
     try {
@@ -590,9 +590,7 @@ function LogbookTab() {
     }
     try {
       setSubmitting(true);
-      const visitDate = form.visitDate
-        ? new Date(form.visitDate).toISOString()
-        : new Date().toISOString();
+      const visitDate = new Date().toISOString();
       const res = await fetch("/api/logbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -601,7 +599,7 @@ function LogbookTab() {
       const json = await res.json();
       if (!res.ok) { setError(json.error || "Failed to add entry."); return; }
       setSuccess("Visitor logged successfully.");
-      setForm({ name: "", purpose: "", visitDate: "" });
+      setForm({ name: "", purpose: "" });
       await fetchEntries();
       setTimeout(() => setSuccess(""), 3000);
     } catch {
@@ -695,7 +693,7 @@ function LogbookTab() {
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                 Full Name *
@@ -720,23 +718,16 @@ function LogbookTab() {
                 className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
               />
             </div>
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                Date & Time (optional)
-              </label>
-              <input
-                type="datetime-local"
-                value={form.visitDate}
-                onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
-                className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-              />
-            </div>
           </div>
+
+          <p className="mt-3 text-xs font-semibold text-slate-400">
+            Date and time will be recorded automatically at the moment of entry.
+          </p>
 
           <button
             type="submit"
             disabled={submitting}
-            className="mt-4 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
+            className="mt-3 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
             {submitting ? "Saving..." : "Add Entry"}
