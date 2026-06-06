@@ -2253,4 +2253,23 @@ function ProgressBar({ label, value }: { label: string; value: number }) {
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    
+    <div className="rounded-2xl border border-sky-200 bg-[#EFF6FF] p-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-extrabold text-sky-600">{value}</p>
+    </div>
+  );
+}
+
+function SummaryBox({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-white to-[#EFF6FF] p-5 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+      <p className="mt-2 text-2xl font-extrabold text-slate-900">{value}</p>
+    </div>
+  );
+}
+

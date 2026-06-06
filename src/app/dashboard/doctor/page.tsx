@@ -1863,4 +1863,39 @@ function yesNo(value: boolean | null | undefined) {
   return value ? "Yes" : "No";
 }
 
-function getResidentInitials(appointment: D
+function getResidentInitials(appointment: DoctorAppointment) {
+  const name = getResidentName(appointment);
+
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+function formatLongDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function formatTime(value: string) {
+  if (!value) return "";
+
+  const [hourRaw, minuteRaw] = value.split(":");
+
+  const date = new Date();
+  date.setHours(Number(hourRaw), Number(minuteRaw || 0), 0, 0);
+
+  return date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}

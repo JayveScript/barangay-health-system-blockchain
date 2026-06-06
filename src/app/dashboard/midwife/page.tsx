@@ -497,4 +497,21 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 function SummaryBox({ title, value }: { title: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[#BFDBFE] bg-gradient-to-br from-white to-[#EFF6FF] p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide 
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+      <p className="mt-2 text-2xl font-extrabold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function InfoBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-4 shadow-sm">
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p className="text-sm font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
