@@ -22,6 +22,7 @@ import {
   Menu,
   Plus,
   RefreshCw,
+  Scale,
   Search,
   ShieldCheck,
   Megaphone,
@@ -50,6 +51,7 @@ type StaffUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
+import { BMITab } from "@/components/dashboard/BMITab";
 
 export default function StaffDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -60,6 +62,7 @@ export default function StaffDashboardPage() {
   | "referrals"
   | "scan-qr"
   | "logbook"
+  | "bmi"
 >("overview");
   const [user, setUser] = useState<StaffUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -216,6 +219,15 @@ export default function StaffDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "bmi"}
+              icon={<Scale className="h-5 w-5" />}
+              label="BMI Records"
+              onClick={() => {
+                setActiveTab("bmi");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -274,6 +286,12 @@ export default function StaffDashboardPage() {
                 icon={<BookOpen className="h-5 w-5" />}
                 label="Logbook"
                 onClick={() => setActiveTab("logbook")}
+              />
+              <SidebarButton
+                active={activeTab === "bmi"}
+                icon={<Scale className="h-5 w-5" />}
+                label="BMI Records"
+                onClick={() => setActiveTab("bmi")}
               />
             </div>
           </div>
@@ -356,6 +374,8 @@ export default function StaffDashboardPage() {
 )}
 
 {activeTab === "logbook" && <StaffLogbookTab />}
+
+{activeTab === "bmi" && <BMITab />}
           </div>
         </section>
       </div>
@@ -367,6 +387,7 @@ export default function StaffDashboardPage() {
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "registration", label: "Register", icon: <UserPlus className="h-5 w-5" /> },
           { id: "logbook", label: "Logbook", icon: <BookOpen className="h-5 w-5" /> },
+          { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
         ]}
         active={activeTab}
         onChange={(id) => setActiveTab(id as typeof activeTab)}

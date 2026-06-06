@@ -16,6 +16,7 @@ import {
   Plus,
   BookOpen,
   RefreshCw,
+  Scale,
   Search,
   ShieldCheck,
   Trash2,
@@ -41,9 +42,10 @@ type BHWUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
+import { BMITab } from "@/components/dashboard/BMITab";
 
 export default function BHWDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "scan-qr" | "logbook">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "scan-qr" | "logbook" | "bmi">(
     "overview"
   );
   const [user, setUser] = useState<BHWUser | null>(null);
@@ -183,6 +185,15 @@ export default function BHWDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "bmi"}
+              icon={<Scale className="h-5 w-5" />}
+              label="BMI Records"
+              onClick={() => {
+                setActiveTab("bmi");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -229,6 +240,12 @@ export default function BHWDashboardPage() {
                 icon={<BookOpen className="h-5 w-5" />}
                 label="Logbook"
                 onClick={() => setActiveTab("logbook")}
+              />
+              <SidebarButton
+                active={activeTab === "bmi"}
+                icon={<Scale className="h-5 w-5" />}
+                label="BMI Records"
+                onClick={() => setActiveTab("bmi")}
               />
             </div>
           </div>
@@ -305,6 +322,8 @@ export default function BHWDashboardPage() {
             {activeTab === "announcements" && <BHWAnnouncementsTab />}
 
             {activeTab === "logbook" && <LogbookTab />}
+
+            {activeTab === "bmi" && <BMITab />}
           </div>
         </section>
       </div>
@@ -316,6 +335,7 @@ export default function BHWDashboardPage() {
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "logbook", label: "Logbook", icon: <BookOpen className="h-5 w-5" /> },
+          { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
         ]}
         active={activeTab}
         onChange={(id) => setActiveTab(id as typeof activeTab)}

@@ -48,6 +48,7 @@ model Barangay {
   sentResidentReferrals           ResidentReferral[] @relation("SourceResidentReferrals")
   receivedResidentReferrals       ResidentReferral[] @relation("TargetResidentReferrals")
   healthCenterLogbook             HealthCenterLogbook[]
+  bmiRecords                      BMIRecord[]
 
   createdAt DateTime @default(now())
 }
@@ -73,6 +74,7 @@ model User {
 
   qrScanAuditLogs QrScanAuditLog[] @relation("QrScanAuditLogs")
   qrOtpSessions   QrOtpSession[]   @relation("QrOtpSessions")
+  bmiRecordsRecorded BMIRecord[]   @relation("BMIRecordedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -118,6 +120,7 @@ model Resident {
 
   appointments Appointment[]
   referrals    ResidentReferral[]
+  bmiRecords   BMIRecord[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -451,6 +454,26 @@ model QrOtpSession {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model BMIRecord {
+  id           String   @id @default(cuid())
+  residentId   String
+  barangayId   String
+  recordedById String
+  height       Float
+  weight       Float
+  bmi          Float
+  bmiCategory  String
+  pulseRate    Int
+  createdAt    DateTime @default(now())
+
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
+  recordedBy User     @relation("BMIRecordedBy", fields: [recordedById], references: [id], onDelete: Cascade)
+
+  @@index([residentId])
+  @@index([barangayId])
 }
 
 model HealthCenterLogbook {
