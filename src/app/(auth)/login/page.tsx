@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   HeartPulse,
@@ -10,7 +11,10 @@ import {
   User,
 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [serverError, setServerError] = useState("");
@@ -43,6 +47,21 @@ export default function LoginPage() {
 
       if (!res.ok) {
         setServerError(data.error || "Login failed.");
+        return;
+      }
+
+      // If there's a callbackUrl (e.g. from a QR scan redirect), go there first.
+      if (callbackUrl && callbackUrl.startsWith("/")) {
+        // IMPORTANT: If they logged in as a resident on the verification screen for a QR code,
+        // they are NOT allowed to view it. Show them the Access Denied screen.
+        if (
+          (callbackUrl.startsWith("/resident/") || callbackUrl.startsWith("/scan")) &&
+          data.role === "RESIDENT"
+        ) {
+          window.location.href = "/access-denied";
+          return;
+        }
+        window.location.href = callbackUrl;
         return;
       }
 
@@ -181,14 +200,14 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9]"
-                >
-                  Forgot password?
-                </button>
-              </div>
+              <div className="flex justify-end">
+  <Link
+    href="/forgot-password"
+    className="inline-block rounded-lg px-1 text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-sky-300"
+  >
+    Forgot password?
+  </Link>
+</div>
 
               <button
                 type="submit"
@@ -220,6 +239,15 @@ export default function LoginPage() {
     </main>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
 
 function Input({
   label,

@@ -21,6 +21,10 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import {
+  DEFAULT_BARANGAY_CITY,
+  REGISTRATION_BARANGAY_OPTIONS,
+} from "@/lib/barangay-options";
 
 type VerificationMethod = "EMAIL" | "PHONE";
 
@@ -108,8 +112,8 @@ const stepLabels = [
   "Account & Verification",
 ];
 
-const STATIC_BARANGAY = "Barangay 19-B";
-const STATIC_CITY = "Davao City";
+const STATIC_BARANGAY = REGISTRATION_BARANGAY_OPTIONS[0].value;
+const STATIC_CITY = DEFAULT_BARANGAY_CITY;
 
 const initialForm: FormState = {
   lastName: "",
@@ -255,6 +259,9 @@ export default function RegisterPage() {
       if (!form.houseStreet.trim()) {
         nextErrors.houseStreet = "House / street is required.";
       }
+      if (!form.barangayName.trim()) {
+        nextErrors.barangayName = "Please select barangay.";
+      }
       if (!form.civilStatus) {
         nextErrors.civilStatus = "Please select civil status.";
       }
@@ -334,13 +341,13 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           ...form,
-          barangayName: STATIC_BARANGAY,
           city: STATIC_CITY,
           age: Number(form.age),
           birthDate: form.birthDate,
           email: form.email.trim().toLowerCase(),
           username: form.username.trim(),
           contactNumber: form.contactNumber.trim(),
+          barangayName: form.barangayName,
           verificationMethod: form.verificationMethod,
         }),
       });
@@ -424,7 +431,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="fixed inset-0 h-screen w-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,#DBEAFE_0%,#EFF6FF_32%,#FFFFFF_68%,#DCEBFF_100%)] px-3 py-3 sm:px-5 sm:py-4">
+    <main className="fixed inset-0 h-screen w-screen overflow-hidden bg-[#EFF6FF] px-4 py-6 sm:px-6 lg:px-8">
       <style jsx global>{`
         html,
         body {
@@ -433,24 +440,24 @@ export default function RegisterPage() {
         }
       `}</style>
 
-      <div className="mx-auto flex h-full w-full max-w-6xl overflow-hidden">
-        <div className="flex h-full w-full flex-col overflow-hidden rounded-[26px] border border-blue-100/80 bg-white/95 shadow-[0_24px_80px_rgba(37,99,235,0.14)] backdrop-blur">
-          <div className="shrink-0 border-b border-blue-100 bg-white/90 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex h-full w-full max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+       <div className="flex h-full w-full flex-col overflow-hidden rounded-[26px] border border-sky-200/80 bg-white shadow-2xl shadow-sky-900/10 backdrop-blur">
+          <div className="shrink-0 border-b border-sky-200 bg-white/90 px-4 py-3 sm:px-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                   <Building2 className="h-6 w-6" />
                 </div>
 
                 <div className="min-w-0">
-                  <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700">
+                  <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold text-sky-600">
                     <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">
                       Trusted Health Center Registration
                     </span>
                   </div>
 
-                  <h1 className="mt-1 text-2xl font-black leading-none tracking-tight text-blue-700 sm:text-3xl">
+                  <h1 className="mt-1 text-2xl font-black leading-none tracking-tight text-sky-600 sm:text-3xl">
                     Register
                   </h1>
                 </div>
@@ -458,7 +465,7 @@ export default function RegisterPage() {
 
               <Link
                 href="/login"
-                className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-100"
+                className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-bold text-sky-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-200"
               >
                 <LogIn className="h-4 w-4" />
                 <span className="hidden sm:inline">Login</span>
@@ -466,10 +473,10 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="shrink-0 border-b border-blue-100 bg-gradient-to-r from-white via-blue-50/40 to-white px-4 py-3 sm:px-6">
+          <div className="shrink-0 border-b border-sky-200 bg-gradient-to-r from-white via-sky-50/40 to-white px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-blue-500">
+                <p className="text-xs font-bold uppercase tracking-wide text-sky-500">
                   Step {step} of 5
                 </p>
                 <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
@@ -488,7 +495,7 @@ export default function RegisterPage() {
                       key={label}
                       className={`rounded-2xl border px-3 py-2 transition ${
                         active
-                          ? "border-blue-500 bg-white shadow-sm shadow-blue-500/10"
+                          ? "border-sky-500 bg-white shadow-sm shadow-sky-500/10"
                           : done
                           ? "border-emerald-200 bg-emerald-50"
                           : "border-slate-200 bg-white/70"
@@ -498,7 +505,7 @@ export default function RegisterPage() {
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black ${
                             active
-                              ? "bg-blue-600 text-white"
+                              ? "bg-sky-500 text-white"
                               : done
                               ? "bg-emerald-600 text-white"
                               : "bg-slate-200 text-slate-600"
@@ -510,7 +517,7 @@ export default function RegisterPage() {
                           <p
                             className={`text-[11px] font-bold ${
                               active
-                                ? "text-blue-600"
+                                ? "text-sky-500"
                                 : done
                                 ? "text-emerald-700"
                                 : "text-slate-500"
@@ -528,9 +535,9 @@ export default function RegisterPage() {
                 })}
               </div>
 
-              <div className="h-2 w-full overflow-hidden rounded-full bg-blue-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-sky-200">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-300"
+                  className="h-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-400 transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -631,7 +638,14 @@ export default function RegisterPage() {
                         error={errors.houseStreet}
                         status={getFieldStatus("houseStreet")}
                       />
-                      <ReadonlyBadgeField label="Barangay" value={STATIC_BARANGAY} />
+                      <SelectField
+                        label="Barangay"
+                        required
+                        value={form.barangayName}
+                        onChange={(v) => updateField("barangayName", v)}
+                        options={REGISTRATION_BARANGAY_OPTIONS}
+                        error={errors.barangayName}
+                      />
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
@@ -707,7 +721,7 @@ export default function RegisterPage() {
                       />
                     </div>
 
-                    <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 sm:p-5">
+                    <div className="rounded-2xl border border-sky-200 bg-white/80 p-4 sm:p-5">
                       <p className="mb-4 text-sm font-bold text-slate-700">
                         If Married
                       </p>
@@ -844,9 +858,9 @@ export default function RegisterPage() {
         ]}
       />
 
-      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
         <div className="flex items-start gap-3">
-          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-sky-500 shadow-sm">
             {form.verificationMethod === "PHONE" ? (
               <Smartphone className="h-5 w-5" />
             ) : (
@@ -865,7 +879,7 @@ export default function RegisterPage() {
               Verification code will be sent to:
             </p>
 
-            <p className="mt-2 break-all text-sm font-bold text-blue-700">
+            <p className="mt-2 break-all text-sm font-bold text-sky-600">
               {form.verificationMethod === "PHONE"
                 ? form.contactNumber || "Please enter your contact number in Step 1"
                 : form.email || "Please enter your Gmail address below"}
@@ -934,7 +948,7 @@ export default function RegisterPage() {
           type="button"
           onClick={handleSendOtp}
           disabled={loading}
-          className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-4 text-base font-black text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl bg-[#0EA5E9] hover:bg-sky-600 px-5 py-4 text-base font-black text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-600 hover:to-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading
             ? "Sending Verification Code..."
@@ -1004,7 +1018,7 @@ export default function RegisterPage() {
                 type="button"
                 onClick={prevStep}
                 disabled={step === 1 || loading || verifying}
-                className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back
@@ -1014,7 +1028,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-blue-600"
+                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl bg-[#0EA5E9] hover:bg-sky-600 shadow-lg shadow-sky-500/25 px-6 py-3 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-600 hover:to-sky-500"
                 >
                   Next Step
                   <ArrowRight className="h-4 w-4" />
@@ -1042,7 +1056,7 @@ function StepSection({
   return (
     <div>
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 text-sky-500 ring-1 ring-sky-200">
           {icon}
         </div>
         <div>
@@ -1063,7 +1077,7 @@ function FormSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4 shadow-sm sm:p-5">
+    <div className="rounded-3xl border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm sm:p-5">
       <h4 className="mb-4 text-sm font-black text-slate-800">{title}</h4>
       <div className="space-y-4">{children}</div>
     </div>
@@ -1102,7 +1116,7 @@ function InputField({
       ? "border-red-400 focus-within:border-red-500"
       : status === "success"
       ? "border-emerald-400 focus-within:border-emerald-500"
-      : "border-blue-100 focus-within:border-blue-500";
+      : "border-sky-200 focus-within:border-sky-500";
 
   return (
     <div>
@@ -1113,7 +1127,7 @@ function InputField({
       <div
         className={`flex min-h-[52px] items-center rounded-2xl border bg-white px-4 shadow-sm transition ${borderClass}`}
       >
-        {icon && <span className="mr-3 text-blue-400">{icon}</span>}
+        {icon && <span className="mr-3 text-sky-400">{icon}</span>}
         <input
           type={type}
           value={value}
@@ -1147,8 +1161,8 @@ function ReadonlyBadgeField({
       <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div className="flex min-h-[52px] items-center rounded-2xl border border-blue-100 bg-blue-50 px-4 shadow-sm">
-        <span className="inline-flex rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white shadow-sm">
+      <div className="flex min-h-[52px] items-center rounded-2xl border border-sky-200 bg-sky-50 px-4 shadow-sm">
+        <span className="inline-flex rounded-full bg-sky-500 px-3 py-1 text-sm font-bold text-white shadow-sm">
           {value}
         </span>
       </div>
@@ -1177,7 +1191,7 @@ function TextAreaInput({
         onChange={(e) => onChange(e.target.value)}
         rows={4}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500"
+        className="w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500"
       />
     </div>
   );
@@ -1212,8 +1226,8 @@ function RadioGroup({
             onClick={() => onChange(opt.value)}
             className={`rounded-2xl border px-4 py-3 text-sm font-bold shadow-sm transition ${
               value === opt.value
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-blue-100 bg-white text-slate-700 hover:bg-blue-50"
+                ? "border-sky-500 bg-sky-50 text-sky-600"
+                : "border-sky-200 bg-white text-slate-700 hover:bg-sky-50"
             }`}
           >
             {opt.label}
@@ -1242,12 +1256,12 @@ function CheckField({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-blue-50">
+    <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-sky-50">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+        className="h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
       />
       {label}
     </label>
@@ -1270,13 +1284,13 @@ function ToggleWithText({
   placeholder: string;
 }) {
   return (
-    <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-sky-200 bg-white p-4 shadow-sm">
       <label className="mb-3 flex items-center gap-3 text-sm font-bold text-slate-700">
         <input
           type="checkbox"
           checked={checked}
           onChange={(e) => onToggle(e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+          className="h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
         />
         {label}
       </label>
@@ -1286,8 +1300,50 @@ function ToggleWithText({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={!checked}
-        className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+        className="w-full rounded-2xl border border-sky-200 bg-sky-50/40 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
       />
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  error,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly { label: string; value: string }[];
+  error?: string;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`min-h-[52px] w-full rounded-2xl border bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition ${
+          error
+            ? "border-red-400 focus:border-red-500"
+            : "border-sky-200 focus:border-sky-500"
+        }`}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {error && <p className="mt-1 text-xs font-medium text-red-500">{error}</p>}
     </div>
   );
 }

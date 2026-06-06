@@ -32,236 +32,410 @@ enum CivilStatus {
 }
 
 model Barangay {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
   municipality String?
-  
 
-  users        User[]
-  residents    Resident[]
+  users                           User[]
+  residents                       Resident[]
+  residentMedicalHistories        ResidentMedicalHistory[]
+  residentFamilyHistories         ResidentFamilyHistory[]
+  residentPersonalSocialHistories ResidentPersonalSocialHistory[]
+  pendingRegistrations            PendingRegistration[]
+  doctorAvailabilities            DoctorAvailability[]
+  appointments                    Appointment[]
+  announcements                   Announcement[]
+  sentResidentReferrals           ResidentReferral[] @relation("SourceResidentReferrals")
+  receivedResidentReferrals       ResidentReferral[] @relation("TargetResidentReferrals")
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model User {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   fullName    String?
-  username    String   @unique
-  email       String?  @unique
-  phoneNumber String?  @unique
+  username    String  @unique
+  email       String? @unique
+  phoneNumber String? @unique
   password    String
-  role        Role     @default(RESIDENT)
-  isVerified  Boolean  @default(false)
+  role        Role    @default(RESIDENT)
+  isVerified  Boolean @default(false)
 
-  barangayId  String
-  barangay    Barangay @relation(fields: [barangayId], references: [id])
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
 
-  resident    Resident?
+  doctorAvailabilities DoctorAvailability[]
+  doctorAppointments   Appointment[]        @relation("DoctorAppointments")
+  staffResidentReferrals ResidentReferral[]  @relation("StaffResidentReferrals")
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  resident Resident?
+
+  qrScanAuditLogs QrScanAuditLog[] @relation("QrScanAuditLogs")
+  qrOtpSessions   QrOtpSession[]   @relation("QrOtpSessions")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Resident {
-  id                     String                       @id @default(uuid())
+  id String @id @default(uuid())
 
   // Step 1 - Identifying Data
-  lastName               String
-  firstName              String
-  middleName             String?
-  age                    Int
-  sex                    Sex
-  birthDate              DateTime
-  religion               String?
-  houseStreet String?
-  completeAddress        String
-  barangayName String @default("Barangay 19-B")
-city          String @default("Davao City")
-  civilStatus            CivilStatus
-  contactNumber          String?
-  educationalAttainment  String?
-  occupation             String?
-  accompanyingPerson     String?
-  relationship           String?
-  spouseMaidenName       String?
-  spouseOccupation       String?
-  spouseContactNumber    String?
+  lastName              String
+  firstName             String
+  middleName            String?
+  age                   Int
+  sex                   Sex
+  birthDate             DateTime
+  religion              String?
+  houseStreet           String?
+  completeAddress       String
+  barangayName          String      @default("Barangay 19-B")
+  city                  String      @default("Davao City")
+  civilStatus           CivilStatus
+  contactNumber         String?
+  educationalAttainment String?
+  occupation            String?
+  accompanyingPerson    String?
+  relationship          String?
+  spouseMaidenName      String?
+  spouseOccupation      String?
+  spouseContactNumber   String?
 
-  email                  String?                      @unique
-  phoneNumber            String?                      @unique
+  email       String? @unique
+  phoneNumber String? @unique
 
-  userId                 String                       @unique
-  user                   User                         @relation(fields: [userId], references: [id])
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  barangayId             String
-  barangay               Barangay                     @relation(fields: [barangayId], references: [id])
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
 
-  medicalHistory         ResidentMedicalHistory?
-  familyHistory          ResidentFamilyHistory?
-  personalSocialHistory  ResidentPersonalSocialHistory?
+  medicalHistory        ResidentMedicalHistory?
+  familyHistory         ResidentFamilyHistory?
+  personalSocialHistory ResidentPersonalSocialHistory?
 
-  createdAt              DateTime                     @default(now())
-  updatedAt              DateTime                     @updatedAt
+  appointments Appointment[]
+  referrals    ResidentReferral[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ResidentMedicalHistory {
-  id                           String    @id @default(uuid())
+  id String @id @default(uuid())
 
-  residentId                   String    @unique
-  resident                     Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  residentId String   @unique
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
 
   // Step 2 - Past Medical History
-  hasHypertension              Boolean   @default(false)
-  hasDiabetes                  Boolean   @default(false)
-  hasStiHiv                    Boolean   @default(false)
-  hasHeartDisease              Boolean   @default(false)
-  hasKidneyFailure             Boolean   @default(false)
-  hasTuberculosis              Boolean   @default(false)
+  hasHypertension  Boolean @default(false)
+  hasDiabetes      Boolean @default(false)
+  hasStiHiv        Boolean @default(false)
+  hasHeartDisease  Boolean @default(false)
+  hasKidneyFailure Boolean @default(false)
+  hasTuberculosis  Boolean @default(false)
 
-  hasAllergies                 Boolean   @default(false)
-  allergiesDetails             String?
+  hasAllergies     Boolean @default(false)
+  allergiesDetails String?
 
-  hasCancer                    Boolean   @default(false)
-  cancerDetails                String?
+  hasCancer     Boolean @default(false)
+  cancerDetails String?
 
-  hasOtherConditions           Boolean   @default(false)
-  otherConditionsDetails       String?
+  hasOtherConditions     Boolean @default(false)
+  otherConditionsDetails String?
 
-  maintenanceMedications       String?
-  previousIllnessesSurgeries   String?
+  maintenanceMedications     String?
+  previousIllnessesSurgeries String?
 
-  createdAt                    DateTime  @default(now())
-  updatedAt                    DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([barangayId])
 }
 
 model ResidentFamilyHistory {
-  id                    String    @id @default(uuid())
+  id String @id @default(uuid())
 
-  residentId            String    @unique
-  resident              Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  residentId String   @unique
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
 
   // Step 3 - Family History
-  asthmaAllergies       Boolean   @default(false)
-  birthDefects          Boolean   @default(false)
-  cancer                Boolean   @default(false)
-  dementia              Boolean   @default(false)
-  diabetes              Boolean   @default(false)
-  hypertension          Boolean   @default(false)
-  kidneyDisease         Boolean   @default(false)
-  mentalIllness         Boolean   @default(false)
+  asthmaAllergies Boolean @default(false)
+  birthDefects    Boolean @default(false)
+  cancer          Boolean @default(false)
+  dementia        Boolean @default(false)
+  diabetes        Boolean @default(false)
+  hypertension    Boolean @default(false)
+  kidneyDisease   Boolean @default(false)
+  mentalIllness   Boolean @default(false)
 
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([barangayId])
 }
 
 model ResidentPersonalSocialHistory {
-  id                            String    @id @default(uuid())
+  id String @id @default(uuid())
 
-  residentId                    String    @unique
-  resident                      Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  residentId String   @unique
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
 
   // Step 4 - Personal / Social History
-  eatsHealthyDiet               Boolean   @default(false)
-  adequatePhysicalActivity      Boolean   @default(false)
-  sufficientRestSleep           Boolean   @default(false)
-  normalGrowthDevelopment       Boolean   @default(false)
-  multipleSexPartners           Boolean   @default(false)
+  eatsHealthyDiet          Boolean @default(false)
+  adequatePhysicalActivity Boolean @default(false)
+  sufficientRestSleep      Boolean @default(false)
+  normalGrowthDevelopment  Boolean @default(false)
+  multipleSexPartners      Boolean @default(false)
 
-  smokesTobacco                 Boolean   @default(false)
-  tobaccoPacksPerYear           String?
+  smokesTobacco       Boolean @default(false)
+  tobaccoPacksPerYear String?
 
-  drinksAlcohol                 Boolean   @default(false)
-  alcoholBottlesPerDay          String?
+  drinksAlcohol        Boolean @default(false)
+  alcoholBottlesPerDay String?
 
-  takesIllicitDrugs             Boolean   @default(false)
-  illicitDrugsDetails           String?
+  takesIllicitDrugs   Boolean @default(false)
+  illicitDrugsDetails String?
 
-  createdAt                     DateTime  @default(now())
-  updatedAt                     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([barangayId])
 }
 
 model PendingRegistration {
-  id                            String    @id @default(uuid())
+  id String @id @default(uuid())
 
   // Step 1 - Identifying Data
-  lastName                      String
-  firstName                     String
-  middleName                    String?
-  age                           Int
-  sex                           Sex
-  birthDate                     DateTime
-  religion                      String?
-  completeAddress               String
-  barangayName                  String
-  city                          String?
-  civilStatus                   CivilStatus
-  contactNumber                 String?
-  educationalAttainment         String?
-  occupation                    String?
-  accompanyingPerson            String?
-  relationship                  String?
-  spouseMaidenName              String?
-  spouseOccupation              String?
-  spouseContactNumber           String?
+  lastName              String
+  firstName             String
+  middleName            String?
+  age                   Int
+  sex                   Sex
+  birthDate             DateTime
+  religion              String?
+  completeAddress       String
+  barangayName          String
+  city                  String?
+  civilStatus           CivilStatus
+  contactNumber         String?
+  educationalAttainment String?
+  occupation            String?
+  accompanyingPerson    String?
+  relationship          String?
+  spouseMaidenName      String?
+  spouseOccupation      String?
+  spouseContactNumber   String?
 
   // Step 2 - Past Medical History
-  hasHypertension               Boolean   @default(false)
-  hasDiabetes                   Boolean   @default(false)
-  hasStiHiv                     Boolean   @default(false)
-  hasHeartDisease               Boolean   @default(false)
-  hasKidneyFailure              Boolean   @default(false)
-  hasTuberculosis               Boolean   @default(false)
+  hasHypertension  Boolean @default(false)
+  hasDiabetes      Boolean @default(false)
+  hasStiHiv        Boolean @default(false)
+  hasHeartDisease  Boolean @default(false)
+  hasKidneyFailure Boolean @default(false)
+  hasTuberculosis  Boolean @default(false)
 
-  hasAllergies                  Boolean   @default(false)
-  allergiesDetails              String?
+  hasAllergies     Boolean @default(false)
+  allergiesDetails String?
 
-  hasCancer                     Boolean   @default(false)
-  cancerDetails                 String?
+  hasCancer     Boolean @default(false)
+  cancerDetails String?
 
-  hasOtherConditions            Boolean   @default(false)
-  otherConditionsDetails        String?
+  hasOtherConditions     Boolean @default(false)
+  otherConditionsDetails String?
 
-  maintenanceMedications        String?
-  previousIllnessesSurgeries    String?
+  maintenanceMedications     String?
+  previousIllnessesSurgeries String?
 
   // Step 3 - Family History
-  familyAsthmaAllergies         Boolean   @default(false)
-  familyBirthDefects            Boolean   @default(false)
-  familyCancer                  Boolean   @default(false)
-  familyDementia                Boolean   @default(false)
-  familyDiabetes                Boolean   @default(false)
-  familyHypertension            Boolean   @default(false)
-  familyKidneyDisease           Boolean   @default(false)
-  familyMentalIllness           Boolean   @default(false)
+  familyAsthmaAllergies Boolean @default(false)
+  familyBirthDefects    Boolean @default(false)
+  familyCancer          Boolean @default(false)
+  familyDementia        Boolean @default(false)
+  familyDiabetes        Boolean @default(false)
+  familyHypertension    Boolean @default(false)
+  familyKidneyDisease   Boolean @default(false)
+  familyMentalIllness   Boolean @default(false)
 
   // Step 4 - Personal / Social History
-  eatsHealthyDiet               Boolean   @default(false)
-  adequatePhysicalActivity      Boolean   @default(false)
-  sufficientRestSleep           Boolean   @default(false)
-  normalGrowthDevelopment       Boolean   @default(false)
-  multipleSexPartners           Boolean   @default(false)
+  eatsHealthyDiet          Boolean @default(false)
+  adequatePhysicalActivity Boolean @default(false)
+  sufficientRestSleep      Boolean @default(false)
+  normalGrowthDevelopment  Boolean @default(false)
+  multipleSexPartners      Boolean @default(false)
 
-  smokesTobacco                 Boolean   @default(false)
-  tobaccoPacksPerYear           String?
+  smokesTobacco       Boolean @default(false)
+  tobaccoPacksPerYear String?
 
-  drinksAlcohol                 Boolean   @default(false)
-  alcoholBottlesPerDay          String?
+  drinksAlcohol        Boolean @default(false)
+  alcoholBottlesPerDay String?
 
-  takesIllicitDrugs             Boolean   @default(false)
-  illicitDrugsDetails           String?
+  takesIllicitDrugs   Boolean @default(false)
+  illicitDrugsDetails String?
 
   // Step 5 - Account Setup + Verification
-  username                      String
-  email                         String
-  passwordHash                  String
+  username     String
+  email        String
+  passwordHash String
 
-  otpCode                       String
-  otpExpiresAt                  DateTime
-  isVerified                    Boolean   @default(false)
+  otpCode      String
+  otpExpiresAt DateTime
+  isVerified   Boolean  @default(false)
 
-  createdAt                     DateTime  @default(now())
-  updatedAt                     DateTime  @updatedAt
+  barangayId String
+  barangay   Barangay @relation(fields: [barangayId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([email])
   @@unique([username])
+  @@index([barangayId])
+}
+
+model DoctorAvailability {
+  id          String   @id @default(cuid())
+  doctorId    String
+  barangayId  String
+  date        DateTime
+  startTime   String
+  endTime     String
+  slotMinutes Int      @default(30)
+  createdAt   DateTime @default(now())
+
+  doctor       User          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  barangay     Barangay      @relation(fields: [barangayId], references: [id])
+  appointments Appointment[]
+
+  @@index([barangayId])
+  @@index([doctorId, barangayId])
+}
+
+model Appointment {
+  id             String   @id @default(cuid())
+  availabilityId String
+  doctorId       String
+  residentId     String
+  barangayId     String
+  date           DateTime
+  time           String
+  reason         String
+  otherReason    String?
+  suggestion     String?
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+
+  availability DoctorAvailability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
+  doctor       User               @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
+  resident     Resident           @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  barangay     Barangay           @relation(fields: [barangayId], references: [id])
+
+  @@unique([availabilityId, time])
+  @@index([barangayId])
+  @@index([residentId, barangayId])
+  @@index([doctorId, barangayId])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  barangayId  String
+  title       String
+  content     String
+  imageUrl    String?
+  publishDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  @@index([barangayId, publishDate])
+}
+
+model ResidentReferral {
+  id              String   @id @default(cuid())
+  residentId      String
+  referredByStaffId String
+  sourceBarangayId String
+  targetBarangayId String
+  status          String   @default("PENDING")
+  reason          String?
+  notes           String?
+
+  identifyingData             Json
+  medicalHistory              Json?
+  familyHistory               Json?
+  personalSocialHistory       Json?
+
+  resident        Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  referredByStaff User     @relation("StaffResidentReferrals", fields: [referredByStaffId], references: [id], onDelete: Cascade)
+  sourceBarangay  Barangay @relation("SourceResidentReferrals", fields: [sourceBarangayId], references: [id])
+  targetBarangay  Barangay @relation("TargetResidentReferrals", fields: [targetBarangayId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([residentId])
+  @@index([sourceBarangayId])
+  @@index([targetBarangayId])
+  @@index([referredByStaffId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum QrScanAction {
+  SCAN_INITIATED
+  ACCESS_GRANTED
+  ACCESS_DENIED
+  OTP_SENT
+  OTP_FAILED
+  SESSION_EXPIRED
+}
+
+model QrScanAuditLog {
+  id            String       @id @default(cuid())
+  residentId    String
+  scannedById   String
+  action        QrScanAction
+  role          String
+  ipAddress     String?
+  userAgent     String?
+  deviceInfo    String?
+  success       Boolean      @default(false)
+  failureReason String?
+  createdAt     DateTime     @default(now())
+
+  scannedBy User @relation("QrScanAuditLogs", fields: [scannedById], references: [id], onDelete: Cascade)
+
+  @@index([residentId])
+  @@index([scannedById])
+  @@index([createdAt])
+}
+
+model QrOtpSession {
+  id         String   @id @default(cuid())
+  userId     String
+  residentId String
+  otpHash    String
+  qrToken    String
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation("QrOtpSessions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
