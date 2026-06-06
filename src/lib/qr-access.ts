@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-
 export const QR_ACCESS_SESSION_MINUTES = 15;
 
 export type QrAccessPayload = {
@@ -11,14 +9,22 @@ export type QrAccessPayload = {
   type: "qr_access";
 };
 
-export function signQrAccessToken(payload: Omit<QrAccessPayload, "type">) {
-  if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is missing.");
+function getJwtSecret(): string {
+  if (process.env.JWT_SECRET) {
+    return process.env.JWT_SECRET;
   }
 
+  if (process.env.npm_lifecycle_event === "build") {
+    return "__build_placeholder__";
+  }
+
+  throw new Error("JWT_SECRET is missing. Add it in Vercel Environment Variables.");
+}
+
+export function signQrAccessToken(payload: Omit<QrAccessPayload, "type">) {
   return jwt.sign(
     { ...payload, type: "qr_access" as const },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: `${QR_ACCESS_SESSION_MINUTES}m` }
   );
 }
@@ -27,10 +33,8 @@ export function verifyQrAccessToken(
   token: string,
   expectedResidentId?: string
 ): QrAccessPayload | null {
-  if (!JWT_SECRET) return null;
-
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as QrAccessPayload;
+    const payload = jwt.verify(token, getJwtSecret()) as QrAccessPayload;
 
     if (payload.type !== "qr_access") return null;
     if (expectedResidentId && payload.residentId !== expectedResidentId) {
