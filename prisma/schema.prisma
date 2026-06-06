@@ -47,6 +47,7 @@ model Barangay {
   announcements                   Announcement[]
   sentResidentReferrals           ResidentReferral[] @relation("SourceResidentReferrals")
   receivedResidentReferrals       ResidentReferral[] @relation("TargetResidentReferrals")
+  healthCenterLogbook             HealthCenterLogbook[]
 
   createdAt DateTime @default(now())
 }
@@ -450,4 +451,17 @@ model QrOtpSession {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model HealthCenterLogbook {
+  id         String   @id @default(cuid())
+  barangayId String
+  name       String
+  purpose    String
+  visitDate  DateTime
+  createdAt  DateTime @default(now())
+
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  @@index([barangayId, visitDate])
 }

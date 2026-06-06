@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BarChart3,
+  BookOpen,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -19,7 +20,9 @@ import {
   LogOut,
   MapPin,
   Menu,
+  Plus,
   RefreshCw,
+  Search,
   ShieldCheck,
   Megaphone,
   Send,
@@ -56,6 +59,7 @@ export default function StaffDashboardPage() {
   | "registration"
   | "referrals"
   | "scan-qr"
+  | "logbook"
 >("overview");
   const [user, setUser] = useState<StaffUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -203,6 +207,15 @@ export default function StaffDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "logbook"}
+              icon={<BookOpen className="h-5 w-5" />}
+              label="Logbook"
+              onClick={() => {
+                setActiveTab("logbook");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -256,9 +269,12 @@ export default function StaffDashboardPage() {
                 label="Scan QR"
                 onClick={() => setActiveTab("scan-qr")}
               />
-
-
-
+              <SidebarButton
+                active={activeTab === "logbook"}
+                icon={<BookOpen className="h-5 w-5" />}
+                label="Logbook"
+                onClick={() => setActiveTab("logbook")}
+              />
             </div>
           </div>
         </aside>
@@ -338,6 +354,8 @@ export default function StaffDashboardPage() {
     <QrScannerTab />
   </div>
 )}
+
+{activeTab === "logbook" && <StaffLogbookTab />}
           </div>
         </section>
       </div>
@@ -348,7 +366,7 @@ export default function StaffDashboardPage() {
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "registration", label: "Register", icon: <UserPlus className="h-5 w-5" /> },
-          { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+          { id: "logbook", label: "Logbook", icon: <BookOpen className="h-5 w-5" /> },
         ]}
         active={activeTab}
         onChange={(id) => setActiveTab(id as typeof activeTab)}
@@ -2136,6 +2154,263 @@ function StaffAnnouncementsTab() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </Panel>
+    </div>
+  );
+}
+
+type LogbookEntry = {
+  id: string;
+  name: string;
+  purpose: string;
+  visitDate: string;
+  createdAt: string;
+};
+
+function StaffLogbookTab() {
+  const today = new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [entries, setEntries] = useState<LogbookEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [search, setSearch] = useState("");
+  const [form, setForm] = useState({ name: "", purpose: "", visitDate: "" });
+
+  const fetchEntries = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(`/api/logbook?date=${selectedDate}`);
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || "Failed to load logbook."); return; }
+      setEntries(Array.isArray(json) ? json : []);
+    } catch {
+      setError("Unable to connect to the server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchEntries(); }, [selectedDate]);
+
+  const submitEntry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    if (!form.name.trim() || !form.purpose.trim()) {
+      setError("Name and Purpose are required.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const visitDate = form.visitDate
+        ? new Date(form.visitDate).toISOString()
+        : new Date().toISOString();
+      const res = await fetch("/api/logbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name.trim(), purpose: form.purpose.trim(), visitDate }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || "Failed to add entry."); return; }
+      setSuccess("Visitor logged successfully.");
+      setForm({ name: "", purpose: "", visitDate: "" });
+      await fetchEntries();
+      setTimeout(() => setSuccess(""), 3000);
+    } catch {
+      setError("Unable to connect to the server.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const filtered = entries.filter(
+    (e) =>
+      e.name.toLowerCase().includes(search.toLowerCase()) ||
+      e.purpose.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-5 pb-4">
+      <Panel
+        icon={<BookOpen className="h-5 w-5" />}
+        title="Health Center Logbook"
+        subtitle="Track visitors entering the health center — date, time, name, and purpose."
+      >
+        {/* Date Filter + Search */}
+        <div className="mb-5 flex flex-col gap-4 rounded-[24px] border border-sky-200 bg-[#EFF6FF] p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-2xl font-extrabold text-slate-900">
+              Logbook for {formatAnnouncementDate(selectedDate)}
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              {filtered.length} visitor{filtered.length !== 1 ? "s" : ""} recorded
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search visitor..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="min-h-[46px] rounded-xl border border-sky-200 bg-white pl-9 pr-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+              />
+            </div>
+            <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-sky-200">
+              <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                Filter Date
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="min-h-[38px] rounded-xl border border-sky-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none focus:border-sky-500"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={fetchEntries}
+              disabled={loading}
+              className="inline-flex min-h-[46px] items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 text-sm font-bold text-sky-600 hover:bg-sky-50 disabled:opacity-60"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        {/* Add Entry Form */}
+        <form
+          onSubmit={submitEntry}
+          className="mb-5 rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm"
+        >
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+              <Plus className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-slate-900">Log a Visitor</h4>
+              <p className="text-xs text-slate-500">Fill in visitor details and click Add Entry.</p>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              {success}
+            </div>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="e.g. Juan Dela Cruz"
+                className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Purpose of Visit *
+              </label>
+              <input
+                type="text"
+                value={form.purpose}
+                onChange={(e) => setForm((f) => ({ ...f, purpose: e.target.value }))}
+                placeholder="e.g. Check-up, Consultation"
+                className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Date & Time (optional)
+              </label>
+              <input
+                type="datetime-local"
+                value={form.visitDate}
+                onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
+                className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="mt-4 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
+          >
+            <Plus className="h-4 w-4" />
+            {submitting ? "Saving..." : "Add Entry"}
+          </button>
+        </form>
+
+        {/* Logbook Table */}
+        {loading ? (
+          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
+            Loading logbook entries...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
+              <BookOpen className="h-9 w-9" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900">No Entries</h3>
+            <p className="mt-2 text-sm text-slate-500">No visitors logged for this date.</p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-[24px] border border-sky-200 bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-sky-100 bg-sky-50">
+                    <th className="px-5 py-4 text-xs font-black uppercase tracking-wide text-slate-500">#</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase tracking-wide text-slate-500">Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase tracking-wide text-slate-500">Time</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase tracking-wide text-slate-500">Name</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase tracking-wide text-slate-500">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-sky-50">
+                  {filtered.map((entry, idx) => {
+                    const dt = new Date(entry.visitDate);
+                    const dateStr = dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+                    const timeStr = dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+                    return (
+                      <tr key={entry.id} className="transition hover:bg-sky-50/50">
+                        <td className="px-5 py-4 font-bold text-slate-400">{idx + 1}</td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center rounded-xl bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                            {dateStr}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center rounded-xl bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+                            {timeStr}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 font-semibold text-slate-900">{entry.name}</td>
+                        <td className="px-5 py-4 text-slate-600">{entry.purpose}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </Panel>
