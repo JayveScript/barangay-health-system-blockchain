@@ -151,67 +151,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (HIGH_PRIVILEGE_ROLES.has(user.role) && user.email) {
-      try {
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpHash = await hash(code, 10);
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-        const otpSession = await prisma.qrOtpSession.create({
-          data: {
-            userId: user.id,
-            residentId: payload.residentId,
-            otpHash,
-            qrToken: sessionKey,
-            expiresAt,
-          },
-        });
-
-        let emailSent = false;
-        try {
-          await transporter.sendMail({
-            from: `"Barangay Health Center" <${process.env.EMAIL_USER}>`,
-            to: user.email,
-            subject: "QR Access Verification Code",
-            html: `
-              <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2 style="color:#2563eb;">Secure QR Access Verification</h2>
-                <p>A resident health record QR code was scanned under your account.</p>
-                <p>Your verification code is:</p>
-                <h1 style="letter-spacing: 6px; color:#2563eb;">${code}</h1>
-                <p>This code expires in 5 minutes.</p>
-              </div>
-            `,
-          });
-          emailSent = true;
-        } catch (mailError) {
-          console.error("[qr-scan/verify] OTP email failed — skipping 2FA, granting direct access", mailError);
-        }
-
-        // Only block on OTP if the email was actually delivered
-        if (!emailSent) {
-          return grantAccess(user, payload.residentId, meta);
-        }
-
-        await logQrScanActivity({
-          residentId: payload.residentId,
-          scannedById: user.id,
-          role: user.role,
-          action: "OTP_SENT",
-          success: true,
-          meta,
-        });
-
-        return NextResponse.json({
-          requiresOtp: true,
-          otpSessionId: otpSession.id,
-          message: "Verification code sent to your registered email.",
-          ...(process.env.NODE_ENV !== "production" ? { devOtp: code } : {}),
-        });
-      } catch (otpError) {
-        console.error("[qr-scan/verify] OTP setup failed, granting direct access", otpError);
-      }
-    }
+    // 2FA removed — password verification is sufficient for QR access
 
     return grantAccess(user, payload.residentId, meta);
   } catch (error) {
