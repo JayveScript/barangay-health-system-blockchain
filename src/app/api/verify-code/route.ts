@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { DEFAULT_BARANGAY_CITY } from "@/lib/barangay-options";
+import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 export async function POST(req: Request) {
   try {
@@ -213,6 +214,87 @@ export async function POST(req: Request) {
         residentId: resident.id,
       };
     });
+
+    // ── Blockchain: anchor health records (fire-and-forget, non-blocking) ───
+    // Failures here do NOT affect the registration response.
+    ;(async () => {
+      try {
+        const residentId = result.residentId;
+        const barangayId = pending.barangayId;
+
+        // Anchor resident profile hash
+        await anchorRecord(
+          residentId,
+          {
+            lastName: pending.lastName, firstName: pending.firstName,
+            middleName: pending.middleName, age: pending.age,
+            sex: pending.sex, birthDate: pending.birthDate,
+            civilStatus: pending.civilStatus, completeAddress: pending.completeAddress,
+            barangayName: pending.barangayName, city: pending.city,
+          },
+          "resident_profile"
+        );
+
+        // Anchor medical history hash
+        await anchorRecord(
+          residentId,
+          {
+            hasHypertension: pending.hasHypertension, hasDiabetes: pending.hasDiabetes,
+            hasStiHiv: pending.hasStiHiv, hasHeartDisease: pending.hasHeartDisease,
+            hasKidneyFailure: pending.hasKidneyFailure, hasTuberculosis: pending.hasTuberculosis,
+            hasAllergies: pending.hasAllergies, allergiesDetails: pending.allergiesDetails,
+            hasCancer: pending.hasCancer, cancerDetails: pending.cancerDetails,
+            hasOtherConditions: pending.hasOtherConditions,
+            otherConditionsDetails: pending.otherConditionsDetails,
+            maintenanceMedications: pending.maintenanceMedications,
+            previousIllnessesSurgeries: pending.previousIllnessesSurgeries,
+          },
+          "medical_history"
+        );
+
+        // Anchor family history hash
+        await anchorRecord(
+          residentId,
+          {
+            asthmaAllergies: pending.familyAsthmaAllergies,
+            birthDefects: pending.familyBirthDefects,
+            cancer: pending.familyCancer, dementia: pending.familyDementia,
+            diabetes: pending.familyDiabetes, hypertension: pending.familyHypertension,
+            kidneyDisease: pending.familyKidneyDisease, mentalIllness: pending.familyMentalIllness,
+          },
+          "family_history"
+        );
+
+        // Anchor personal/social history hash
+        await anchorRecord(
+          residentId,
+          {
+            eatsHealthyDiet: pending.eatsHealthyDiet,
+            adequatePhysicalActivity: pending.adequatePhysicalActivity,
+            sufficientRestSleep: pending.sufficientRestSleep,
+            normalGrowthDevelopment: pending.normalGrowthDevelopment,
+            multipleSexPartners: pending.multipleSexPartners,
+            smokesTobacco: pending.smokesTobacco, tobaccoPacksPerYear: pending.tobaccoPacksPerYear,
+            drinksAlcohol: pending.drinksAlcohol, alcoholBottlesPerDay: pending.alcoholBottlesPerDay,
+            takesIllicitDrugs: pending.takesIllicitDrugs, illicitDrugsDetails: pending.illicitDrugsDetails,
+          },
+          "personal_social"
+        );
+
+        // Log RECORD_CREATED audit event
+        await logAuditEvent(
+          AuditEventType.RECORD_CREATED,
+          result.userId,
+          residentId,
+          barangayId,
+          null,
+          { event: "resident_registered" }
+        );
+      } catch (blockchainErr) {
+        console.error("[blockchain] verify-code anchor failed:", blockchainErr);
+      }
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json({
       success: true,

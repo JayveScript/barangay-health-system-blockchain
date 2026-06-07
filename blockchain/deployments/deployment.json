@@ -1,0 +1,10 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployedAt": "2026-06-07T14:37:09.864Z",
+  "deployer": "0xA3118a23Ec9B7898D2F3728197e4D00029F27db0",
+  "contracts": {
+    "HealthRecordRegistry": "0x13caFe48BD7a6D9bC9f0d2ADec7162ac5CDDeB48",
+    "AuditLog": "0x7ccDc8df7aDF26578CD6382F8F0b98132b4246b1"
+  }
+}

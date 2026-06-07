@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth";
+import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 function createSlots(startTime: string, endTime: string, slotMinutes: number) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -323,6 +324,17 @@ if (alreadyHasAppointmentSameDay) {
         status: "PENDING",
       },
     });
+
+    // ── Blockchain: log appointment booked (fire-and-forget) ─────────────────
+    logAuditEvent(
+      AuditEventType.APPT_BOOKED,
+      user.id,
+      resident.id,
+      barangayId,
+      null,
+      { role: user.role, appointmentId: appointment.id, date: appointment.date.toISOString(), time }
+    ).catch(err => console.error("[blockchain] appt log failed:", err));
+    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(
       {
