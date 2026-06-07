@@ -167,6 +167,7 @@ export async function POST(req: Request) {
           },
         });
 
+        let emailSent = false;
         try {
           await transporter.sendMail({
             from: `"Barangay Health Center" <${process.env.EMAIL_USER}>`,
@@ -182,8 +183,14 @@ export async function POST(req: Request) {
               </div>
             `,
           });
+          emailSent = true;
         } catch (mailError) {
-          console.error("[qr-scan/verify] OTP email failed", mailError);
+          console.error("[qr-scan/verify] OTP email failed — skipping 2FA, granting direct access", mailError);
+        }
+
+        // Only block on OTP if the email was actually delivered
+        if (!emailSent) {
+          return grantAccess(user, payload.residentId, meta);
         }
 
         await logQrScanActivity({
