@@ -109,6 +109,29 @@ function LoginForm() {
 
   return (
     <main className="min-h-[100dvh] bg-[#EFF6FF] px-4 py-6 sm:px-6 lg:px-8">
+      <style>{`
+        @keyframes cardGlow {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 8px 32px rgba(15, 23, 42, 0.25);
+          }
+          50% {
+            box-shadow: 0 0 22px 6px rgba(56, 189, 248, 0.35), 0 8px 32px rgba(15, 23, 42, 0.25);
+          }
+        }
+        @keyframes cardFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        .info-card-anim {
+          animation: cardGlow 3s ease-in-out infinite, cardFloat 4s ease-in-out infinite;
+        }
+        .info-card-anim-d1 {
+          animation: cardGlow 3s ease-in-out 0.6s infinite, cardFloat 4s ease-in-out 0.6s infinite;
+        }
+        .info-card-anim-d2 {
+          animation: cardGlow 3s ease-in-out 1.2s infinite, cardFloat 4s ease-in-out 1.2s infinite;
+        }
+      `}</style>
       <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
         <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
@@ -144,16 +167,19 @@ function LoginForm() {
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
                 text="Securely manage consultations, health history, and treatment records."
+                animClass="info-card-anim"
               />
               <InfoCard
                 icon={<Stethoscope className="h-5 w-5" />}
                 title="Health Staff Access"
                 text="Organized access for doctors, nurses, BHWs, and health staff."
+                animClass="info-card-anim-d1"
               />
               <InfoCard
                 icon={<ShieldCheck className="h-5 w-5" />}
                 title="Blockchain Security"
                 text="Blockchain-powered security for tamper-proof and trusted health records."
+                animClass="info-card-anim-d2"
               />
             </div>
           </div>
@@ -287,13 +313,15 @@ function InfoCard({
   icon,
   title,
   text,
+  animClass,
 }: {
   icon: React.ReactNode;
   title: string;
   text: string;
+  animClass: string;
 }) {
   return (
-    <div className="group rounded-[24px] border border-white/20 bg-white/15 p-5 shadow-lg shadow-slate-950/20 backdrop-blur-md transition duration-300 hover:-translate-y-2 hover:border-sky-200/70 hover:bg-white/20 hover:shadow-2xl hover:shadow-sky-950/30">
+    <div className={`${animClass} group rounded-[24px] border border-white/20 bg-white/15 p-5 shadow-lg shadow-slate-950/20 backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-sky-200/70 hover:bg-white/20`}>
       <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
         {icon}
       </div>
