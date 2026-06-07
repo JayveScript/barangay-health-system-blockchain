@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 async function verifyAdminPassword(userId: string, password: string) {
   const admin = await prisma.user.findUnique({
@@ -128,6 +129,34 @@ export async function PATCH(
         },
       });
     }
+
+    // ── Blockchain: anchor updated profile hash (fire-and-forget) ────────────
+    anchorRecord(
+      id,
+      {
+        firstName: updatedResident.firstName,
+        lastName: updatedResident.lastName,
+        middleName: updatedResident.middleName,
+        age: updatedResident.age,
+        sex: updatedResident.sex,
+        birthDate: updatedResident.birthDate,
+        civilStatus: updatedResident.civilStatus,
+        completeAddress: updatedResident.completeAddress,
+        barangayName: updatedResident.barangayName,
+        city: updatedResident.city,
+      },
+      "resident_profile"
+    ).then(() =>
+      logAuditEvent(
+        AuditEventType.RECORD_UPDATED,
+        currentUserId,
+        id,
+        barangayId,
+        null,
+        { role: currentUser?.role ?? "unknown", event: "resident_profile_updated" }
+      )
+    ).catch(err => console.error("[blockchain] resident update anchor failed:", err));
+    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json({
       message: "Resident updated successfully.",

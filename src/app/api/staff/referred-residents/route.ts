@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth";
 import { REFERRAL_RECEIVING_BARANGAY_NAMES } from "@/lib/barangay-options";
+import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 function createSlots(startTime: string, endTime: string, slotMinutes: number) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -595,6 +596,33 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // ── Blockchain: anchor referral hash + log audit event (fire-and-forget) ─
+    anchorRecord(
+      residentId,
+      {
+        referralId: referral.id,
+        sourceBarangayId,
+        targetBarangayId,
+        reason,
+        notes,
+        identifyingData: buildIdentifyingData(resident),
+        medicalHistory,
+        familyHistory,
+        personalSocialHistory,
+      },
+      "referral"
+    ).then(() =>
+      logAuditEvent(
+        AuditEventType.REFERRAL_CREATED,
+        user.id,
+        residentId,
+        sourceBarangayId,
+        null,
+        { role: user.role, targetBarangayId, referralId: referral.id }
+      )
+    ).catch(err => console.error("[blockchain] referral anchor failed:", err));
+    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(
       {
