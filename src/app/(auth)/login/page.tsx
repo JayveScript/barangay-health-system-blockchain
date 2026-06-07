@@ -50,10 +50,7 @@ function LoginForm() {
         return;
       }
 
-      // If there's a callbackUrl (e.g. from a QR scan redirect), go there first.
       if (callbackUrl && callbackUrl.startsWith("/")) {
-        // IMPORTANT: If they logged in as a resident on the verification screen for a QR code,
-        // they are NOT allowed to view it. Show them the Access Denied screen.
         if (
           (callbackUrl.startsWith("/resident/") || callbackUrl.startsWith("/scan")) &&
           data.role === "RESIDENT"
@@ -70,31 +67,24 @@ function LoginForm() {
         case "BARANGAY_ADMIN":
           window.location.href = "/dashboard/admin";
           break;
-
         case "RESIDENT":
           window.location.href = "/dashboard/resident";
           break;
-
         case "DOCTOR":
           window.location.href = "/dashboard/doctor";
           break;
-
         case "NURSE":
           window.location.href = "/dashboard/nurse";
           break;
-
         case "BHW":
           window.location.href = "/dashboard/bhw";
           break;
-
         case "STAFF":
           window.location.href = "/dashboard/staff";
           break;
-
         case "MIDWIFE":
           window.location.href = "/dashboard/midwife";
           break;
-
         default:
           setServerError("Unknown account role.");
           break;
@@ -131,16 +121,53 @@ function LoginForm() {
         .info-card-anim-d2 {
           animation: cardGlow 3s ease-in-out 1.2s infinite, cardFloat 4s ease-in-out 1.2s infinite;
         }
+
+        @keyframes iconPulseRing {
+          0% { transform: scale(1); opacity: 1; }
+          70% { transform: scale(1.55); opacity: 0; }
+          100% { transform: scale(1.55); opacity: 0; }
+        }
+        @keyframes iconPulseRing2 {
+          0% { transform: scale(1); opacity: 0.7; }
+          70% { transform: scale(1.85); opacity: 0; }
+          100% { transform: scale(1.85); opacity: 0; }
+        }
+        @keyframes iconBeat {
+          0%, 100% { transform: scale(1); }
+          14% { transform: scale(1.08); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.05); }
+          56% { transform: scale(1); }
+        }
+        @keyframes iconGlow {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0),
+                        0 8px 24px rgba(14, 165, 233, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 28px 8px rgba(14, 165, 233, 0.45),
+                        0 8px 24px rgba(14, 165, 233, 0.4);
+          }
+        }
+        .icon-beat { animation: iconBeat 2.4s ease-in-out infinite; }
+        .icon-glow { animation: iconGlow 2.4s ease-in-out infinite; }
+        .icon-ring-1 {
+          position: absolute; inset: 0; border-radius: 28px;
+          background: rgba(14, 165, 233, 0.25);
+          animation: iconPulseRing 2.4s ease-out infinite;
+        }
+        .icon-ring-2 {
+          position: absolute; inset: 0; border-radius: 28px;
+          background: rgba(14, 165, 233, 0.15);
+          animation: iconPulseRing2 2.4s ease-out 0.4s infinite;
+        }
       `}</style>
       <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
         <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('/images/login-medical-bg.jpg')",
-            }}
+            style={{ backgroundImage: "url('/images/login-medical-bg.jpg')" }}
           />
-
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-blue-950/70 to-sky-900/65" />
           <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-transparent to-slate-950/30" />
 
@@ -188,8 +215,12 @@ function LoginForm() {
         <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:w-[40%] lg:px-10">
           <div className="w-full max-w-md">
             <div className="mb-8 flex justify-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/30">
-                <HeartPulse className="h-10 w-10" />
+              <div className="relative">
+                <span className="icon-ring-1" />
+                <span className="icon-ring-2" />
+                <div className="icon-beat icon-glow relative flex h-20 w-20 items-center justify-center rounded-[28px] bg-[#0EA5E9] text-white">
+                  <HeartPulse className="h-10 w-10 drop-shadow-md" />
+                </div>
               </div>
             </div>
 
@@ -227,13 +258,13 @@ function LoginForm() {
               )}
 
               <div className="flex justify-end">
-  <Link
-    href="/forgot-password"
-    className="inline-block rounded-lg px-1 text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-sky-300"
-  >
-    Forgot password?
-  </Link>
-</div>
+                <Link
+                  href="/forgot-password"
+                  className="inline-block rounded-lg px-1 text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-sky-300"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <button
                 type="submit"
@@ -273,7 +304,6 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-
 
 function Input({
   label,
