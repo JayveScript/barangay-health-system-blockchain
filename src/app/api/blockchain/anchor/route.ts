@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { anchorRecord, RecordType } from "@/lib/blockchain";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentResidentUser } from "@/lib/current-user";
 
 const VALID_RECORD_TYPES: RecordType[] = [
   "medical_history",
@@ -22,7 +22,7 @@ const VALID_RECORD_TYPES: RecordType[] = [
 export async function POST(req: NextRequest) {
   try {
     // Only authenticated staff can anchor records
-    const user = await getCurrentUser();
+    const user = await getCurrentResidentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }

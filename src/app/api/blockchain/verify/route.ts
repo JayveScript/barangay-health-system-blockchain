@@ -8,11 +8,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRecord, RecordType } from "@/lib/blockchain";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentResidentUser } from "@/lib/current-user";
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentResidentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }

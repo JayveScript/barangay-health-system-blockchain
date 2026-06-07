@@ -23,13 +23,13 @@ import {
   AuditEventType,
   AuditEventTypeValue,
 } from "@/lib/blockchain";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentResidentUser } from "@/lib/current-user";
 
 const VALID_EVENT_TYPES = Object.values(AuditEventType) as number[];
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentResidentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentResidentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
