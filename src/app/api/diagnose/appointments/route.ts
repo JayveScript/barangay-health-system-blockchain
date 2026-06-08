@@ -27,10 +27,19 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(todayStart);
+    todayEnd.setDate(todayEnd.getDate() + 1);
+
     const appointments = await db.appointment.findMany({
       where: {
         barangayId: user.barangayId,
         status: "ACCEPTED",
+        date: {
+          gte: todayStart,
+          lt: todayEnd,
+        },
       },
       include: {
         resident: {
@@ -47,7 +56,7 @@ export async function GET() {
         doctor: { select: { fullName: true } },
         _count: { select: { diagnoses: true } },
       },
-      orderBy: [{ date: "desc" }, { time: "desc" }],
+      orderBy: [{ time: "asc" }],
       take: 100,
     });
 
