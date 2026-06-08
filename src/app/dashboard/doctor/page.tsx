@@ -372,7 +372,8 @@ export default function DoctorDashboardPage() {
 
         <section className="flex-1 overflow-y-auto lg:h-full">
           <div className="h-full rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 sm:p-6">
-            <div className="sticky top-0 z-10 mb-6 rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 backdrop-blur sm:p-5">
+            <div className="sticky top-0 z-20 -mx-4 -mt-4 bg-white px-4 pt-4 pb-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:pt-6 sm:pb-6">
+              <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 sm:p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   {/* Mobile hamburger menu button */}
@@ -423,6 +424,7 @@ export default function DoctorDashboardPage() {
                   <LogOut className="h-4 w-4" />
                   Logout
                 </button>
+              </div>
               </div>
             </div>
 
