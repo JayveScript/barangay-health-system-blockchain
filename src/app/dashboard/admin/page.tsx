@@ -209,6 +209,23 @@ export default function AdminDashboardPage() {
   const [secureLoading, setSecureLoading] = useState(false);
   const [secureError, setSecureError] = useState("");
   const [residentSearch, setResidentSearch] = useState("");
+  const [staffSearch, setStaffSearch] = useState("");
+
+  const [staffViewUser, setStaffViewUser] = useState<StaffUser | null>(null);
+  const [staffEditUser, setStaffEditUser] = useState<StaffUser | null>(null);
+  const [staffEditForm, setStaffEditForm] = useState({
+    fullName: "",
+    username: "",
+    role: "STAFF",
+    password: "",
+  });
+  const [staffEditLoading, setStaffEditLoading] = useState(false);
+  const [staffEditError, setStaffEditError] = useState("");
+
+  const [staffDeleteUser, setStaffDeleteUser] = useState<StaffUser | null>(null);
+  const [staffDeletePassword, setStaffDeletePassword] = useState("");
+  const [staffDeleteLoading, setStaffDeleteLoading] = useState(false);
+  const [staffDeleteError, setStaffDeleteError] = useState("");
 
   const [form, setForm] = useState({
     fullName: "",
@@ -342,6 +359,20 @@ export default function AdminDashboardPage() {
     );
   });
 }, [data, residentSearch]);
+
+  const filteredStaffUsers = useMemo(() => {
+    const query = staffSearch.toLowerCase().trim();
+
+    if (!query) return data?.staffUsers ?? [];
+
+    return (data?.staffUsers ?? []).filter((user) => {
+      return (
+        (user.fullName ?? "").toLowerCase().includes(query) ||
+        user.username.toLowerCase().includes(query) ||
+        user.role.toLowerCase().includes(query)
+      );
+    });
+  }, [data, staffSearch]);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -482,6 +513,124 @@ export default function AdminDashboardPage() {
     setSecureLoading(false);
   }
 };
+
+  const openStaffView = (user: StaffUser) => {
+    setStaffViewUser(user);
+  };
+
+  const openStaffEdit = (user: StaffUser) => {
+    setStaffEditUser(user);
+    setStaffEditForm({
+      fullName: user.fullName ?? "",
+      username: getBarangayHcmsUsernameLocalPart(user.username),
+      role: user.role,
+      password: "",
+    });
+    setStaffEditError("");
+  };
+
+  const closeStaffEdit = () => {
+    if (staffEditLoading) return;
+
+    setStaffEditUser(null);
+    setStaffEditError("");
+  };
+
+  const submitStaffEdit = async () => {
+    if (!staffEditUser) return;
+
+    if (!staffEditForm.password.trim()) {
+      setStaffEditError("Admin password is required.");
+      return;
+    }
+
+    try {
+      setStaffEditLoading(true);
+      setStaffEditError("");
+
+      const res = await fetch(`/api/staff/${staffEditUser.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: staffEditForm.password,
+          fullName: staffEditForm.fullName,
+          username: normalizeBarangayHcmsUsername(staffEditForm.username),
+          role: staffEditForm.role,
+        }),
+      });
+
+      const json = await readJsonSafe(res);
+
+      if (!res.ok) {
+        setStaffEditError(json.error || "Failed to update staff user.");
+        return;
+      }
+
+      closeStaffEdit();
+      await fetchDashboard();
+    } catch (err) {
+      console.error(err);
+      setStaffEditError("Unable to connect to the server.");
+    } finally {
+      setStaffEditLoading(false);
+    }
+  };
+
+  const openStaffDelete = (user: StaffUser) => {
+    setStaffDeleteUser(user);
+    setStaffDeletePassword("");
+    setStaffDeleteError("");
+  };
+
+  const closeStaffDelete = () => {
+    if (staffDeleteLoading) return;
+
+    setStaffDeleteUser(null);
+    setStaffDeletePassword("");
+    setStaffDeleteError("");
+  };
+
+  const confirmStaffDelete = async () => {
+    if (!staffDeleteUser) return;
+
+    if (!staffDeletePassword.trim()) {
+      setStaffDeleteError("Admin password is required.");
+      return;
+    }
+
+    try {
+      setStaffDeleteLoading(true);
+      setStaffDeleteError("");
+
+      const res = await fetch(`/api/staff/${staffDeleteUser.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: staffDeletePassword,
+        }),
+      });
+
+      const json = await readJsonSafe(res);
+
+      if (!res.ok) {
+        setStaffDeleteError(json.error || "Failed to delete staff user.");
+        return;
+      }
+
+      closeStaffDelete();
+      await fetchDashboard();
+    } catch (err) {
+      console.error(err);
+      setStaffDeleteError("Unable to connect to the server.");
+    } finally {
+      setStaffDeleteLoading(false);
+    }
+  };
+
   const adminBottomNavItems = [
     { id: "overview",      label: "Overview",   icon: <Activity className="h-5 w-5" /> },
     { id: "residents",     label: "Residents",  icon: <Users className="h-5 w-5" /> },
@@ -1066,51 +1215,129 @@ export default function AdminDashboardPage() {
 
                 {tab === "staff-users" && (
                   <div className="rounded-[24px] border border-sky-200 bg-white p-5">
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-                        <Stethoscope className="h-6 w-6" />
+                    <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      {/* LEFT SIDE */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+                          <Stethoscope className="h-6 w-6" />
+                        </div>
+
+                        <div>
+                          <h2 className="text-2xl font-bold text-slate-900">
+                            Existing Staff Users
+                          </h2>
+
+                          <p className="text-sm text-slate-500">
+                            View all staff, doctor, BHW, nurse, and midwife accounts.
+                          </p>
+                        </div>
                       </div>
 
-                      <div>
-                        <h2 className="text-2xl font-bold text-slate-900">
-                          Existing Staff Users
-                        </h2>
+                      {/* RIGHT SIDE SEARCH */}
+                      <div className="relative w-full lg:max-w-sm">
+                        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
-                        <p className="text-sm text-slate-500">
-                          View all staff, doctor, BHW, nurse, and midwife accounts.
-                        </p>
+                        <input
+                          type="text"
+                          value={staffSearch}
+                          onChange={(e) => setStaffSearch(e.target.value)}
+                          placeholder="Search name, username, role..."
+                          className="min-h-[52px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
+                        />
                       </div>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {data?.staffUsers?.map((user) => (
+                    {/* Mobile compact list - Name + Actions on one line */}
+                    <div className="space-y-2 md:hidden">
+                      <div className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        Staff Name
+                      </div>
+
+                      {filteredStaffUsers.length === 0 && (
+                        <div className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
+                          No staff user found.
+                        </div>
+                      )}
+
+                      {filteredStaffUsers.map((user) => (
                         <div
                           key={user.id}
-                          className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                          className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-3 py-2.5 shadow-sm"
                         >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="truncate text-lg font-bold text-slate-900">
-                                {user.fullName}
-                              </p>
+                          <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
+                            {user.fullName || user.username}
+                          </p>
 
-                              <p className="mt-1 text-sm text-slate-500">
-                                {user.barangay?.name || currentBarangayName}
-                              </p>
-                            </div>
-
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-sm">
-                              <UserRound className="h-5 w-5" />
-                            </div>
-                          </div>
-
-                          <div className="mt-5 flex items-center justify-between">
-                            <span className="inline-flex rounded-full bg-[#0EA5E9] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
-                              {user.role}
-                            </span>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <IconActionButton
+                              label="View"
+                              icon={<Eye className="h-3.5 w-3.5" />}
+                              onClick={() => openStaffView(user)}
+                            />
+                            <IconActionButton
+                              label="Edit"
+                              icon={<Edit className="h-3.5 w-3.5" />}
+                              variant="warning"
+                              onClick={() => openStaffEdit(user)}
+                            />
+                            <IconActionButton
+                              label="Delete"
+                              icon={<Trash2 className="h-3.5 w-3.5" />}
+                              variant="danger"
+                              onClick={() => openStaffDelete(user)}
+                            />
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Desktop full table */}
+                    <div className="hidden overflow-x-auto md:block">
+                      <table className="min-w-[700px] w-full table-fixed border-separate border-spacing-y-2">
+                        <thead>
+                          <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                            <th className="w-[34%] px-3">Name</th>
+                            <th className="w-[28%] px-3">Username</th>
+                            <th className="w-[18%] px-3">Role</th>
+                            <th className="w-[20%] px-3 text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredStaffUsers.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
+                                No staff user found.
+                              </td>
+                            </tr>
+                          )}
+                          {filteredStaffUsers.map((user) => (
+                            <tr key={user.id} className="bg-sky-50 shadow-sm">
+                              <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-900">
+                                <span className="block truncate whitespace-nowrap">
+                                  {user.fullName || "—"}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-sm text-slate-600">
+                                <span className="block truncate whitespace-nowrap">
+                                  {user.username}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3">
+                                <span className="inline-flex rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+                                  {user.role}
+                                </span>
+                              </td>
+                              <td className="rounded-r-2xl px-3 py-3">
+                                <div className="flex items-center justify-center gap-2">
+                                  <IconActionButton label="View Details" icon={<Eye className="h-4 w-4" />} onClick={() => openStaffView(user)} />
+                                  <IconActionButton label="Edit Staff User" icon={<Edit className="h-4 w-4" />} variant="warning" onClick={() => openStaffEdit(user)} />
+                                  <IconActionButton label="Delete Staff User" icon={<Trash2 className="h-4 w-4" />} variant="danger" onClick={() => openStaffDelete(user)} />
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
@@ -1163,6 +1390,38 @@ export default function AdminDashboardPage() {
           onPasswordChange={setSecurePassword}
           onCancel={closeSecureModal}
           onConfirm={confirmSecureAction}
+        />
+      )}
+
+      {staffViewUser && (
+        <StaffViewModal
+          user={staffViewUser}
+          barangayName={currentBarangayName}
+          onClose={() => setStaffViewUser(null)}
+        />
+      )}
+
+      {staffEditUser && (
+        <StaffEditModal
+          form={staffEditForm}
+          loading={staffEditLoading}
+          error={staffEditError}
+          onChange={(next) => setStaffEditForm((p) => ({ ...p, ...next }))}
+          onCancel={closeStaffEdit}
+          onSubmit={submitStaffEdit}
+        />
+      )}
+
+      {staffDeleteUser && (
+        <PasswordConfirmModal
+          action="delete"
+          subjectLabel="this staff user"
+          password={staffDeletePassword}
+          loading={staffDeleteLoading}
+          error={staffDeleteError}
+          onPasswordChange={setStaffDeletePassword}
+          onCancel={closeStaffDelete}
+          onConfirm={confirmStaffDelete}
         />
       )}
 
@@ -1240,6 +1499,7 @@ function IconActionButton({
 
 function PasswordConfirmModal({
   action,
+  subjectLabel = "this resident",
   password,
   loading,
   error,
@@ -1248,6 +1508,7 @@ function PasswordConfirmModal({
   onConfirm,
 }: {
   action: SecureAction;
+  subjectLabel?: string;
   password: string;
   loading: boolean;
   error: string;
@@ -1269,7 +1530,7 @@ function PasswordConfirmModal({
             </h2>
 
             <p className="text-sm text-slate-500">
-              Required before you can {action === "delete" ? "delete" : "edit"} this resident.
+              Required before you can {action === "delete" ? "delete" : "edit"} {subjectLabel}.
             </p>
           </div>
         </div>
@@ -1308,6 +1569,163 @@ function PasswordConfirmModal({
             }`}
           >
             {loading ? "Checking..." : "Continue"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StaffViewModal({
+  user,
+  barangayName,
+  onClose,
+}: {
+  user: StaffUser;
+  barangayName: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.30)]">
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+              <UserRound className="h-6 w-6" />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                {user.fullName || user.username}
+              </h2>
+
+              <p className="text-sm text-slate-500">Staff user details</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-sky-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Username</p>
+            <p className="text-sm font-semibold text-slate-900">{user.username}</p>
+          </div>
+
+          <div className="rounded-2xl bg-sky-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Role</p>
+            <span className="mt-1 inline-flex rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+              {user.role}
+            </span>
+          </div>
+
+          <div className="rounded-2xl bg-sky-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Barangay</p>
+            <p className="text-sm font-semibold text-slate-900">{user.barangay?.name || barangayName}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-2xl bg-[#0EA5E9] px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StaffEditModal({
+  form,
+  loading,
+  error,
+  onChange,
+  onCancel,
+  onSubmit,
+}: {
+  form: { fullName: string; username: string; role: string; password: string };
+  loading: boolean;
+  error: string;
+  onChange: (next: Partial<{ fullName: string; username: string; role: string; password: string }>) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.30)]">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+            <Edit className="h-6 w-6" />
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Edit Staff User</h2>
+            <p className="text-sm text-slate-500">Update account details and confirm with your admin password.</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Input
+            label="Full Name"
+            value={form.fullName}
+            onChange={(v) => onChange({ fullName: v })}
+          />
+
+          <Input
+            label="Username"
+            value={form.username}
+            onChange={(v) => onChange({ username: normalizeBarangayHcmsUsername(v) })}
+            fixedSuffix={BARANGAY_ADMIN_USERNAME_SUFFIX}
+          />
+
+          <Select
+            label="Role"
+            value={form.role}
+            onChange={(v) => onChange({ role: v })}
+            options={["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
+          />
+
+          <Input
+            label="Admin Password"
+            type="password"
+            value={form.password}
+            onChange={(v) => onChange({ password: v })}
+          />
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading}
+            className="rounded-2xl bg-[#0EA5E9] px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60"
+          >
+            {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
