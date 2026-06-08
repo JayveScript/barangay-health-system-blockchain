@@ -14,6 +14,7 @@ import {
   Pill,
   Scale,
   ShieldCheck,
+  Stethoscope,
   Syringe,
   UserRound,
   Users,
@@ -38,9 +39,10 @@ type NurseUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
+import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr" | "bmi">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr" | "bmi" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -171,6 +173,15 @@ export default function NurseDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "diagnose"}
+              icon={<Stethoscope className="h-5 w-5" />}
+              label="Diagnose Patient"
+              onClick={() => {
+                setActiveTab("diagnose");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -211,6 +222,12 @@ export default function NurseDashboardPage() {
                 icon={<Scale className="h-5 w-5" />}
                 label="BMI Records"
                 onClick={() => setActiveTab("bmi")}
+              />
+              <SidebarButton
+                active={activeTab === "diagnose"}
+                icon={<Stethoscope className="h-5 w-5" />}
+                label="Diagnose Patient"
+                onClick={() => setActiveTab("diagnose")}
               />
             </div>
           </div>
@@ -285,6 +302,8 @@ export default function NurseDashboardPage() {
             )}
 
             {activeTab === "bmi" && <BMITab />}
+
+            {activeTab === "diagnose" && <DiagnoseTab />}
           </div>
         </section>
       </div>
@@ -295,6 +314,7 @@ export default function NurseDashboardPage() {
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
+          { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
         ]}
         active={activeTab}
         onChange={(id) => setActiveTab(id as typeof activeTab)}

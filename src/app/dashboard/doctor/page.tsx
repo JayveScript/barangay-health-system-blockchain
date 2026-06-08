@@ -145,10 +145,11 @@ type DoctorAvailability = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
+import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "appointments" | "announcements" | "scan-qr"
+  "overview" | "personal" | "appointments" | "diagnose" | "announcements" | "scan-qr"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -268,6 +269,16 @@ export default function DoctorDashboardPage() {
             />
 
             <SidebarButton
+              active={activeTab === "diagnose"}
+              icon={<Stethoscope className="h-5 w-5" />}
+              label="Diagnose Patient"
+              onClick={() => {
+                setActiveTab("diagnose");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={activeTab === "announcements"}
               icon={<Megaphone className="h-5 w-5" />}
               label="Announcements"
@@ -326,6 +337,13 @@ export default function DoctorDashboardPage() {
                 icon={<CalendarCheck className="h-5 w-5" />}
                 label="Appointments"
                 onClick={() => setActiveTab("appointments")}
+              />
+
+              <SidebarButton
+                active={activeTab === "diagnose"}
+                icon={<Stethoscope className="h-5 w-5" />}
+                label="Diagnose Patient"
+                onClick={() => setActiveTab("diagnose")}
               />
 
               <SidebarButton
@@ -412,6 +430,8 @@ export default function DoctorDashboardPage() {
 
             {activeTab === "appointments" && <AppointmentsTab />}
 
+            {activeTab === "diagnose" && <DiagnoseTab />}
+
             {activeTab === "announcements" && <DoctorAnnouncementsTab />}
 
             {activeTab === "scan-qr" && (
@@ -431,6 +451,7 @@ export default function DoctorDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "appointments", label: "Schedule", icon: <CalendarCheck className="h-5 w-5" /> },
+          { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
