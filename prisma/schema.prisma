@@ -49,6 +49,7 @@ model Barangay {
   receivedResidentReferrals       ResidentReferral[] @relation("TargetResidentReferrals")
   healthCenterLogbook             HealthCenterLogbook[]
   bmiRecords                      BMIRecord[]
+  diagnoses                       Diagnosis[]
 
   createdAt DateTime @default(now())
 }
@@ -75,6 +76,7 @@ model User {
   qrScanAuditLogs QrScanAuditLog[] @relation("QrScanAuditLogs")
   qrOtpSessions   QrOtpSession[]   @relation("QrOtpSessions")
   bmiRecordsRecorded BMIRecord[]   @relation("BMIRecordedBy")
+  diagnosesRecorded  Diagnosis[]   @relation("DiagnosesRecorded")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -121,6 +123,7 @@ model Resident {
   appointments Appointment[]
   referrals    ResidentReferral[]
   bmiRecords   BMIRecord[]
+  diagnoses    Diagnosis[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -341,10 +344,34 @@ model Appointment {
   resident     Resident           @relation(fields: [residentId], references: [id], onDelete: Cascade)
   barangay     Barangay           @relation(fields: [barangayId], references: [id])
 
+  diagnoses Diagnosis[]
+
   @@unique([availabilityId, time])
   @@index([barangayId])
   @@index([residentId, barangayId])
   @@index([doctorId, barangayId])
+}
+
+model Diagnosis {
+  id            String   @id @default(cuid())
+  residentId    String
+  diagnosedById String
+  barangayId    String
+  appointmentId String?
+
+  isHealthy  Boolean  @default(false)
+  conditions String[] @default([])
+  notes      String?
+
+  createdAt DateTime @default(now())
+
+  resident    Resident     @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  diagnosedBy User         @relation("DiagnosesRecorded", fields: [diagnosedById], references: [id], onDelete: Cascade)
+  barangay    Barangay     @relation(fields: [barangayId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([barangayId])
+  @@index([residentId, barangayId])
 }
 
 model Announcement {
