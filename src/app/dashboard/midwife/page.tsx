@@ -196,7 +196,8 @@ export default function MidwifeDashboardPage() {
 
         <section className="h-full flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm">
-            <div className="sticky top-0 z-10 mb-6 rounded-[24px] border border-[#E5E7EB] bg-[#F8FAFC]/95 p-5 backdrop-blur">
+            <div className="sticky top-0 z-20 -mx-6 -mt-6 bg-white px-6 pt-6 pb-6">
+              <div className="rounded-[24px] border border-[#E5E7EB] bg-[#F8FAFC] p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   {/* Mobile hamburger menu button */}
@@ -242,6 +243,7 @@ export default function MidwifeDashboardPage() {
                   <LogOut className="h-4 w-4" />
                   Logout
                 </button>
+              </div>
               </div>
             </div>
 
