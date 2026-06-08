@@ -570,7 +570,7 @@ export default function ResidentDashboard() {
             </div>
           </aside>
 
-          <section className="h-full overflow-y-auto rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 backdrop-blur md:p-6">
+          <section className="h-full overflow-y-auto [transform:translateZ(0)] [will-change:transform] [backface-visibility:hidden] rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 backdrop-blur md:p-6">
             <div className="mb-6 flex flex-col gap-4 overflow-hidden rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-5 shadow-lg shadow-sky-900/5 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 {/* Mobile hamburger menu button */}
