@@ -254,7 +254,7 @@ export function DiagnoseTab() {
           <div>
             <h3 className="text-xl font-bold text-slate-900">Diagnose Patient</h3>
             <p className="text-sm text-slate-500">
-              Choose a patient from a completed appointment or your registered residents, then record your findings.
+              Choose a patient from today&apos;s accepted appointments or your registered residents, then record your findings.
             </p>
           </div>
         </div>
@@ -280,7 +280,7 @@ export function DiagnoseTab() {
             }`}
           >
             <CalendarCheck className="h-4 w-4" />
-            From Appointment Bookings
+            Today&apos;s Appointment Bookings
           </button>
           <button
             type="button"
@@ -427,8 +427,8 @@ function AppointmentPicker({
     return (
       <div className="rounded-[20px] border border-dashed border-sky-200 bg-sky-50/50 py-10 text-center">
         <CalendarCheck className="mx-auto mb-3 h-10 w-10 text-sky-300" />
-        <p className="text-sm font-bold text-slate-500">No completed appointments yet.</p>
-        <p className="mt-1 text-xs text-slate-400">Accepted appointments will appear here for diagnosis.</p>
+        <p className="text-sm font-bold text-slate-500">No accepted appointments for today.</p>
+        <p className="mt-1 text-xs text-slate-400">Today&apos;s accepted bookings will appear here for diagnosis.</p>
       </div>
     );
   }
