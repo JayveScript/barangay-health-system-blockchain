@@ -195,7 +195,7 @@ export default function MidwifeDashboardPage() {
         </aside>
 
         <section className="h-full flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm">
+          <div className="h-full overflow-y-auto [transform:translateZ(0)] [will-change:transform] [backface-visibility:hidden] rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm">
             <div className="mb-6 overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-[#F8FAFC] p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
