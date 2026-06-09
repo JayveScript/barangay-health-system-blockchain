@@ -604,12 +604,23 @@ export default function RegisterPage() {
                         error={errors.birthDate}
                         status={getFieldStatus("birthDate")}
                       />
-                      <InputField
+                      <SelectWithOther
                         label="Religion"
-                        placeholder="Optional"
                         value={form.religion}
                         onChange={(v) => updateField("religion", v)}
-                        status={getFieldStatus("religion")}
+                        options={[
+                          "Roman Catholic",
+                          "Muslim / Islam",
+                          "Iglesia ni Cristo",
+                          "Born Again Christian",
+                          "Baptist",
+                          "Seventh Day Adventist",
+                          "Jehovah's Witness",
+                          "Evangelical",
+                          "Aglipayan (Philippine Independent Church)",
+                          "Buddhism",
+                          "None / Non-Religious",
+                        ]}
                       />
                     </div>
 
@@ -688,19 +699,47 @@ export default function RegisterPage() {
                         status={getFieldStatus("contactNumber")}
                         helper="Use a valid Philippine mobile number."
                       />
-                      <InputField
+                      <SelectWithOther
                         label="Educational Attainment"
-                        placeholder="Example: College Graduate"
                         value={form.educationalAttainment}
                         onChange={(v) => updateField("educationalAttainment", v)}
-                        status={getFieldStatus("educationalAttainment")}
+                        options={[
+                          "No Formal Education",
+                          "Elementary Level",
+                          "Elementary Graduate",
+                          "High School Level",
+                          "High School Graduate",
+                          "Senior High School Level",
+                          "Senior High School Graduate",
+                          "Vocational / Technical Course",
+                          "College Level",
+                          "College Graduate",
+                          "Post Graduate (Master's / Doctorate)",
+                        ]}
                       />
-                      <InputField
+                      <SelectWithOther
                         label="Occupation"
-                        placeholder="Enter occupation"
                         value={form.occupation}
                         onChange={(v) => updateField("occupation", v)}
-                        status={getFieldStatus("occupation")}
+                        options={[
+                          "Unemployed",
+                          "Student",
+                          "Farmer / Fisher",
+                          "Driver",
+                          "Construction Worker / Laborer",
+                          "Factory Worker",
+                          "Vendor / Market Seller",
+                          "Housekeeper / Domestic Worker",
+                          "Sari-sari Store Owner",
+                          "Government Employee",
+                          "Private Employee",
+                          "Healthcare Worker",
+                          "Teacher / Educator",
+                          "Engineer",
+                          "Overseas Filipino Worker (OFW)",
+                          "Self-Employed / Business Owner",
+                          "Retired",
+                        ]}
                       />
                     </div>
 
@@ -712,12 +751,26 @@ export default function RegisterPage() {
                         onChange={(v) => updateField("accompanyingPerson", v)}
                         status={getFieldStatus("accompanyingPerson")}
                       />
-                      <InputField
+                      <SelectWithOther
                         label="Relationship"
-                        placeholder="Example: Mother, Brother"
                         value={form.relationship}
                         onChange={(v) => updateField("relationship", v)}
-                        status={getFieldStatus("relationship")}
+                        options={[
+                          "Father",
+                          "Mother",
+                          "Husband",
+                          "Wife",
+                          "Son",
+                          "Daughter",
+                          "Brother",
+                          "Sister",
+                          "Grandfather",
+                          "Grandmother",
+                          "Uncle",
+                          "Aunt",
+                          "Guardian",
+                          "Friend",
+                        ]}
                       />
                     </div>
 
@@ -1302,6 +1355,71 @@ function ToggleWithText({
         disabled={!checked}
         className="w-full rounded-2xl border border-sky-200 bg-sky-50/40 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
       />
+    </div>
+  );
+}
+
+function SelectWithOther({
+  label,
+  value,
+  onChange,
+  options,
+  required = false,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  required?: boolean;
+  error?: string;
+}) {
+  const isOther = value !== "" && !options.includes(value);
+  const selectValue = isOther ? "__other__" : value;
+
+  const handleSelect = (v: string) => {
+    if (v === "__other__") {
+      onChange("");
+    } else {
+      onChange(v);
+    }
+  };
+
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+
+      <select
+        value={isOther ? "__other__" : selectValue}
+        onChange={(e) => handleSelect(e.target.value)}
+        className={`min-h-[52px] w-full rounded-2xl border bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition ${
+          error
+            ? "border-red-400 focus:border-red-500"
+            : "border-sky-200 focus:border-sky-500"
+        }`}
+      >
+        <option value="">— Select —</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+        <option value="__other__">Others (please specify)</option>
+      </select>
+
+      {(isOther || selectValue === "__other__") && (
+        <input
+          type="text"
+          value={isOther ? value : ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Please specify…"
+          className="mt-2 w-full rounded-2xl border border-sky-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500"
+        />
+      )}
+
+      {error && <p className="mt-1 text-xs font-medium text-red-500">{error}</p>}
     </div>
   );
 }
