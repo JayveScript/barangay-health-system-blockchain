@@ -119,7 +119,11 @@ export function SecureScanGate({
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-200">
                 Secure Access Verification
               </p>
-              <h1 className="mt-1 text-2xl font-black sm:text-3xl">WELCOME ADMIN</h1>
+              <h1 className="mt-1 text-2xl font-black sm:text-3xl">
+                {["SUPER_ADMIN", "BARANGAY_ADMIN"].includes(role.toUpperCase())
+                  ? "WELCOME ADMIN"
+                  : `WELCOME ${role.replace(/_/g, " ").toUpperCase()}`}
+              </h1>
               <p className="mt-2 text-sm font-semibold text-blue-100">{welcomeLine}</p>
             </div>
           </div>
