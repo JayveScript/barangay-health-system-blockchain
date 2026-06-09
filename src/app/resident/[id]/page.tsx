@@ -42,11 +42,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
     redirect("/access-denied");
   }
 
-  // Barangay isolation: non-SUPER_ADMIN users must have a barangay assigned
-  if (viewer.role !== "SUPER_ADMIN" && !viewer.barangayId) {
-    redirect("/access-denied");
-  }
-
   const cookieStore = await cookies();
   const qrAccessToken = cookieStore.get("qr_access_token")?.value;
   const qrAccess = qrAccessToken
@@ -54,13 +49,12 @@ export default async function PublicResidentPage({ params }: PageProps) {
     : null;
 
   if (!qrAccess || qrAccess.userId !== viewer.id) {
-    // First, check if the resident exists at all (no barangay filter)
-    const residentCheck = await prisma.resident.findUnique({
+    const residentStub = await prisma.resident.findUnique({
       where: { id },
       select: { id: true, barangayId: true },
     });
 
-    if (!residentCheck) {
+    if (!residentStub) {
       return (
         <main className="flex min-h-[100dvh] items-center justify-center bg-[#EEF4FF] p-5">
           <div className="rounded-3xl bg-white p-8 text-center shadow-xl">
@@ -72,13 +66,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
         </main>
       );
     }
-
-    // Enforce barangay isolation: deny cross-barangay access immediately
-    if (viewer.role !== "SUPER_ADMIN" && residentCheck.barangayId !== viewer.barangayId) {
-      redirect("/access-denied");
-    }
-
-    const residentStub = residentCheck;
 
     if (qrAccessToken && !qrAccess) {
       await logQrScanActivity({
@@ -122,11 +109,8 @@ export default async function PublicResidentPage({ params }: PageProps) {
   }
 
   const [resident, appointments, bmiRecords] = await Promise.all([
-  prisma.resident.findFirst({
-    where: {
-      id,
-      ...(viewer.role === "SUPER_ADMIN" ? {} : { barangayId: viewer.barangayId }),
-    },
+  prisma.resident.findUnique({
+    where: { id },
     select: {
       id: true,
       firstName: true,

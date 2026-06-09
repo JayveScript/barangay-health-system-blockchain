@@ -58,25 +58,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (user.role !== "SUPER_ADMIN") {
-      if (!user.barangayId || user.barangayId !== payload.barangayId) {
-        await logQrScanActivity({
-          residentId: payload.residentId,
-          scannedById: user.id,
-          role: user.role,
-          action: "ACCESS_DENIED",
-          success: false,
-          failureReason: !user.barangayId
-            ? "User has no barangay assigned"
-            : "Cross-barangay access attempt",
-          meta,
-        });
-        return NextResponse.json(
-          { error: "Access denied. You can only access residents from your own barangay." },
-          { status: 403 }
-        );
-      }
-    }
 
     if (otpSessionId && otp) {
       const session = await prisma.qrOtpSession.findFirst({
