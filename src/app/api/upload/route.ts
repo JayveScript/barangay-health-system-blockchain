@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { cookies } from "next/headers";
 import { verifyAuthToken } from "@/lib/auth";
 
@@ -85,20 +83,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // ── Save file ────────────────────────────────────────────────────────────
-  try {
-    const ext = detectedMime.split("/")[1].replace("jpeg", "jpg");
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    const fileName = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-
-    return NextResponse.json({ imageUrl: `/uploads/${fileName}` });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("UPLOAD_ERROR writeFile():", err);
-    return NextResponse.json({ error: `Failed to save image file: ${msg}` }, { status: 500 });
-  }
+  // ── Return as base64 data URL (works on serverless / read-only filesystems) ──
+  const base64 = buffer.toString("base64");
+  const imageUrl = `data:${detectedMime};base64,${base64}`;
+  return NextResponse.json({ imageUrl });
 }
