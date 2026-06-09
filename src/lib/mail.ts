@@ -23,10 +23,37 @@ export async function sendAnnouncementEmail(
     day: "numeric",
   });
 
+  // Extract base64 data from data URL so Gmail can render it as a CID attachment
+  const attachments: {
+    filename: string;
+    content: Buffer;
+    cid: string;
+    contentDisposition: "inline";
+  }[] = [];
+
+  let imageHtml = "";
+
+  if (imageUrl) {
+    const match = imageUrl.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (match) {
+      const mimeType = match[1];
+      const base64Data = match[2];
+      const ext = mimeType.split("/")[1];
+      attachments.push({
+        filename: `announcement.${ext}`,
+        content: Buffer.from(base64Data, "base64"),
+        cid: "announcementImage",
+        contentDisposition: "inline",
+      });
+      imageHtml = `<img src="cid:announcementImage" alt="Announcement image" style="max-width: 100%; border-radius: 6px; margin: 12px 0;" />`;
+    }
+  }
+
   await transporter.sendMail({
     from: `"${barangayName} Health Center" <${process.env.EMAIL_USER}>`,
     to,
     subject: `[Announcement] ${title}`,
+    attachments,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a;">
         <div style="background: #0EA5E9; padding: 16px 24px; border-radius: 8px 8px 0 0;">
@@ -36,7 +63,7 @@ export async function sendAnnouncementEmail(
         <div style="border: 1px solid #e2e8f0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
           <h3 style="color: #0EA5E9; margin-top: 0;">${title}</h3>
           <p style="color: #475569; font-size: 13px;">📅 ${formattedDate}</p>
-          ${imageUrl ? `<img src="${imageUrl}" alt="Announcement image" style="max-width: 100%; border-radius: 6px; margin: 12px 0;" />` : ""}
+          ${imageHtml}
           <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-top: 12px;">
             <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${content}</p>
           </div>
