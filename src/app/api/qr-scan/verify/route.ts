@@ -5,7 +5,6 @@ import { getScannerUser } from "@/lib/get-scanner-user";
 import { decryptQrToken, type QrPayload } from "@/lib/qr-encryption";
 import { signQrAccessToken, QR_ACCESS_SESSION_MINUTES } from "@/lib/qr-access";
 import { extractRequestMeta, logQrScanActivity } from "@/lib/qr-audit";
-import { HIGH_PRIVILEGE_ROLES } from "@/lib/role-labels";
 import { transporter } from "@/lib/mail";
 import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
@@ -59,20 +58,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (user.role !== "SUPER_ADMIN" && user.barangayId !== payload.barangayId) {
-      await logQrScanActivity({
-        residentId: payload.residentId,
-        scannedById: user.id,
-        role: user.role,
-        action: "ACCESS_DENIED",
-        success: false,
-        failureReason: "Cross-barangay access attempt",
-        meta,
-      });
-      return NextResponse.json(
-        { error: "Access denied. Resident belongs to another barangay." },
-        { status: 403 }
-      );
+    if (user.role !== "SUPER_ADMIN") {
+      if (!user.barangayId || user.barangayId !== payload.barangayId) {
+        await logQrScanActivity({
+          residentId: payload.residentId,
+          scannedById: user.id,
+          role: user.role,
+          action: "ACCESS_DENIED",
+          success: false,
+          failureReason: !user.barangayId
+            ? "User has no barangay assigned"
+            : "Cross-barangay access attempt",
+          meta,
+        });
+        return NextResponse.json(
+          { error: "Access denied. You can only access residents from your own barangay." },
+          { status: 403 }
+        );
+      }
     }
 
     if (otpSessionId && otp) {
