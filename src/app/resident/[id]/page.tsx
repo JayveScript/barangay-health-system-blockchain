@@ -111,7 +111,8 @@ export default async function PublicResidentPage({ params }: PageProps) {
     );
   }
 
-  const resident = await prisma.resident.findFirst({
+  const [resident, appointments, bmiRecords] = await Promise.all([
+  prisma.resident.findFirst({
     where: {
       id,
       ...(viewer.role === "SUPER_ADMIN" ? {} : { barangayId: viewer.barangayId }),
@@ -198,7 +199,35 @@ export default async function PublicResidentPage({ params }: PageProps) {
         },
       },
     },
-  });
+  }),
+  prisma.appointment.findMany({
+    where: { residentId: id },
+    select: {
+      id: true,
+      date: true,
+      time: true,
+      reason: true,
+      otherReason: true,
+      suggestion: true,
+      status: true,
+      doctor: { select: { fullName: true } },
+    },
+    orderBy: { date: "desc" },
+  }),
+  prisma.bMIRecord.findMany({
+    where: { residentId: id },
+    select: {
+      id: true,
+      height: true,
+      weight: true,
+      bmi: true,
+      bmiCategory: true,
+      pulseRate: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  }),
+]);
 
   if (!resident) {
     return (
@@ -384,64 +413,109 @@ export default async function PublicResidentPage({ params }: PageProps) {
             </section>
 
             <section className="tab-panel panel-medical">
-              <SectionTitle title="Past Medical History" />
-              <div className="space-y-3">
-                <Info
-                  label="Hypertension"
-                  value={yesNo(resident.medicalHistory?.hasHypertension)}
-                />
-                <Info
-                  label="Diabetes"
-                  value={yesNo(resident.medicalHistory?.hasDiabetes)}
-                />
-                <Info
-                  label="STI / HIV"
-                  value={yesNo(resident.medicalHistory?.hasStiHiv)}
-                />
-                <Info
-                  label="Heart Disease"
-                  value={yesNo(resident.medicalHistory?.hasHeartDisease)}
-                />
-                <Info
-                  label="Kidney Failure"
-                  value={yesNo(resident.medicalHistory?.hasKidneyFailure)}
-                />
-                <Info
-                  label="Tuberculosis"
-                  value={yesNo(resident.medicalHistory?.hasTuberculosis)}
-                />
-                <Info
-                  label="Allergies"
-                  value={yesNo(resident.medicalHistory?.hasAllergies)}
-                />
-                <Info
-                  label="Allergies Details"
-                  value={resident.medicalHistory?.allergiesDetails}
-                />
-                <Info
-                  label="Cancer"
-                  value={yesNo(resident.medicalHistory?.hasCancer)}
-                />
-                <Info
-                  label="Cancer Details"
-                  value={resident.medicalHistory?.cancerDetails}
-                />
-                <Info
-                  label="Other Conditions"
-                  value={yesNo(resident.medicalHistory?.hasOtherConditions)}
-                />
-                <Info
-                  label="Other Conditions Details"
-                  value={resident.medicalHistory?.otherConditionsDetails}
-                />
-                <Info
-                  label="Maintenance Medications"
-                  value={resident.medicalHistory?.maintenanceMedications}
-                />
-                <Info
-                  label="Previous Illnesses / Surgeries"
-                  value={resident.medicalHistory?.previousIllnessesSurgeries}
-                />
+              <SectionTitle title="Medical History" />
+              <div className="space-y-5">
+                {/* Conditions summary */}
+                <div>
+                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">Recorded Conditions</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {[
+                      { label: "Hypertension", value: resident.medicalHistory?.hasHypertension },
+                      { label: "Diabetes", value: resident.medicalHistory?.hasDiabetes },
+                      { label: "STI / HIV", value: resident.medicalHistory?.hasStiHiv },
+                      { label: "Heart Disease", value: resident.medicalHistory?.hasHeartDisease },
+                      { label: "Kidney Failure", value: resident.medicalHistory?.hasKidneyFailure },
+                      { label: "Tuberculosis", value: resident.medicalHistory?.hasTuberculosis },
+                      { label: "Allergies", value: resident.medicalHistory?.hasAllergies },
+                      { label: "Cancer", value: resident.medicalHistory?.hasCancer },
+                      { label: "Other Conditions", value: resident.medicalHistory?.hasOtherConditions },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
+                          item.value
+                            ? "border border-red-200 bg-red-50 text-red-700"
+                            : "border border-slate-200 bg-slate-50 text-slate-400"
+                        }`}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Extra condition details */}
+                <div className="space-y-2">
+                  <Info label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} />
+                  <Info label="Cancer Details" value={resident.medicalHistory?.cancerDetails} />
+                  <Info label="Other Conditions Details" value={resident.medicalHistory?.otherConditionsDetails} />
+                  <Info label="Maintenance Medications" value={resident.medicalHistory?.maintenanceMedications} />
+                  <Info label="Previous Illnesses / Surgeries" value={resident.medicalHistory?.previousIllnessesSurgeries} />
+                </div>
+
+                {/* BMI Records */}
+                {bmiRecords.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">BMI Records</p>
+                    <div className="space-y-2">
+                      {bmiRecords.map((r) => (
+                        <div key={r.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-sm font-black text-slate-900">{r.bmiCategory}</span>
+                            <span className="text-xs font-bold text-slate-500">
+                              {new Date(r.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">
+                            BMI: {r.bmi.toFixed(1)} · Height: {r.height} cm · Weight: {r.weight} kg · Pulse: {r.pulseRate} bpm
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Appointment history */}
+                <div>
+                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">
+                    Appointment History ({appointments.length})
+                  </p>
+                  {appointments.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-400">
+                      No appointments recorded yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {appointments.map((appt) => (
+                        <div key={appt.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-sm font-black text-slate-900">
+                              {new Date(appt.date).toLocaleDateString()} · {appt.time}
+                            </span>
+                            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${
+                              appt.status === "COMPLETED"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : appt.status === "CANCELLED"
+                                ? "bg-red-50 text-red-600"
+                                : "bg-sky-50 text-sky-600"
+                            }`}>
+                              {appt.status}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">
+                            {appt.reason}{appt.otherReason ? ` — ${appt.otherReason}` : ""}
+                            {appt.doctor?.fullName ? ` · Dr. ${appt.doctor.fullName}` : ""}
+                          </p>
+                          {appt.suggestion && (
+                            <p className="mt-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                              Suggestion: {appt.suggestion}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
 
