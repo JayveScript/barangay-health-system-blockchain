@@ -1374,13 +1374,15 @@ function SelectWithOther({
   required?: boolean;
   error?: string;
 }) {
-  const isOther = value !== "" && !options.includes(value);
-  const selectValue = isOther ? "__other__" : value;
+  const isKnownOption = options.includes(value);
+  const [otherMode, setOtherMode] = useState(() => value !== "" && !isKnownOption);
 
   const handleSelect = (v: string) => {
     if (v === "__other__") {
+      setOtherMode(true);
       onChange("");
     } else {
+      setOtherMode(false);
       onChange(v);
     }
   };
@@ -1392,7 +1394,7 @@ function SelectWithOther({
       </label>
 
       <select
-        value={isOther ? "__other__" : selectValue}
+        value={otherMode ? "__other__" : value}
         onChange={(e) => handleSelect(e.target.value)}
         className={`min-h-[52px] w-full rounded-2xl border bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition ${
           error
@@ -1409,12 +1411,13 @@ function SelectWithOther({
         <option value="__other__">Others (please specify)</option>
       </select>
 
-      {(isOther || selectValue === "__other__") && (
+      {otherMode && (
         <input
           type="text"
-          value={isOther ? value : ""}
+          value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Please specify…"
+          autoFocus
           className="mt-2 w-full rounded-2xl border border-sky-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500"
         />
       )}
