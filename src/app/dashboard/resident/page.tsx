@@ -790,107 +790,6 @@ export default function ResidentDashboard() {
                     </Section>
                   )}
 
-                  {activeTab === "medical" && (
-                    <Section
-                      title="Past Medical History"
-                      subtitle="Resident’s declared conditions, treatments, and prior procedures."
-                      icon={<MedicalIcon className="h-5 w-5" />}
-                    >
-                      <div className="grid gap-5 lg:grid-cols-3">
-                        <InfoCard
-                          title="Conditions"
-                          icon={<MedicalIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Hypertension"
-                            value={bool(
-                              resident.medicalHistory?.hasHypertension
-                            )}
-                          />
-                          <MiniField
-                            label="Diabetes"
-                            value={bool(resident.medicalHistory?.hasDiabetes)}
-                          />
-                          <MiniField
-                            label="STI / HIV"
-                            value={bool(resident.medicalHistory?.hasStiHiv)}
-                          />
-                          <MiniField
-                            label="Heart Disease"
-                            value={bool(
-                              resident.medicalHistory?.hasHeartDisease
-                            )}
-                          />
-                          <MiniField
-                            label="Kidney Failure"
-                            value={bool(
-                              resident.medicalHistory?.hasKidneyFailure
-                            )}
-                          />
-                          <MiniField
-                            label="Tuberculosis"
-                            value={bool(
-                              resident.medicalHistory?.hasTuberculosis
-                            )}
-                          />
-                        </InfoCard>
-
-                        <InfoCard
-                          title="Details"
-                          icon={<FamilyIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Has Allergies"
-                            value={bool(resident.medicalHistory?.hasAllergies)}
-                          />
-                          <MiniField
-                            label="Allergies Details"
-                            value={resident.medicalHistory?.allergiesDetails}
-                          />
-                          <MiniField
-                            label="Has Cancer"
-                            value={bool(resident.medicalHistory?.hasCancer)}
-                          />
-                          <MiniField
-                            label="Cancer Details"
-                            value={resident.medicalHistory?.cancerDetails}
-                          />
-                          <MiniField
-                            label="Other Conditions"
-                            value={bool(
-                              resident.medicalHistory?.hasOtherConditions
-                            )}
-                          />
-                          <MiniField
-                            label="Other Conditions Details"
-                            value={
-                              resident.medicalHistory?.otherConditionsDetails
-                            }
-                          />
-                        </InfoCard>
-
-                        <InfoCard
-                          title="Medication / Surgeries"
-                          icon={<LifestyleIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Maintenance Medication(s)"
-                            value={
-                              resident.medicalHistory?.maintenanceMedications
-                            }
-                          />
-                          <MiniField
-                            label="Previous Illnesses / Surgeries"
-                            value={
-                              resident.medicalHistory
-                                ?.previousIllnessesSurgeries
-                            }
-                          />
-                        </InfoCard>
-                      </div>
-                    </Section>
-                  )}
-
                   {activeTab === "family" && (
                     <Section
                       title="Family History"
@@ -2682,11 +2581,6 @@ const tabs = [
     id: "identifying",
     label: "Identifying Data",
     icon: <UserIcon className="h-5 w-5" />,
-  },
-  {
-    id: "medical",
-    label: "Past Medical History",
-    icon: <MedicalIcon className="h-5 w-5" />,
   },
   {
     id: "family",
