@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import { sendAnnouncementEmail } from "@/lib/mail";
 
 export async function GET(req: Request) {
   try {
@@ -72,6 +73,41 @@ export async function POST(req: Request) {
         publishDate: new Date(body.publishDate),
       },
     });
+
+    // Send email notifications to all barangay residents with an email on file
+    const barangay = await prisma.barangay.findUnique({
+      where: { id: barangayId },
+      select: { name: true },
+    });
+
+    const residents = await prisma.resident.findMany({
+      where: { barangayId },
+      select: {
+        email: true,
+        user: { select: { email: true } },
+      },
+    });
+
+    const barangayName = barangay?.name ?? "Barangay";
+
+    const emailPromises = residents
+      .map((r) => r.email || r.user?.email)
+      .filter((email): email is string => !!email)
+      .map((email) =>
+        sendAnnouncementEmail(
+          email,
+          barangayName,
+          announcement.title,
+          announcement.content,
+          announcement.publishDate,
+          announcement.imageUrl
+        ).catch((err) =>
+          console.error(`Failed to send announcement email to ${email}:`, err)
+        )
+      );
+
+    // Fire-and-forget — don't block the response
+    Promise.all(emailPromises);
 
     return NextResponse.json(announcement);
   } catch (error) {

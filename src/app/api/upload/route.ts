@@ -11,6 +11,7 @@ const ALLOWED_TYPES: Record<string, number[][]> = {
   "image/jpeg": [[0xff, 0xd8, 0xff]],
   "image/png":  [[0x89, 0x50, 0x4e, 0x47]],
   "image/webp": [[0x52, 0x49, 0x46, 0x46]],
+  "image/gif":  [[0x47, 0x49, 0x46, 0x38]],
 };
 
 function detectMimeType(buffer: Buffer): string | null {
@@ -23,48 +24,69 @@ function detectMimeType(buffer: Buffer): string | null {
 }
 
 export async function POST(req: Request) {
+  // ── Auth check ──────────────────────────────────────────────────────────
+  let token: string | undefined;
   try {
-    // ── Auth check ──────────────────────────────────────────────────────────
     const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value ?? cookieStore.get("token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    }
-    try {
-      verifyAuthToken(token);
-    } catch {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    }
+    token = cookieStore.get("auth_token")?.value ?? cookieStore.get("token")?.value;
+  } catch (err) {
+    console.error("UPLOAD_ERROR cookies():", err);
+    return NextResponse.json({ error: "Server error reading session." }, { status: 500 });
+  }
 
-    // ── Parse form ───────────────────────────────────────────────────────────
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  try {
+    verifyAuthToken(token);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  // ── Parse form ───────────────────────────────────────────────────────────
+  let file: File | null;
+  try {
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    file = formData.get("file") as File | null;
+  } catch (err) {
+    console.error("UPLOAD_ERROR formData():", err);
+    return NextResponse.json({ error: "Failed to read uploaded file." }, { status: 400 });
+  }
 
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
-    }
+  if (!file) {
+    return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
+  }
 
-    // ── Size check ───────────────────────────────────────────────────────────
-    if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 5 MB." },
-        { status: 400 }
-      );
-    }
+  // ── Size check ───────────────────────────────────────────────────────────
+  if (file.size > MAX_SIZE_BYTES) {
+    return NextResponse.json(
+      { error: "File too large. Maximum size is 5 MB." },
+      { status: 400 }
+    );
+  }
 
+  // ── Read bytes ───────────────────────────────────────────────────────────
+  let buffer: Buffer;
+  try {
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    buffer = Buffer.from(bytes);
+  } catch (err) {
+    console.error("UPLOAD_ERROR arrayBuffer():", err);
+    return NextResponse.json({ error: "Failed to read file data." }, { status: 500 });
+  }
 
-    // ── Magic-byte MIME check (ignore Content-Type header) ───────────────────
-    const detectedMime = detectMimeType(buffer);
-    if (!detectedMime) {
-      return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, and WebP images are allowed." },
-        { status: 400 }
-      );
-    }
+  // ── Magic-byte MIME check ────────────────────────────────────────────────
+  const detectedMime = detectMimeType(buffer);
+  if (!detectedMime) {
+    return NextResponse.json(
+      { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed." },
+      { status: 400 }
+    );
+  }
 
-    // ── Save file ────────────────────────────────────────────────────────────
+  // ── Save file ────────────────────────────────────────────────────────────
+  try {
     const ext = detectedMime.split("/")[1].replace("jpeg", "jpg");
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadDir, { recursive: true });
@@ -74,11 +96,8 @@ export async function POST(req: Request) {
     await writeFile(filePath, buffer);
 
     return NextResponse.json({ imageUrl: `/uploads/${fileName}` });
-  } catch (error) {
-    console.error("UPLOAD_ERROR", error);
-    return NextResponse.json(
-      { error: "Failed to upload image." },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("UPLOAD_ERROR writeFile():", err);
+    return NextResponse.json({ error: "Failed to save image file." }, { status: 500 });
   }
 }
