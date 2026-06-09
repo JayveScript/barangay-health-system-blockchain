@@ -97,7 +97,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ imageUrl: `/uploads/${fileName}` });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error("UPLOAD_ERROR writeFile():", err);
-    return NextResponse.json({ error: "Failed to save image file." }, { status: 500 });
+    return NextResponse.json({ error: `Failed to save image file: ${msg}` }, { status: 500 });
   }
 }
