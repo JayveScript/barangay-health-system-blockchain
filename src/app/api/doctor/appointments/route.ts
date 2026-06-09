@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentResidentUser } from "@/lib/current-user";
+import { sendDoctorAvailabilityEmail } from "@/lib/mail";
 
 function createSlots(startTime: string, endTime: string, slotMinutes: number) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -240,6 +241,45 @@ export async function POST(req: Request) {
         slotMinutes,
       },
     });
+
+    // Send email notifications to all barangay residents with an email on file
+    const barangay = await db.barangay.findUnique({
+      where: { id: barangayId },
+      select: { name: true },
+    });
+
+    const residents = await db.resident.findMany({
+      where: { barangayId },
+      select: {
+        email: true,
+        user: { select: { email: true } },
+      },
+    });
+
+    const barangayName = barangay?.name ?? "Barangay";
+
+    const emailPromises = residents
+      .map((r) => r.email || r.user?.email)
+      .filter((email): email is string => !!email)
+      .map((email) =>
+        sendDoctorAvailabilityEmail(
+          email,
+          barangayName,
+          user.fullName ?? "Doctor",
+          availability.date,
+          availability.startTime,
+          availability.endTime,
+          availability.slotMinutes
+        ).catch((err) =>
+          console.error(
+            `Failed to send doctor availability email to ${email}:`,
+            err
+          )
+        )
+      );
+
+    // Fire-and-forget — don't block the response
+    Promise.all(emailPromises);
 
     return NextResponse.json(
       {
