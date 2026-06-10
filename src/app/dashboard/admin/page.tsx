@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import * as htmlToImage from "html-to-image";
 import {
   Activity,
+  Archive,
   ClipboardList,
   IdCard,
   Edit,
@@ -24,9 +25,9 @@ import {
   UserRound,
   Users,
   Megaphone,
-CalendarDays,
-ImageIcon,
-PlusCircle,
+  CalendarDays,
+  ImageIcon,
+  PlusCircle,
   ScanLine,
   Search,
   X,
@@ -72,6 +73,8 @@ type ResidentRecord = {
   spouseMaidenName?: string | null;
   spouseOccupation?: string | null;
   spouseContactNumber?: string | null;
+  isArchived?: boolean;
+  archivedAt?: string | null;
   createdAt: string;
   user?: {
     email?: string | null;
@@ -157,7 +160,7 @@ type DashboardData = {
   staffUsers: StaffUser[];
 };
 
-type SecureAction = "edit" | "delete" | null;
+type SecureAction = "view" | "edit" | "digital-id" | "archive" | "delete" | null;
 
 const chartColors = ["#0EA5E9", "#38BDF8", "#10B981", "#F59E0B", "#EF4444"];
 const sexDistributionColors = ["#075985", "#7DD3FC", "#94A3B8"];
@@ -449,70 +452,88 @@ export default function AdminDashboardPage() {
   };
 
   const confirmSecureAction = async () => {
-  if (!secureResident || !secureAction) return;
+    if (!secureResident || !secureAction) return;
 
-  if (!securePassword.trim()) {
-    setSecureError("Admin password is required.");
-    return;
-  }
-
-  try {
-    setSecureLoading(true);
-    setSecureError("");
-
-    const verifyRes = await fetch("/api/admin/verify-password", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        password: securePassword,
-      }),
-    });
-
-    const verifyJson = await readJsonSafe(verifyRes);
-
-    if (!verifyRes.ok) {
-      setSecureError(verifyJson.error || "Invalid admin password.");
+    if (!securePassword.trim()) {
+      setSecureError("Admin password is required.");
       return;
     }
 
-    if (secureAction === "edit") {
-      setSelectedResident(secureResident);
-      setResidentEditPassword(securePassword);
-      setResidentEditMode(true);
-      setResidentModalTab("identifying");
-      setResidentModalOpen(true);
+    try {
+      setSecureLoading(true);
+      setSecureError("");
+
+      // For "view" and "digital-id" we just verify password then open the modal
+      if (secureAction === "view" || secureAction === "digital-id") {
+        const verifyRes = await fetch("/api/admin/verify-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: securePassword }),
+        });
+        const verifyJson = await readJsonSafe(verifyRes);
+        if (!verifyRes.ok) {
+          setSecureError(verifyJson.error || "Invalid admin password.");
+          return;
+        }
+
+        if (secureAction === "view") {
+          setSelectedResident(secureResident);
+          setResidentEditMode(false);
+          setResidentEditPassword("");
+          setResidentModalTab("identifying");
+          setResidentModalOpen(true);
+        } else {
+          setDigitalIdResident(secureResident);
+        }
+        closeSecureModal();
+        return;
+      }
+
+      if (secureAction === "edit") {
+        const verifyRes = await fetch("/api/admin/verify-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: securePassword }),
+        });
+        const verifyJson = await readJsonSafe(verifyRes);
+        if (!verifyRes.ok) {
+          setSecureError(verifyJson.error || "Invalid admin password.");
+          return;
+        }
+        setSelectedResident(secureResident);
+        setResidentEditPassword(securePassword);
+        setResidentEditMode(true);
+        setResidentModalTab("identifying");
+        setResidentModalOpen(true);
+        closeSecureModal();
+        return;
+      }
+
+      if (secureAction === "archive") {
+        const res = await fetch(`/api/residents/${secureResident.id}/archive`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: securePassword }),
+        });
+        const json = await readJsonSafe(res);
+        if (!res.ok) {
+          setSecureError(json.error || "Failed to archive resident.");
+          return;
+        }
+        closeSecureModal();
+        await fetchDashboard();
+        return;
+      }
+
       closeSecureModal();
-      return;
+      await fetchDashboard();
+    } catch (err) {
+      console.error(err);
+      setSecureError("Unable to connect to the server.");
+    } finally {
+      setSecureLoading(false);
     }
-
-    const deleteRes = await fetch(`/api/residents/${secureResident.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        password: securePassword,
-      }),
-    });
-
-    const deleteJson = await readJsonSafe(deleteRes);
-
-    if (!deleteRes.ok) {
-      setSecureError(deleteJson.error || "Failed to delete resident.");
-      return;
-    }
-
-    closeSecureModal();
-    await fetchDashboard();
-  } catch (err) {
-    console.error(err);
-    setSecureError("Unable to connect to the server.");
-  } finally {
-    setSecureLoading(false);
-  }
-};
+  };
 
   const openStaffView = (user: StaffUser) => {
     setStaffViewUser(user);
@@ -1045,12 +1066,12 @@ export default function AdminDashboardPage() {
                   <IconActionButton
                     label="View"
                     icon={<Eye className="h-3.5 w-3.5" />}
-                    onClick={() => openResidentDetails(resident)}
+                    onClick={() => openSecureModal(resident, "view")}
                   />
                   <IconActionButton
-                    label="ID"
+                    label="Digital ID"
                     icon={<IdCard className="h-3.5 w-3.5" />}
-                    onClick={() => openResidentDigitalId(resident)}
+                    onClick={() => openSecureModal(resident, "digital-id")}
                   />
                   <IconActionButton
                     label="Edit"
@@ -1059,10 +1080,10 @@ export default function AdminDashboardPage() {
                     onClick={() => openSecureModal(resident, "edit")}
                   />
                   <IconActionButton
-                    label="Delete"
-                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    label={resident.isArchived ? "Unarchive" : "Archive"}
+                    icon={<Archive className="h-3.5 w-3.5" />}
                     variant="danger"
-                    onClick={() => openSecureModal(resident, "delete")}
+                    onClick={() => openSecureModal(resident, "archive")}
                   />
                 </div>
               </div>
@@ -1108,10 +1129,10 @@ export default function AdminDashboardPage() {
           </td>
           <td className="rounded-r-2xl px-3 py-3">
             <div className="flex items-center justify-center gap-2">
-              <IconActionButton label="View Details" icon={<Eye className="h-4 w-4" />} onClick={() => openResidentDetails(resident)} />
-              <IconActionButton label="View Digital ID" icon={<IdCard className="h-4 w-4" />} onClick={() => openResidentDigitalId(resident)} />
+              <IconActionButton label="View Details" icon={<Eye className="h-4 w-4" />} onClick={() => openSecureModal(resident, "view")} />
+              <IconActionButton label="Digital ID" icon={<IdCard className="h-4 w-4" />} onClick={() => openSecureModal(resident, "digital-id")} />
               <IconActionButton label="Edit Resident" icon={<Edit className="h-4 w-4" />} variant="warning" onClick={() => openSecureModal(resident, "edit")} />
-              <IconActionButton label="Delete Resident" icon={<Trash2 className="h-4 w-4" />} variant="danger" onClick={() => openSecureModal(resident, "delete")} />
+              <IconActionButton label={resident.isArchived ? "Unarchive" : "Archive"} icon={<Archive className="h-4 w-4" />} variant="danger" onClick={() => openSecureModal(resident, "archive")} />
             </div>
           </td>
         </tr>
@@ -1516,22 +1537,66 @@ function PasswordConfirmModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const meta: Record<
+    NonNullable<SecureAction>,
+    { title: string; desc: string; iconBg: string; iconColor: string; btnClass: string; btnLabel: string }
+  > = {
+    view: {
+      title: "View Resident",
+      desc: `Enter your admin password to view ${subjectLabel}.`,
+      iconBg: "bg-sky-50",
+      iconColor: "text-sky-600",
+      btnClass: "bg-[#0EA5E9] hover:bg-sky-600",
+      btnLabel: "View",
+    },
+    edit: {
+      title: "Edit Resident",
+      desc: `Enter your admin password to edit ${subjectLabel}.`,
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-600",
+      btnClass: "bg-amber-500 hover:bg-amber-600",
+      btnLabel: "Edit",
+    },
+    "digital-id": {
+      title: "View Digital ID",
+      desc: `Enter your admin password to view the Digital ID of ${subjectLabel}.`,
+      iconBg: "bg-sky-50",
+      iconColor: "text-sky-600",
+      btnClass: "bg-[#0EA5E9] hover:bg-sky-600",
+      btnLabel: "View ID",
+    },
+    archive: {
+      title: "Archive Resident",
+      desc: `Enter your admin password to archive ${subjectLabel}.`,
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
+      btnClass: "bg-red-600 hover:bg-red-700",
+      btnLabel: "Archive",
+    },
+    delete: {
+      title: "Delete",
+      desc: `Enter your admin password to permanently delete ${subjectLabel}.`,
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
+      btnClass: "bg-red-600 hover:bg-red-700",
+      btnLabel: "Delete",
+    },
+  };
+
+  const m = action ? meta[action] : null;
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.30)]">
         <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${m?.iconBg ?? "bg-sky-50"} ${m?.iconColor ?? "text-sky-600"}`}>
             <KeyRound className="h-6 w-6" />
           </div>
-
           <div>
             <h2 className="text-xl font-bold text-slate-900">
-              Enter Password
+              {m?.title ?? "Confirm Action"}
             </h2>
-
-            <p className="text-sm text-slate-500">
-              Required before you can {action === "delete" ? "delete" : "edit"} {subjectLabel}.
-            </p>
+            <p className="text-sm text-slate-500">{m?.desc}</p>
           </div>
         </div>
 
@@ -1557,18 +1622,13 @@ function PasswordConfirmModal({
           >
             Cancel
           </button>
-
           <button
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:opacity-60 ${
-              action === "delete"
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-[#0EA5E9] hover:bg-sky-600"
-            }`}
+            className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:opacity-60 ${m?.btnClass ?? "bg-[#0EA5E9] hover:bg-sky-600"}`}
           >
-            {loading ? "Checking..." : "Continue"}
+            {loading ? "Verifying…" : (m?.btnLabel ?? "Continue")}
           </button>
         </div>
       </div>

@@ -125,6 +125,9 @@ model Resident {
   bmiRecords   BMIRecord[]
   diagnoses    Diagnosis[]
 
+  isArchived Boolean   @default(false)
+  archivedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
