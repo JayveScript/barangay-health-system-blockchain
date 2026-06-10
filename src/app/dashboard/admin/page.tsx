@@ -1903,6 +1903,60 @@ function ResidentDetailsModal({
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
 
+  // Medical history tab — live data
+  type AppointmentEntry = {
+    id: string;
+    date: string;
+    time: string;
+    reason: string;
+    otherReason?: string | null;
+    suggestion?: string | null;
+    status: string;
+    doctor?: { fullName?: string | null } | null;
+  };
+  type BmiEntry = {
+    id: string;
+    height: number;
+    weight: number;
+    bmi: number;
+    bmiCategory: string;
+    pulseRate: number;
+    createdAt: string;
+  };
+  const [medAppointments, setMedAppointments] = useState<AppointmentEntry[]>([]);
+  const [medBmi, setMedBmi] = useState<BmiEntry[]>([]);
+  const [medLoading, setMedLoading] = useState(false);
+  const [medError, setMedError] = useState("");
+
+  useEffect(() => {
+    if (activeTab !== "medical") return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setMedLoading(true);
+        setMedError("");
+        const [apptRes, bmiRes] = await Promise.all([
+          fetch(`/api/residents/${resident.id}/appointments`),
+          fetch(`/api/residents/${resident.id}/bmi`),
+        ]);
+        const [apptJson, bmiJson] = await Promise.all([
+          apptRes.json(),
+          bmiRes.json(),
+        ]);
+        if (!cancelled) {
+          setMedAppointments(Array.isArray(apptJson) ? apptJson : []);
+          setMedBmi(Array.isArray(bmiJson) ? bmiJson : []);
+        }
+      } catch {
+        if (!cancelled) setMedError("Failed to load medical data.");
+      } finally {
+        if (!cancelled) setMedLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [activeTab, resident.id]);
+
   const [editForm, setEditForm] = useState({
     firstName: resident.firstName ?? "",
     lastName: resident.lastName ?? "",
@@ -2178,84 +2232,111 @@ function ResidentDetailsModal({
           )}
 
           {activeTab === "medical" && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <InfoSection
-                icon={<HeartPulse className="h-5 w-5" />}
-                title="Conditions"
-              >
-                <InfoRow
-                  label="Hypertension"
-                  value={yesNo(resident.medicalHistory?.hasHypertension)}
-                />
-                <InfoRow
-                  label="Diabetes"
-                  value={yesNo(resident.medicalHistory?.hasDiabetes)}
-                />
-                <InfoRow
-                  label="STI / HIV"
-                  value={yesNo(resident.medicalHistory?.hasStiHiv)}
-                />
-                <InfoRow
-                  label="Heart Disease"
-                  value={yesNo(resident.medicalHistory?.hasHeartDisease)}
-                />
-                <InfoRow
-                  label="Kidney Failure"
-                  value={yesNo(resident.medicalHistory?.hasKidneyFailure)}
-                />
-                <InfoRow
-                  label="Tuberculosis"
-                  value={yesNo(resident.medicalHistory?.hasTuberculosis)}
-                />
+            <div className="space-y-6">
+              {medLoading && (
+                <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-4 text-sm font-semibold text-sky-600">
+                  Loading medical history…
+                </div>
+              )}
+              {medError && (
+                <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                  {medError}
+                </div>
+              )}
+
+              {/* Condition flags */}
+              <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[
+                    { label: "Hypertension", value: resident.medicalHistory?.hasHypertension },
+                    { label: "Diabetes", value: resident.medicalHistory?.hasDiabetes },
+                    { label: "STI / HIV", value: resident.medicalHistory?.hasStiHiv },
+                    { label: "Heart Disease", value: resident.medicalHistory?.hasHeartDisease },
+                    { label: "Kidney Failure", value: resident.medicalHistory?.hasKidneyFailure },
+                    { label: "Tuberculosis", value: resident.medicalHistory?.hasTuberculosis },
+                    { label: "Allergies", value: resident.medicalHistory?.hasAllergies },
+                    { label: "Cancer", value: resident.medicalHistory?.hasCancer },
+                    { label: "Other Conditions", value: resident.medicalHistory?.hasOtherConditions },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
+                        item.value
+                          ? "border border-red-200 bg-red-50 text-red-700"
+                          : "border border-slate-200 bg-white text-slate-400"
+                      }`}
+                    >
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 space-y-2">
+                  <InfoRow label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} multiline />
+                  <InfoRow label="Cancer Details" value={resident.medicalHistory?.cancerDetails} multiline />
+                  <InfoRow label="Other Conditions Details" value={resident.medicalHistory?.otherConditionsDetails} multiline />
+                  <InfoRow label="Maintenance Medications" value={resident.medicalHistory?.maintenanceMedications} multiline />
+                  <InfoRow label="Previous Illnesses / Surgeries" value={resident.medicalHistory?.previousIllnessesSurgeries} multiline />
+                </div>
               </InfoSection>
 
-              <InfoSection
-                icon={<ClipboardList className="h-5 w-5" />}
-                title="Details"
-              >
-                <InfoRow
-                  label="Has Allergies"
-                  value={yesNo(resident.medicalHistory?.hasAllergies)}
-                />
-                <InfoRow
-                  label="Allergies Details"
-                  value={resident.medicalHistory?.allergiesDetails}
-                  multiline
-                />
-                <InfoRow
-                  label="Has Cancer"
-                  value={yesNo(resident.medicalHistory?.hasCancer)}
-                />
-                <InfoRow
-                  label="Cancer Details"
-                  value={resident.medicalHistory?.cancerDetails}
-                  multiline
-                />
-                <InfoRow
-                  label="Other Conditions"
-                  value={yesNo(resident.medicalHistory?.hasOtherConditions)}
-                />
-                <InfoRow
-                  label="Other Conditions Details"
-                  value={resident.medicalHistory?.otherConditionsDetails}
-                  multiline
-                />
+              {/* BMI Records */}
+              <InfoSection icon={<Activity className="h-5 w-5" />} title={`BMI Records (${medBmi.length})`}>
+                {medBmi.length === 0 && !medLoading ? (
+                  <p className="text-sm text-slate-400">No BMI records found.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {medBmi.map((r) => (
+                      <div key={r.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm font-black text-slate-900">{r.bmiCategory}</span>
+                          <span className="text-xs font-bold text-slate-500">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600">
+                          BMI: {r.bmi.toFixed(1)} · Height: {r.height} cm · Weight: {r.weight} kg · Pulse: {r.pulseRate} bpm
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </InfoSection>
 
-              <InfoSection
-                icon={<FileText className="h-5 w-5" />}
-                title="Medication / Surgeries"
-              >
-                <InfoRow
-                  label="Maintenance Medications"
-                  value={resident.medicalHistory?.maintenanceMedications}
-                  multiline
-                />
-                <InfoRow
-                  label="Previous Illnesses / Surgeries"
-                  value={resident.medicalHistory?.previousIllnessesSurgeries}
-                  multiline
-                />
+              {/* Appointment history */}
+              <InfoSection icon={<ClipboardList className="h-5 w-5" />} title={`Appointment History (${medAppointments.length})`}>
+                {medAppointments.length === 0 && !medLoading ? (
+                  <p className="text-sm text-slate-400">No appointments recorded yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {medAppointments.map((appt) => (
+                      <div key={appt.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm font-black text-slate-900">
+                            {new Date(appt.date).toLocaleDateString()} · {appt.time}
+                          </span>
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${
+                            appt.status === "COMPLETED"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : appt.status === "CANCELLED"
+                              ? "bg-red-50 text-red-600"
+                              : "bg-sky-50 text-sky-600"
+                          }`}>
+                            {appt.status}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {appt.reason}{appt.otherReason ? ` — ${appt.otherReason}` : ""}
+                          {appt.doctor?.fullName ? ` · Dr. ${appt.doctor.fullName}` : ""}
+                        </p>
+                        {appt.suggestion && (
+                          <p className="mt-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                            Suggestion: {appt.suggestion}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </InfoSection>
             </div>
           )}
