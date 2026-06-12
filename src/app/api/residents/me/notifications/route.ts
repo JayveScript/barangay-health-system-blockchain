@@ -205,13 +205,18 @@ export async function GET() {
     }
 
     for (const log of scanLogs) {
-      const actorName = log.scannedBy?.fullName || "A staff member";
+      // Only use a real name when one is recorded; otherwise rely on the role
+      // so we never mislabel (e.g. a Barangay Admin shown as "a staff member").
+      const actorName = log.scannedBy?.fullName?.trim() || null;
       const actorRole = humanizeRole(log.role);
+      const article = /^[AEIOU]/.test(actorRole) ? "An" : "A";
       items.push({
         id: `scan-${log.id}`,
         type: "scan",
         title: "Your QR ID was scanned",
-        message: `${actorRole} ${actorName} scanned and viewed your digital health ID.`,
+        message: actorName
+          ? `${actorRole} ${actorName} scanned and viewed your digital health ID.`
+          : `${article} ${actorRole} scanned and viewed your digital health ID.`,
         doctorName: null,
         barangayName: null,
         actorName,
