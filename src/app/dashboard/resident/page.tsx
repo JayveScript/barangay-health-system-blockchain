@@ -1826,6 +1826,9 @@ function ResidentMedicalHistoryTab({
                       value={item.value}
                       updatedBy={update?.by}
                       updatedAt={update ? formatUpdateDate(update.at) : undefined}
+                      selfReportedBy={`${resident.firstName} ${resident.lastName}`
+                        .replace(/\s+/g, " ")
+                        .trim()}
                     />
                   );
                 })}
@@ -2067,12 +2070,14 @@ function HistoryFlag({
   tone = "blue",
   updatedBy,
   updatedAt,
+  selfReportedBy,
 }: {
   label: string;
   value?: boolean | null;
   tone?: "blue" | "emerald" | "amber" | "rose";
   updatedBy?: string;
   updatedAt?: string;
+  selfReportedBy?: string;
 }) {
   const recorded = value !== null && value !== undefined;
   const active = value === true;
@@ -2100,12 +2105,16 @@ function HistoryFlag({
           {!recorded ? "Not recorded" : active ? "Yes" : "No"}
         </span>
       </div>
-      {active && updatedBy && (
+      {active && (updatedBy ? (
         <p className="mt-1.5 text-[11px] font-semibold leading-tight text-slate-500">
           Status set by Dr. {updatedBy}
           {updatedAt ? ` · ${updatedAt}` : ""}
         </p>
-      )}
+      ) : selfReportedBy ? (
+        <p className="mt-1.5 text-[11px] font-semibold leading-tight text-slate-500">
+          Self-reported by {selfReportedBy} at registration
+        </p>
+      ) : null)}
     </div>
   );
 }
