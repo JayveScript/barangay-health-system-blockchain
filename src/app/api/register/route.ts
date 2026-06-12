@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { sendOtpEmail } from "@/lib/mail";
-import { sendOtpSms } from "@/lib/sms";
 import {
   DEFAULT_BARANGAY_CITY,
   getRegistrationBarangay,
@@ -75,10 +74,8 @@ export async function POST(req: Request) {
       username,
       email,
       password,
-      verificationMethod,
     } = body;
 
-    const method = verificationMethod === "PHONE" ? "PHONE" : "EMAIL";
     const normalizedEmail = String(email || "").trim().toLowerCase();
     const normalizedUsername = String(username || "").trim();
     const normalizedPhone = String(contactNumber || "").trim();
@@ -105,16 +102,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (method === "EMAIL" && !normalizedEmail) {
+    if (!normalizedEmail) {
       return NextResponse.json(
         { error: "Email is required for Gmail verification." },
-        { status: 400 }
-      );
-    }
-
-    if (method === "PHONE" && !normalizedPhone) {
-      return NextResponse.json(
-        { error: "Phone number is required for phone verification." },
         { status: 400 }
       );
     }
@@ -251,20 +241,12 @@ export async function POST(req: Request) {
       create: pendingData,
     });
 
-    if (method === "PHONE") {
-      await sendOtpSms(normalizedPhone, otp);
-      console.log("OTP dispatched via PHONE");
-    } else {
-      await sendOtpEmail(normalizedEmail, otp);
-      console.log("OTP dispatched via EMAIL");
-    }
+    await sendOtpEmail(normalizedEmail, otp);
+    console.log("OTP dispatched via EMAIL");
 
     return NextResponse.json({
       success: true,
-      message:
-        method === "PHONE"
-          ? "OTP sent to phone successfully."
-          : "OTP sent to Gmail successfully.",
+      message: "OTP sent to Gmail successfully.",
     });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
