@@ -1290,6 +1290,17 @@ function ResidentAppointmentsTab() {
   (appointment) => appointment.suggestion && appointment.suggestion.trim() !== ""
 );
 
+  // Only show today's and upcoming appointment requests — past-dated ones have
+  // already happened and shouldn't linger in the active requests list.
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const visibleAppointments = myAppointments.filter((appointment) => {
+    const apptDate = new Date(appointment.date);
+    apptDate.setHours(0, 0, 0, 0);
+    return apptDate.getTime() >= todayStart.getTime();
+  });
+
   return (
     <div className="space-y-6">
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -1478,9 +1489,9 @@ function ResidentAppointmentsTab() {
     </button>
   </div>
 
-        {myAppointments.length === 0 ? (
+        {visibleAppointments.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-dashed border-sky-200 bg-sky-50 p-6 text-center text-sm font-semibold text-slate-500">
-            No appointment requests yet.
+            No current or upcoming appointment requests.
           </div>
         ) : (
           <>
@@ -1491,7 +1502,7 @@ function ResidentAppointmentsTab() {
               <span className="text-center">Queue</span>
               <span className="text-right">Details</span>
             </div>
-            {myAppointments.map((appointment) => (
+            {visibleAppointments.map((appointment) => (
               <button
                 key={appointment.id}
                 type="button"
@@ -1582,7 +1593,7 @@ function ResidentAppointmentsTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {myAppointments.map((appointment) => (
+                {visibleAppointments.map((appointment) => (
                   <tr key={appointment.id} className="bg-white">
                     <td className="px-4 py-4 font-semibold text-slate-700">
                       {formatLongDate(appointment.date)}
