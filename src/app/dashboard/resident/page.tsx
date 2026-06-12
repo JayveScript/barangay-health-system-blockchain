@@ -1789,7 +1789,19 @@ function ResidentMedicalHistoryTab({
   const activeConditionCount = medicalConditions.filter(
     (item) => item.value === true
   ).length;
-  const latestRecord = sortedAppointments[0];
+
+  // Latest record = the most recent dated activity across the appointment
+  // timeline AND diagnoses (medical-record status changes). A diagnosis made
+  // after the visit date — e.g. a condition set on Jun 8 — should win over an
+  // earlier appointment date.
+  const latestRecordDate = useMemo(() => {
+    const times = [
+      ...appointments.map((a) => new Date(a.date).getTime()),
+      ...Object.values(conditionUpdates).map((u) => new Date(u.at).getTime()),
+    ].filter((t) => !Number.isNaN(t));
+
+    return times.length ? new Date(Math.max(...times)) : null;
+  }, [appointments, conditionUpdates]);
 
   return (
     <Section
@@ -1819,8 +1831,12 @@ function ResidentMedicalHistoryTab({
           />
           <HistoryMetric
             label="Latest Record"
-            value={latestRecord ? formatLongDate(latestRecord.date) : "None"}
-            detail={latestRecord ? formatTime(latestRecord.time) : "No visits yet"}
+            value={
+              latestRecordDate
+                ? formatLongDate(latestRecordDate.toISOString())
+                : "None"
+            }
+            detail={latestRecordDate ? "Most recent update" : "No records yet"}
             tone="slate"
           />
         </div>
@@ -1831,7 +1847,7 @@ function ResidentMedicalHistoryTab({
           </div>
         )}
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <div className="grid gap-5 xl:grid-cols-2">
           <div className="space-y-5">
             <div className="rounded-[28px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between gap-3">
@@ -1869,57 +1885,6 @@ function ResidentMedicalHistoryTab({
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-[28px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-slate-900">
-                    Doctor Suggestions
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Advice and next steps from appointment records.
-                  </p>
-                </div>
-                <span className="w-fit rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-600">
-                  {suggestionAppointments.length} suggestion(s)
-                </span>
-              </div>
-
-              {loading ? (
-                <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-5 text-sm font-semibold text-sky-600">
-                  Loading doctor suggestions...
-                </div>
-              ) : suggestionAppointments.length === 0 ? (
-                <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm font-semibold text-slate-500">
-                  No doctor suggestions recorded yet.
-                </div>
-              ) : (
-                <div className="mt-4 space-y-3">
-                  {suggestionAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4"
-                    >
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className="text-sm font-black text-slate-900">
-                            Dr. {appointment.doctor?.fullName || "Doctor"}
-                          </p>
-                          <p className="mt-1 text-xs font-semibold text-slate-500">
-                            {formatLongDate(appointment.date)} at{" "}
-                            {formatTime(appointment.time)}
-                          </p>
-                        </div>
-                        <StatusBadge status={appointment.status} />
-                      </div>
-                      <p className="mt-3 whitespace-pre-line text-sm font-semibold leading-7 text-slate-800">
-                        {appointment.suggestion}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             <div className="rounded-[28px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
