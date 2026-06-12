@@ -51,6 +51,11 @@ import {
   getBarangayHcmsUsernameLocalPart,
   normalizeBarangayHcmsUsername,
 } from "@/lib/username-validation";
+import {
+  buildConditionUpdates,
+  formatUpdateDate,
+  type ConditionUpdate,
+} from "@/lib/condition-updates";
 
 type ResidentRecord = {
   id: string;
@@ -1987,6 +1992,9 @@ function ResidentDetailsModal({
   const [medBmi, setMedBmi] = useState<BmiEntry[]>([]);
   const [medLoading, setMedLoading] = useState(false);
   const [medError, setMedError] = useState("");
+  const [conditionUpdates, setConditionUpdates] = useState<
+    Record<string, ConditionUpdate>
+  >({});
 
   useEffect(() => {
     if (activeTab !== "medical") return;
@@ -1995,17 +2003,22 @@ function ResidentDetailsModal({
       try {
         setMedLoading(true);
         setMedError("");
-        const [apptRes, bmiRes] = await Promise.all([
+        const [apptRes, bmiRes, dxRes] = await Promise.all([
           fetch(`/api/residents/${resident.id}/appointments`),
           fetch(`/api/residents/${resident.id}/bmi`),
+          fetch(`/api/residents/${resident.id}/diagnoses`),
         ]);
-        const [apptJson, bmiJson] = await Promise.all([
+        const [apptJson, bmiJson, dxJson] = await Promise.all([
           apptRes.json(),
           bmiRes.json(),
+          dxRes.json(),
         ]);
         if (!cancelled) {
           setMedAppointments(Array.isArray(apptJson) ? apptJson : []);
           setMedBmi(Array.isArray(bmiJson) ? bmiJson : []);
+          setConditionUpdates(
+            buildConditionUpdates(Array.isArray(dxJson) ? dxJson : [])
+          );
         }
       } catch {
         if (!cancelled) setMedError("Failed to load medical data.");
@@ -2308,27 +2321,37 @@ function ResidentDetailsModal({
               <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {[
-                    { label: "Hypertension", value: resident.medicalHistory?.hasHypertension },
-                    { label: "Diabetes", value: resident.medicalHistory?.hasDiabetes },
-                    { label: "STI / HIV", value: resident.medicalHistory?.hasStiHiv },
-                    { label: "Heart Disease", value: resident.medicalHistory?.hasHeartDisease },
-                    { label: "Kidney Failure", value: resident.medicalHistory?.hasKidneyFailure },
-                    { label: "Tuberculosis", value: resident.medicalHistory?.hasTuberculosis },
-                    { label: "Allergies", value: resident.medicalHistory?.hasAllergies },
-                    { label: "Cancer", value: resident.medicalHistory?.hasCancer },
-                    { label: "Other Conditions", value: resident.medicalHistory?.hasOtherConditions },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
-                        item.value
-                          ? "border border-red-200 bg-red-50 text-red-700"
-                          : "border border-slate-200 bg-white text-slate-400"
-                      }`}
-                    >
-                      {item.label}
-                    </div>
-                  ))}
+                    { label: "Hypertension", key: "hasHypertension", value: resident.medicalHistory?.hasHypertension },
+                    { label: "Diabetes", key: "hasDiabetes", value: resident.medicalHistory?.hasDiabetes },
+                    { label: "STI / HIV", key: "hasStiHiv", value: resident.medicalHistory?.hasStiHiv },
+                    { label: "Heart Disease", key: "hasHeartDisease", value: resident.medicalHistory?.hasHeartDisease },
+                    { label: "Kidney Failure", key: "hasKidneyFailure", value: resident.medicalHistory?.hasKidneyFailure },
+                    { label: "Tuberculosis", key: "hasTuberculosis", value: resident.medicalHistory?.hasTuberculosis },
+                    { label: "Allergies", key: "hasAllergies", value: resident.medicalHistory?.hasAllergies },
+                    { label: "Cancer", key: "hasCancer", value: resident.medicalHistory?.hasCancer },
+                    { label: "Other Conditions", key: "hasOtherConditions", value: resident.medicalHistory?.hasOtherConditions },
+                  ].map((item) => {
+                    const update = conditionUpdates[item.key];
+                    return (
+                      <div
+                        key={item.label}
+                        className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
+                          item.value
+                            ? "border border-red-200 bg-red-50 text-red-700"
+                            : "border border-slate-200 bg-white text-slate-400"
+                        }`}
+                      >
+                        {item.label}
+                        {item.value && update && (
+                          <span className="mt-1 block text-[10px] font-semibold leading-tight text-red-500/80">
+                            by Dr. {update.by}
+                            <br />
+                            {formatUpdateDate(update.at)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="mt-3 space-y-2">
                   <InfoRow label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} multiline />
