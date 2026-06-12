@@ -261,6 +261,251 @@ function ResidentAnnouncementsTab() {
   );
 }
 
+type ResidentNotification = {
+  id: string;
+  type: "diagnosis" | "record-update" | "suggestion" | "availability" | "announcement";
+  title: string;
+  message: string;
+  doctorName: string | null;
+  barangayName: string | null;
+  conditions?: string[];
+  createdAt: string;
+};
+
+const NOTIFICATION_STYLES: Record<
+  ResidentNotification["type"],
+  { label: string; icon: React.ReactNode; ring: string; chip: string; iconWrap: string }
+> = {
+  diagnosis: {
+    label: "Diagnosis",
+    icon: <Stethoscope className="h-5 w-5 stroke-[2.6]" />,
+    ring: "border-rose-200",
+    chip: "bg-rose-50 text-rose-600",
+    iconWrap: "bg-rose-50 text-rose-600 ring-rose-200",
+  },
+  "record-update": {
+    label: "Record Update",
+    icon: <MessageSquareText className="h-5 w-5" />,
+    ring: "border-violet-200",
+    chip: "bg-violet-50 text-violet-600",
+    iconWrap: "bg-violet-50 text-violet-600 ring-violet-200",
+  },
+  suggestion: {
+    label: "Suggestion",
+    icon: <CalendarClock className="h-5 w-5" />,
+    ring: "border-amber-200",
+    chip: "bg-amber-50 text-amber-600",
+    iconWrap: "bg-amber-50 text-amber-600 ring-amber-200",
+  },
+  availability: {
+    label: "Doctor Availability",
+    icon: <CalendarCheck className="h-5 w-5" />,
+    ring: "border-emerald-200",
+    chip: "bg-emerald-50 text-emerald-600",
+    iconWrap: "bg-emerald-50 text-emerald-600 ring-emerald-200",
+  },
+  announcement: {
+    label: "Announcement",
+    icon: <Megaphone className="h-5 w-5 stroke-[2.6]" />,
+    ring: "border-sky-200",
+    chip: "bg-sky-50 text-sky-600",
+    iconWrap: "bg-sky-50 text-sky-600 ring-sky-200",
+  },
+};
+
+const NOTIFICATION_FILTERS: { id: "all" | ResidentNotification["type"]; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "diagnosis", label: "Diagnoses" },
+  { id: "record-update", label: "Record Updates" },
+  { id: "suggestion", label: "Suggestions" },
+  { id: "availability", label: "Availability" },
+  { id: "announcement", label: "Announcements" },
+];
+
+function formatRelativeTime(iso: string) {
+  const date = new Date(iso);
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.round(diffMs / 60000);
+
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} hr ago`;
+
+  const diffDay = Math.round(diffHr / 24);
+  if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function ResidentNotificationsTab() {
+  const [notifications, setNotifications] = useState<ResidentNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState<"all" | ResidentNotification["type"]>("all");
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await fetch("/api/residents/me/notifications");
+        const json = await res.json();
+
+        if (!res.ok) {
+          setError(json.error || "Failed to load notifications.");
+          return;
+        }
+
+        setNotifications(json.notifications || []);
+      } catch (err) {
+        console.error(err);
+        setError("Unable to connect to the server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const item of notifications) {
+      map[item.type] = (map[item.type] || 0) + 1;
+    }
+    return map;
+  }, [notifications]);
+
+  const filteredNotifications = useMemo(() => {
+    if (filter === "all") return notifications;
+    return notifications.filter((item) => item.type === filter);
+  }, [notifications, filter]);
+
+  return (
+    <div className="space-y-5">
+      {/* Filter chips */}
+      <div className="flex flex-wrap gap-2">
+        {NOTIFICATION_FILTERS.map((tab) => {
+          const count =
+            tab.id === "all" ? notifications.length : counts[tab.id] || 0;
+          const active = filter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilter(tab.id)}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
+                active
+                  ? "bg-[#0EA5E9] text-white shadow-sm shadow-sky-500/25"
+                  : "border border-sky-200 bg-white text-slate-600 hover:bg-sky-50"
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-black ${
+                  active ? "bg-white/25 text-white" : "bg-sky-50 text-sky-600"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {error && (
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="rounded-[26px] border border-sky-200 bg-white p-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
+          Loading notifications...
+        </div>
+      ) : filteredNotifications.length === 0 ? (
+        <div className="rounded-[30px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-12 text-center shadow-sm">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
+            <Bell className="h-10 w-10" />
+          </div>
+          <h3 className="text-2xl font-black text-slate-900">
+            No notifications
+          </h3>
+          <p className="mt-2 text-sm text-slate-500">
+            You have no notifications in this category yet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredNotifications.map((item) => {
+            const style = NOTIFICATION_STYLES[item.type];
+            return (
+              <div
+                key={item.id}
+                className={`rounded-[24px] border ${style.ring} bg-white p-4 shadow-sm sm:p-5`}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm ring-1 ${style.iconWrap}`}
+                  >
+                    {style.icon}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ${style.chip}`}
+                      >
+                        {style.label}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatRelativeTime(item.createdAt)}
+                      </span>
+                    </div>
+
+                    <h4 className="mt-2 text-base font-black text-slate-900">
+                      {item.title}
+                    </h4>
+
+                    <p className="mt-1 whitespace-pre-line text-sm leading-6 text-slate-600">
+                      {item.message}
+                    </p>
+
+                    {(item.doctorName || item.barangayName) && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        {item.doctorName && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
+                            <Stethoscope className="h-3.5 w-3.5 text-sky-600" />
+                            Dr. {item.doctorName}
+                          </span>
+                        )}
+                        {item.barangayName && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {item.barangayName}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const appointmentReasons = [
   "General Check-up",
   "Follow-up Check-up",
@@ -279,7 +524,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "announcements" | "digital"
+  "personal" | "medical-history" | "appointments" | "notifications" | "announcements" | "digital"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -360,6 +605,7 @@ export default function ResidentDashboard() {
     { id: "personal",       label: "Profile",      icon: <UserRound className="h-5 w-5" /> },
     { id: "medical-history",label: "Medical",      icon: <Stethoscope className="h-5 w-5" /> },
     { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
+    { id: "notifications",  label: "Alerts",       icon: <Bell className="h-5 w-5" /> },
     { id: "announcements",  label: "News",         icon: <Megaphone className="h-5 w-5" /> },
     { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
   ];
@@ -454,6 +700,22 @@ export default function ResidentDashboard() {
               <button
                 type="button"
                 onClick={() => {
+                  setSidebarTab("notifications");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "notifications"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <Bell className="h-5 w-5 shrink-0" />
+                Notifications
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
                   setSidebarTab("announcements");
                   setMobileSidebarOpen(false);
                 }}
@@ -539,6 +801,19 @@ export default function ResidentDashboard() {
                 >
                   <CalendarCheck className="h-5 w-5 shrink-0" />
                   Appointments
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("notifications")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "notifications"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <Bell className="h-5 w-5 shrink-0" />
+                  Notifications
                 </button>
 
                 <button
@@ -944,6 +1219,18 @@ export default function ResidentDashboard() {
             {sidebarTab === "appointments" && (
   <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
     <ResidentAppointmentsTab />
+  </div>
+)}
+
+            {sidebarTab === "notifications" && (
+  <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
+    <Section
+      title="Notifications"
+      subtitle="Diagnoses, medical record updates, checkup suggestions, doctor availability, and announcements — with the doctor's name and assigned barangay."
+      icon={<Bell className="h-5 w-5" />}
+    >
+      <ResidentNotificationsTab />
+    </Section>
   </div>
 )}
 
