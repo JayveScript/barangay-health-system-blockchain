@@ -51,11 +51,8 @@ import {
   getBarangayHcmsUsernameLocalPart,
   normalizeBarangayHcmsUsername,
 } from "@/lib/username-validation";
-import {
-  buildConditionUpdates,
-  formatUpdateDate,
-  type ConditionUpdate,
-} from "@/lib/condition-updates";
+import type { DiagnosisLike } from "@/lib/condition-updates";
+import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { PortalLoader } from "@/components/PortalLoader";
 
 type ResidentRecord = {
@@ -1993,9 +1990,7 @@ function ResidentDetailsModal({
   const [medBmi, setMedBmi] = useState<BmiEntry[]>([]);
   const [medLoading, setMedLoading] = useState(false);
   const [medError, setMedError] = useState("");
-  const [conditionUpdates, setConditionUpdates] = useState<
-    Record<string, ConditionUpdate>
-  >({});
+  const [medDiagnoses, setMedDiagnoses] = useState<DiagnosisLike[]>([]);
 
   useEffect(() => {
     if (activeTab !== "medical") return;
@@ -2017,9 +2012,7 @@ function ResidentDetailsModal({
         if (!cancelled) {
           setMedAppointments(Array.isArray(apptJson) ? apptJson : []);
           setMedBmi(Array.isArray(bmiJson) ? bmiJson : []);
-          setConditionUpdates(
-            buildConditionUpdates(Array.isArray(dxJson) ? dxJson : [])
-          );
+          setMedDiagnoses(Array.isArray(dxJson) ? dxJson : []);
         }
       } catch {
         if (!cancelled) setMedError("Failed to load medical data.");
@@ -2320,40 +2313,13 @@ function ResidentDetailsModal({
 
               {/* Condition flags */}
               <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {[
-                    { label: "Hypertension", key: "hasHypertension", value: resident.medicalHistory?.hasHypertension },
-                    { label: "Diabetes", key: "hasDiabetes", value: resident.medicalHistory?.hasDiabetes },
-                    { label: "STI / HIV", key: "hasStiHiv", value: resident.medicalHistory?.hasStiHiv },
-                    { label: "Heart Disease", key: "hasHeartDisease", value: resident.medicalHistory?.hasHeartDisease },
-                    { label: "Kidney Failure", key: "hasKidneyFailure", value: resident.medicalHistory?.hasKidneyFailure },
-                    { label: "Tuberculosis", key: "hasTuberculosis", value: resident.medicalHistory?.hasTuberculosis },
-                    { label: "Allergies", key: "hasAllergies", value: resident.medicalHistory?.hasAllergies },
-                    { label: "Cancer", key: "hasCancer", value: resident.medicalHistory?.hasCancer },
-                    { label: "Other Conditions", key: "hasOtherConditions", value: resident.medicalHistory?.hasOtherConditions },
-                  ].map((item) => {
-                    const update = conditionUpdates[item.key];
-                    return (
-                      <div
-                        key={item.label}
-                        className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
-                          item.value
-                            ? "border border-red-200 bg-red-50 text-red-700"
-                            : "border border-slate-200 bg-white text-slate-400"
-                        }`}
-                      >
-                        {item.label}
-                        {item.value && update && (
-                          <span className="mt-1 block text-[10px] font-semibold leading-tight text-red-500/80">
-                            by Dr. {update.by}
-                            <br />
-                            {formatUpdateDate(update.at)}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                <ConditionHistoryCard
+                  medicalHistory={resident.medicalHistory ?? null}
+                  diagnoses={medDiagnoses}
+                  residentName={`${resident.firstName ?? ""} ${resident.lastName ?? ""}`
+                    .replace(/\s+/g, " ")
+                    .trim()}
+                />
                 <div className="mt-3 space-y-2">
                   <InfoRow label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} multiline />
                   <InfoRow label="Cancer Details" value={resident.medicalHistory?.cancerDetails} multiline />
