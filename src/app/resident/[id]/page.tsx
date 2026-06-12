@@ -7,7 +7,14 @@ import { encryptQrPayload } from "@/lib/qr-encryption";
 import { logQrScanActivity } from "@/lib/qr-audit";
 import { formatWelcomeLine } from "@/lib/role-labels";
 import { SecureScanGate } from "@/components/SecureScanGate";
-import { ShieldCheck } from "lucide-react";
+import {
+  ShieldCheck,
+  UserRound,
+  Phone,
+  MapPin,
+  Users,
+  HeartPulse,
+} from "lucide-react";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 
 export const dynamic = "force-dynamic";
@@ -378,57 +385,37 @@ export default async function PublicResidentPage({ params }: PageProps) {
           <div className="tab-panels p-5">
             <section className="tab-panel panel-identifying">
               <SectionTitle title="Identifying Data" />
-              <div className="space-y-3">
-                <Info label="Full Name" value={fullName} />
-                <TwoCols>
-                  <Info label="Age" value={resident.age} />
-                  <Info label="Sex" value={resident.sex} />
-                </TwoCols>
-                <Info label="Birth Date" value={birthDate} />
-                <Info label="Civil Status" value={resident.civilStatus} />
-                <Info label="Religion" value={resident.religion} />
-                <Info
-                  label="Educational Attainment"
-                  value={resident.educationalAttainment}
-                />
-                <Info label="Occupation" value={resident.occupation} />
-                <Info label="Contact Number" value={resident.contactNumber} />
-                <Info
-                  label="Email"
-                  value={resident.email ?? resident.user?.email}
-                />
-                <Info
-                  label="Phone Number"
-                  value={resident.phoneNumber ?? resident.user?.phoneNumber}
-                />
-                <Info label="Username" value={resident.user?.username} />
-                <Info
-                  label="Verified Resident"
-                  value={resident.user?.isVerified ? "Yes" : "No"}
-                />
-                <Info label="House / Street" value={resident.houseStreet} />
-                <Info
-                  label="Complete Address"
-                  value={resident.completeAddress}
-                />
-                
-                <Info
-                  label="Accompanying Person"
-                  value={resident.accompanyingPerson}
-                />
-                <Info label="Relationship" value={resident.relationship} />
-                <Info
-                  label="Spouse Maiden Name"
-                  value={resident.spouseMaidenName}
-                />
-                <Info
-                  label="Spouse Occupation"
-                  value={resident.spouseOccupation}
-                />
-                <Info
-                  label="Spouse Contact Number"
-                  value={resident.spouseContactNumber}
-                />
+              <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
+                <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
+                  <QrInfoRow label="Full Name" value={fullName} />
+                  <QrInfoRow label="Age" value={resident.age} />
+                  <QrInfoRow label="Sex" value={resident.sex} />
+                  <QrInfoRow label="Birth Date" value={birthDate} />
+                  <QrInfoRow label="Civil Status" value={resident.civilStatus} />
+                  <QrInfoRow label="Religion" value={resident.religion} />
+                  <QrInfoRow label="Education" value={resident.educationalAttainment} />
+                  <QrInfoRow label="Occupation" value={resident.occupation} />
+                </QrInfoGroup>
+
+                <div className="space-y-8">
+                  <QrInfoGroup title="Contact & Account" icon={<Phone className="h-4 w-4" />}>
+                    <QrInfoRow label="Contact Number" value={resident.contactNumber} />
+                    <QrInfoRow label="Email" value={resident.email ?? resident.user?.email} />
+                    <QrInfoRow label="Phone Number" value={resident.phoneNumber ?? resident.user?.phoneNumber} />
+                    <QrInfoRow label="Username" value={resident.user?.username} />
+                    <QrInfoRow label="Verified Resident" value={resident.user?.isVerified ? "Yes" : "No"} />
+                    <QrInfoRow label="Accompanying Person" value={resident.accompanyingPerson} />
+                    <QrInfoRow label="Relationship" value={resident.relationship} />
+                    <QrInfoRow label="Spouse Maiden Name" value={resident.spouseMaidenName} />
+                    <QrInfoRow label="Spouse Occupation" value={resident.spouseOccupation} />
+                    <QrInfoRow label="Spouse Contact Number" value={resident.spouseContactNumber} />
+                  </QrInfoGroup>
+
+                  <QrInfoGroup title="Address" icon={<MapPin className="h-4 w-4" />}>
+                    <QrInfoRow label="House / Street" value={resident.houseStreet} />
+                    <QrInfoRow label="Complete Address" value={resident.completeAddress} />
+                  </QrInfoGroup>
+                </div>
               </div>
             </section>
 
@@ -522,102 +509,66 @@ export default async function PublicResidentPage({ params }: PageProps) {
 
             <section className="tab-panel panel-family">
               <SectionTitle title="Family History" />
-              <div className="space-y-3">
-                <Info
-                  label="Asthma / Allergies"
-                  value={yesNo(resident.familyHistory?.asthmaAllergies)}
+              {resident.familyHistory ? (
+                <QrFlagGroup
+                  title="Hereditary Conditions"
+                  icon={<Users className="h-4 w-4" />}
+                  tone="bad"
+                  columns={2}
+                  items={[
+                    { label: "Asthma / Allergies", value: resident.familyHistory.asthmaAllergies },
+                    { label: "Birth Defects", value: resident.familyHistory.birthDefects },
+                    { label: "Cancer", value: resident.familyHistory.cancer },
+                    { label: "Dementia", value: resident.familyHistory.dementia },
+                    { label: "Diabetes", value: resident.familyHistory.diabetes },
+                    { label: "Hypertension", value: resident.familyHistory.hypertension },
+                    { label: "Kidney Disease", value: resident.familyHistory.kidneyDisease },
+                    { label: "Mental Illness", value: resident.familyHistory.mentalIllness },
+                  ]}
                 />
-                <Info
-                  label="Birth Defects"
-                  value={yesNo(resident.familyHistory?.birthDefects)}
-                />
-                <Info
-                  label="Cancer"
-                  value={yesNo(resident.familyHistory?.cancer)}
-                />
-                <Info
-                  label="Dementia"
-                  value={yesNo(resident.familyHistory?.dementia)}
-                />
-                <Info
-                  label="Diabetes"
-                  value={yesNo(resident.familyHistory?.diabetes)}
-                />
-                <Info
-                  label="Hypertension"
-                  value={yesNo(resident.familyHistory?.hypertension)}
-                />
-                <Info
-                  label="Kidney Disease"
-                  value={yesNo(resident.familyHistory?.kidneyDisease)}
-                />
-                <Info
-                  label="Mental Illness"
-                  value={yesNo(resident.familyHistory?.mentalIllness)}
-                />
-              </div>
+              ) : (
+                <p className="text-sm font-semibold text-slate-400">
+                  No family history recorded.
+                </p>
+              )}
             </section>
 
             <section className="tab-panel panel-social">
               <SectionTitle title="Personal / Social History" />
-              <div className="space-y-3">
-                <Info
-                  label="Eats Healthy Diet"
-                  value={yesNo(
-                    resident.personalSocialHistory?.eatsHealthyDiet
-                  )}
-                />
-                <Info
-                  label="Adequate Physical Activity"
-                  value={yesNo(
-                    resident.personalSocialHistory?.adequatePhysicalActivity
-                  )}
-                />
-                <Info
-                  label="Sufficient Rest / Sleep"
-                  value={yesNo(
-                    resident.personalSocialHistory?.sufficientRestSleep
-                  )}
-                />
-                <Info
-                  label="Normal Growth / Development"
-                  value={yesNo(
-                    resident.personalSocialHistory?.normalGrowthDevelopment
-                  )}
-                />
-                <Info
-                  label="Multiple Sex Partners"
-                  value={yesNo(
-                    resident.personalSocialHistory?.multipleSexPartners
-                  )}
-                />
-                <Info
-                  label="Smokes Tobacco"
-                  value={yesNo(resident.personalSocialHistory?.smokesTobacco)}
-                />
-                <Info
-                  label="Tobacco Packs Per Year"
-                  value={resident.personalSocialHistory?.tobaccoPacksPerYear}
-                />
-                <Info
-                  label="Drinks Alcohol"
-                  value={yesNo(resident.personalSocialHistory?.drinksAlcohol)}
-                />
-                <Info
-                  label="Alcohol Bottles Per Day"
-                  value={resident.personalSocialHistory?.alcoholBottlesPerDay}
-                />
-                <Info
-                  label="Takes Illicit Drugs"
-                  value={yesNo(
-                    resident.personalSocialHistory?.takesIllicitDrugs
-                  )}
-                />
-                <Info
-                  label="Illicit Drugs Details"
-                  value={resident.personalSocialHistory?.illicitDrugsDetails}
-                />
-              </div>
+              {resident.personalSocialHistory ? (
+                <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+                  <QrFlagGroup
+                    title="Healthy Lifestyle"
+                    icon={<HeartPulse className="h-4 w-4" />}
+                    tone="good"
+                    items={[
+                      { label: "Eats Healthy Diet", value: resident.personalSocialHistory.eatsHealthyDiet },
+                      { label: "Adequate Physical Activity", value: resident.personalSocialHistory.adequatePhysicalActivity },
+                      { label: "Sufficient Rest / Sleep", value: resident.personalSocialHistory.sufficientRestSleep },
+                      { label: "Normal Growth / Development", value: resident.personalSocialHistory.normalGrowthDevelopment },
+                      { label: "Multiple Sex Partners", value: resident.personalSocialHistory.multipleSexPartners, tone: "bad" },
+                    ]}
+                  />
+
+                  <QrFlagGroup
+                    title="Risk Factors"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                    tone="bad"
+                    items={[
+                      { label: "Smokes Tobacco", value: resident.personalSocialHistory.smokesTobacco },
+                      { label: "Tobacco Packs / Year", value: resident.personalSocialHistory.tobaccoPacksPerYear },
+                      { label: "Drinks Alcohol", value: resident.personalSocialHistory.drinksAlcohol },
+                      { label: "Alcohol Bottles / Day", value: resident.personalSocialHistory.alcoholBottlesPerDay },
+                      { label: "Takes Illicit Drugs", value: resident.personalSocialHistory.takesIllicitDrugs },
+                      { label: "Illicit Drugs Details", value: resident.personalSocialHistory.illicitDrugsDetails },
+                    ]}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm font-semibold text-slate-400">
+                  No personal / social history recorded.
+                </p>
+              )}
             </section>
           </div>
         </div>
@@ -635,8 +586,126 @@ function SectionTitle({ title }: { title: string }) {
   );
 }
 
-function TwoCols({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>;
+function QrInfoGroup({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </h4>
+      </div>
+      <dl className="divide-y divide-slate-100">{children}</dl>
+    </div>
+  );
+}
+
+function QrInfoRow({ label, value }: { label: string; value: unknown }) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return null;
+  }
+
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-3">
+      <span className="shrink-0 text-sm text-slate-500">{label}</span>
+      <span className="break-words text-right text-sm font-bold text-slate-900">
+        {String(value)}
+      </span>
+    </div>
+  );
+}
+
+function QrFlagGroup({
+  title,
+  icon,
+  items,
+  tone = "bad",
+  columns = 1,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  items: { label: string; value: unknown; tone?: "good" | "bad" }[];
+  tone?: "good" | "bad";
+  columns?: 1 | 2;
+}) {
+  const visible = items.filter((item) =>
+    typeof item.value === "boolean"
+      ? true
+      : item.value !== null &&
+        item.value !== undefined &&
+        String(item.value).trim() !== ""
+  );
+
+  if (visible.length === 0) {
+    return (
+      <p className="text-sm font-semibold text-slate-400">
+        No records in this section.
+      </p>
+    );
+  }
+
+  const headerBadge =
+    tone === "bad"
+      ? "bg-rose-50 text-rose-600 ring-rose-100"
+      : "bg-emerald-50 text-emerald-600 ring-emerald-100";
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${headerBadge}`}
+        >
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </h4>
+      </div>
+
+      <div className={columns === 2 ? "grid sm:grid-cols-2 sm:gap-x-10" : ""}>
+        {visible.map((item) => {
+          const isBool = typeof item.value === "boolean";
+          const itemTone = item.tone ?? tone;
+
+          return (
+            <div
+              key={item.label}
+              className="flex items-center justify-between gap-4 border-b border-slate-100 py-3"
+            >
+              <span className="text-sm text-slate-500">{item.label}</span>
+              {isBool ? (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${
+                    item.value === true
+                      ? itemTone === "good"
+                        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                        : "bg-rose-50 text-rose-700 ring-rose-100"
+                      : "bg-slate-100 text-slate-500 ring-slate-200"
+                  }`}
+                >
+                  {item.value === true ? "Yes" : "No"}
+                </span>
+              ) : (
+                <span className="break-words text-right text-sm font-bold text-slate-900">
+                  {String(item.value)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function Info({ label, value }: { label: string; value: unknown }) {
@@ -656,6 +725,3 @@ function Info({ label, value }: { label: string; value: unknown }) {
   );
 }
 
-function yesNo(value: boolean | null | undefined) {
-  return value ? "Yes" : "No";
-}
