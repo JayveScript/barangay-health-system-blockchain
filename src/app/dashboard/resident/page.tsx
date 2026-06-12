@@ -2867,16 +2867,16 @@ const tabs = [
     label: "Family History",
     icon: <FamilyIcon className="h-5 w-5" />,
     activeClass:
-      "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-md shadow-violet-500/30",
-    idleClass: "text-violet-600 hover:bg-violet-50",
+      "bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/30",
+    idleClass: "text-sky-600 hover:bg-sky-50",
   },
   {
     id: "personal",
     label: "Personal / Social History",
     icon: <LifestyleIcon className="h-5 w-5" />,
     activeClass:
-      "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/30",
-    idleClass: "text-emerald-600 hover:bg-emerald-50",
+      "bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/30",
+    idleClass: "text-sky-600 hover:bg-sky-50",
   },
 ];
 
