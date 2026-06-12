@@ -413,8 +413,8 @@ function ResidentNotificationsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Filter chips */}
-      <div className="flex flex-wrap gap-2">
+      {/* Filter chips — single scrollable row */}
+      <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {NOTIFICATION_FILTERS.map((tab) => {
           const count =
             tab.id === "all" ? notifications.length : counts[tab.id] || 0;
@@ -424,7 +424,7 @@ function ResidentNotificationsTab() {
               key={tab.id}
               type="button"
               onClick={() => setFilter(tab.id)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-bold transition ${
                 active
                   ? "bg-[#0EA5E9] text-white shadow-sm shadow-sky-500/25"
                   : "border border-sky-200 bg-white text-slate-600 hover:bg-sky-50"
