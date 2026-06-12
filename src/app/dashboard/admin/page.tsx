@@ -2163,138 +2163,38 @@ function ResidentDetailsModal({
 
         <div className="max-h-[72vh] overflow-y-auto bg-sky-50 p-6 sm:p-7">
           {activeTab === "identifying" && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <InfoSection
-                icon={<UserRound className="h-5 w-5" />}
-                title="Personal Information"
-              >
-                <InfoRow label="Full Name" value={fullName} />
+            <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
+                <ModalCleanGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
+                  <ModalCleanField label="Full Name" value={fullName} />
+                  <ModalCleanField label="Age" value={editForm.age} editMode={editMode} type="number" onChange={(v) => update("age", v)} />
+                  <ModalCleanField label="Sex" value={editForm.sex} editMode={editMode} options={["MALE", "FEMALE"]} onChange={(v) => update("sex", v)} />
+                  <ModalCleanField label="Birthday" value={editForm.birthDate} editMode={editMode} type="date" onChange={(v) => update("birthDate", v)} />
+                  <ModalCleanField label="Civil Status" value={editForm.civilStatus} editMode={editMode} onChange={(v) => update("civilStatus", v)} />
+                  <ModalCleanField label="Religion" value={editForm.religion} editMode={editMode} onChange={(v) => update("religion", v)} />
+                  <ModalCleanField label="Education" value={editForm.educationalAttainment} editMode={editMode} onChange={(v) => update("educationalAttainment", v)} />
+                  <ModalCleanField label="Occupation" value={editForm.occupation} editMode={editMode} onChange={(v) => update("occupation", v)} />
+                </ModalCleanGroup>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoRow
-                    label="Age"
-                    value={editForm.age}
-                    editMode={editMode}
-                    onChange={(v) => update("age", v)}
-                  />
+                <div className="space-y-8">
+                  <ModalCleanGroup title="Contact & Family" icon={<Phone className="h-4 w-4" />}>
+                    <ModalCleanField label="Contact No." value={editForm.contactNumber} editMode={editMode} onChange={(v) => update("contactNumber", v)} />
+                    <ModalCleanField label="Email" value={editForm.email} editMode={editMode} onChange={(v) => update("email", v)} />
+                    <ModalCleanField label="Accompanying Person" value={editForm.accompanyingPerson} editMode={editMode} onChange={(v) => update("accompanyingPerson", v)} />
+                    <ModalCleanField label="Relationship" value={editForm.relationship} editMode={editMode} onChange={(v) => update("relationship", v)} />
+                    <ModalCleanField label="Spouse Maiden Name" value={editForm.spouseMaidenName} editMode={editMode} onChange={(v) => update("spouseMaidenName", v)} />
+                    <ModalCleanField label="Spouse Occupation" value={editForm.spouseOccupation} editMode={editMode} onChange={(v) => update("spouseOccupation", v)} />
+                    <ModalCleanField label="Spouse Contact No." value={editForm.spouseContactNumber} editMode={editMode} onChange={(v) => update("spouseContactNumber", v)} />
+                  </ModalCleanGroup>
 
-                  <InfoRow
-                    label="Sex"
-                    value={editForm.sex}
-                    editMode={editMode}
-                    onChange={(v) => update("sex", v)}
-                  />
+                  <ModalCleanGroup title="Address" icon={<MapPin className="h-4 w-4" />}>
+                    <ModalCleanField label="Street" value={editForm.completeAddress?.split(",")[0] || ""} editMode={editMode} onChange={(v) => update("completeAddress", v)} />
+                    <ModalCleanField label="Barangay" value={editForm.barangayName} editMode={editMode} onChange={(v) => update("barangayName", v)} />
+                    <ModalCleanField label="City" value={editForm.city} editMode={editMode} onChange={(v) => update("city", v)} />
+                    <ModalCleanField label="Province" value="Davao del Norte" />
+                  </ModalCleanGroup>
                 </div>
-
-                <InfoRow
-                  label="Birthday"
-                  value={editForm.birthDate}
-                  editMode={editMode}
-                  type="date"
-                  onChange={(v) => update("birthDate", v)}
-                />
-
-                <InfoRow
-                  label="Religion"
-                  value={editForm.religion}
-                  editMode={editMode}
-                  onChange={(v) => update("religion", v)}
-                />
-
-                <InfoRow
-                  label="Civil Status"
-                  value={editForm.civilStatus}
-                  editMode={editMode}
-                  onChange={(v) => update("civilStatus", v)}
-                />
-
-                <InfoRow
-                  label="Educational Attainment"
-                  value={editForm.educationalAttainment}
-                  editMode={editMode}
-                  onChange={(v) => update("educationalAttainment", v)}
-                />
-
-                <InfoRow
-                  label="Occupation"
-                  value={editForm.occupation}
-                  editMode={editMode}
-                  onChange={(v) => update("occupation", v)}
-                />
-              </InfoSection>
-
-              <InfoSection icon={<Phone className="h-5 w-5" />} title="Contacts">
-                <InfoRow
-                  label="Contact No."
-                  value={editForm.contactNumber}
-                  editMode={editMode}
-                  onChange={(v) => update("contactNumber", v)}
-                />
-
-                <InfoRow
-                  label="Email"
-                  value={editForm.email}
-                  editMode={editMode}
-                  onChange={(v) => update("email", v)}
-                />
-
-                <InfoRow
-                  label="Accompanying Person"
-                  value={editForm.accompanyingPerson}
-                  editMode={editMode}
-                  onChange={(v) => update("accompanyingPerson", v)}
-                />
-
-                <InfoRow
-                  label="Relationship"
-                  value={editForm.relationship}
-                  editMode={editMode}
-                  onChange={(v) => update("relationship", v)}
-                />
-
-                <InfoRow
-                  label="Spouse Maiden Name"
-                  value={editForm.spouseMaidenName}
-                  editMode={editMode}
-                  onChange={(v) => update("spouseMaidenName", v)}
-                />
-
-                <InfoRow
-                  label="Spouse Occupation"
-                  value={editForm.spouseOccupation}
-                  editMode={editMode}
-                  onChange={(v) => update("spouseOccupation", v)}
-                />
-
-                <InfoRow
-                  label="Spouse Contact No."
-                  value={editForm.spouseContactNumber}
-                  editMode={editMode}
-                  onChange={(v) => update("spouseContactNumber", v)}
-                />
-              </InfoSection>
-
-              <InfoSection icon={<MapPin className="h-5 w-5" />} title="Address">
-  <InfoRow
-    label="Street"
-    value={editForm.completeAddress?.split(",")[0] || "—"}
-    editMode={editMode}
-    onChange={(v) => update("completeAddress", v)}
-  />
-                <InfoRow
-                  label="Barangay"
-                  value={editForm.barangayName}
-                  editMode={editMode}
-                  onChange={(v) => update("barangayName", v)}
-                />
-
-                <InfoRow
-                  label="City"
-                  value={editForm.city}
-                  editMode={editMode}
-                  onChange={(v) => update("city", v)}
-                />
-              </InfoSection>
+              </div>
             </div>
           )}
 
@@ -2312,7 +2212,7 @@ function ResidentDetailsModal({
               )}
 
               {/* Condition flags */}
-              <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions">
+              <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions" alwaysShow>
                 <ConditionHistoryCard
                   medicalHistory={resident.medicalHistory ?? null}
                   diagnoses={medDiagnoses}
@@ -2392,106 +2292,68 @@ function ResidentDetailsModal({
           )}
 
           {activeTab === "family" && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <InfoSection icon={<Users className="h-5 w-5" />} title="Family History">
-                <InfoRow
-                  label="Asthma / Allergies"
-                  value={yesNo(resident.familyHistory?.asthmaAllergies)}
+            <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              {resident.familyHistory ? (
+                <ModalFlagGroup
+                  title="Hereditary Conditions"
+                  icon={<Users className="h-4 w-4" />}
+                  tone="bad"
+                  columns={2}
+                  items={[
+                    { label: "Asthma / Allergies", value: resident.familyHistory.asthmaAllergies },
+                    { label: "Birth Defects", value: resident.familyHistory.birthDefects },
+                    { label: "Cancer", value: resident.familyHistory.cancer },
+                    { label: "Dementia", value: resident.familyHistory.dementia },
+                    { label: "Diabetes", value: resident.familyHistory.diabetes },
+                    { label: "Hypertension", value: resident.familyHistory.hypertension },
+                    { label: "Kidney Disease", value: resident.familyHistory.kidneyDisease },
+                    { label: "Mental Illness", value: resident.familyHistory.mentalIllness },
+                  ]}
                 />
-                <InfoRow
-                  label="Birth Defects"
-                  value={yesNo(resident.familyHistory?.birthDefects)}
-                />
-                <InfoRow
-                  label="Cancer"
-                  value={yesNo(resident.familyHistory?.cancer)}
-                />
-                <InfoRow
-                  label="Dementia"
-                  value={yesNo(resident.familyHistory?.dementia)}
-                />
-                <InfoRow
-                  label="Diabetes"
-                  value={yesNo(resident.familyHistory?.diabetes)}
-                />
-                <InfoRow
-                  label="Hypertension"
-                  value={yesNo(resident.familyHistory?.hypertension)}
-                />
-                <InfoRow
-                  label="Kidney Disease"
-                  value={yesNo(resident.familyHistory?.kidneyDisease)}
-                />
-                <InfoRow
-                  label="Mental Illness"
-                  value={yesNo(resident.familyHistory?.mentalIllness)}
-                />
-              </InfoSection>
+              ) : (
+                <p className="text-sm font-semibold text-slate-400">
+                  No family history recorded.
+                </p>
+              )}
             </div>
           )}
 
           {activeTab === "personal" && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <InfoSection
-                icon={<Activity className="h-5 w-5" />}
-                title="Lifestyle Information"
-              >
-                <InfoRow
-                  label="Eats Healthy Diet"
-                  value={yesNo(resident.personalSocialHistory?.eatsHealthyDiet)}
-                />
-                <InfoRow
-                  label="Adequate Physical Activity"
-                  value={yesNo(
-                    resident.personalSocialHistory?.adequatePhysicalActivity
-                  )}
-                />
-                <InfoRow
-                  label="Sufficient Rest / Sleep"
-                  value={yesNo(resident.personalSocialHistory?.sufficientRestSleep)}
-                />
-                <InfoRow
-                  label="Normal Growth & Development"
-                  value={yesNo(
-                    resident.personalSocialHistory?.normalGrowthDevelopment
-                  )}
-                />
-                <InfoRow
-                  label="Multiple Sex Partners"
-                  value={yesNo(resident.personalSocialHistory?.multipleSexPartners)}
-                />
-              </InfoSection>
+            <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              {resident.personalSocialHistory ? (
+                <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
+                  <ModalFlagGroup
+                    title="Healthy Lifestyle"
+                    icon={<Activity className="h-4 w-4" />}
+                    tone="good"
+                    items={[
+                      { label: "Eats Healthy Diet", value: resident.personalSocialHistory.eatsHealthyDiet },
+                      { label: "Adequate Physical Activity", value: resident.personalSocialHistory.adequatePhysicalActivity },
+                      { label: "Sufficient Rest / Sleep", value: resident.personalSocialHistory.sufficientRestSleep },
+                      { label: "Normal Growth & Development", value: resident.personalSocialHistory.normalGrowthDevelopment },
+                      { label: "Multiple Sex Partners", value: resident.personalSocialHistory.multipleSexPartners, tone: "bad" },
+                    ]}
+                  />
 
-              <InfoSection
-                icon={<ShieldCheck className="h-5 w-5" />}
-                title="Risk Factors"
-              >
-                <InfoRow
-                  label="Smokes Tobacco"
-                  value={yesNo(resident.personalSocialHistory?.smokesTobacco)}
-                />
-                <InfoRow
-                  label="Tobacco Packs / Year"
-                  value={resident.personalSocialHistory?.tobaccoPacksPerYear}
-                />
-                <InfoRow
-                  label="Drinks Alcohol"
-                  value={yesNo(resident.personalSocialHistory?.drinksAlcohol)}
-                />
-                <InfoRow
-                  label="Alcohol Bottles / Day"
-                  value={resident.personalSocialHistory?.alcoholBottlesPerDay}
-                />
-                <InfoRow
-                  label="Takes Illicit Drugs"
-                  value={yesNo(resident.personalSocialHistory?.takesIllicitDrugs)}
-                />
-                <InfoRow
-                  label="Illicit Drugs Details"
-                  value={resident.personalSocialHistory?.illicitDrugsDetails}
-                  multiline
-                />
-              </InfoSection>
+                  <ModalFlagGroup
+                    title="Risk Factors"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                    tone="bad"
+                    items={[
+                      { label: "Smokes Tobacco", value: resident.personalSocialHistory.smokesTobacco },
+                      { label: "Tobacco Packs / Year", value: resident.personalSocialHistory.tobaccoPacksPerYear },
+                      { label: "Drinks Alcohol", value: resident.personalSocialHistory.drinksAlcohol },
+                      { label: "Alcohol Bottles / Day", value: resident.personalSocialHistory.alcoholBottlesPerDay },
+                      { label: "Takes Illicit Drugs", value: resident.personalSocialHistory.takesIllicitDrugs },
+                      { label: "Illicit Drugs Details", value: resident.personalSocialHistory.illicitDrugsDetails },
+                    ]}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm font-semibold text-slate-400">
+                  No personal / social history recorded.
+                </p>
+              )}
             </div>
           )}
 
@@ -2835,16 +2697,178 @@ function DashboardBarChart({
   );
 }
 
+function ModalCleanGroup({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </h4>
+      </div>
+      <dl className="divide-y divide-slate-100">{children}</dl>
+    </div>
+  );
+}
+
+function ModalCleanField({
+  label,
+  value,
+  editMode = false,
+  onChange,
+  type = "text",
+  options,
+}: {
+  label: string;
+  value: unknown;
+  editMode?: boolean;
+  onChange?: (value: string) => void;
+  type?: string;
+  options?: string[];
+}) {
+  if (editMode && onChange) {
+    return (
+      <div className="py-3">
+        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          {label}
+        </label>
+        {options ? (
+          <select
+            value={String(value ?? "")}
+            onChange={(e) => onChange(e.target.value)}
+            className="min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
+          >
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            value={String(value ?? "")}
+            onChange={(e) => onChange(e.target.value)}
+            className="min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
+          />
+        )}
+      </div>
+    );
+  }
+
+  if (!hasDisplayValue(value)) return null;
+
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-3">
+      <span className="shrink-0 text-sm text-slate-500">{label}</span>
+      <span className="break-words text-right text-sm font-bold text-slate-900">
+        {String(value)}
+      </span>
+    </div>
+  );
+}
+
+function ModalFlagGroup({
+  title,
+  icon,
+  items,
+  tone = "bad",
+  columns = 1,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  items: { label: string; value: unknown; tone?: "good" | "bad" }[];
+  tone?: "good" | "bad";
+  columns?: 1 | 2;
+}) {
+  const visible = items.filter((item) =>
+    typeof item.value === "boolean" ? true : hasDisplayValue(item.value)
+  );
+
+  if (visible.length === 0) {
+    return (
+      <p className="text-sm font-semibold text-slate-400">
+        No records in this section.
+      </p>
+    );
+  }
+
+  const headerBadge =
+    tone === "bad"
+      ? "bg-rose-50 text-rose-600 ring-rose-100"
+      : "bg-emerald-50 text-emerald-600 ring-emerald-100";
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${headerBadge}`}
+        >
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </h4>
+      </div>
+
+      <div className={columns === 2 ? "grid sm:grid-cols-2 sm:gap-x-10" : ""}>
+        {visible.map((item) => {
+          const isBool = typeof item.value === "boolean";
+          const itemTone = item.tone ?? tone;
+
+          return (
+            <div
+              key={item.label}
+              className="flex items-center justify-between gap-4 border-b border-slate-100 py-3"
+            >
+              <span className="text-sm text-slate-500">{item.label}</span>
+              {isBool ? (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${
+                    item.value === true
+                      ? itemTone === "good"
+                        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                        : "bg-rose-50 text-rose-700 ring-rose-100"
+                      : "bg-slate-100 text-slate-500 ring-slate-200"
+                  }`}
+                >
+                  {item.value === true ? "Yes" : "No"}
+                </span>
+              ) : (
+                <span className="break-words text-right text-sm font-bold text-slate-900">
+                  {String(item.value)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function InfoSection({
   icon,
   title,
   children,
+  alwaysShow = false,
 }: {
   icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
+  alwaysShow?: boolean;
 }) {
-  const hasVisibleContent = hasVisibleReactContent(children);
+  const hasVisibleContent = alwaysShow || hasVisibleReactContent(children);
 
   if (!hasVisibleContent) {
     return null;
@@ -2981,11 +3005,6 @@ function hasDisplayValue(value: unknown) {
   const text = String(value).trim();
 
   return text !== "" && text !== "—";
-}
-
-function yesNo(value?: boolean | null) {
-  if (value === null || value === undefined) return null;
-  return value ? "Yes" : "No";
 }
 
 type Announcement = {
