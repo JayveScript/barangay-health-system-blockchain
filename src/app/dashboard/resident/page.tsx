@@ -21,6 +21,7 @@ X,
   UserRound,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { PortalLoader } from "@/components/PortalLoader";
 import {
   buildConditionUpdates,
   formatUpdateDate,
@@ -580,22 +581,11 @@ export default function ResidentDashboard() {
 
   if (!resident) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EFF6FF] px-6">
-        <div className="rounded-3xl border border-white/70 bg-white/80 px-8 py-6 shadow-xl backdrop-blur">
-          <p className="text-sm font-medium text-slate-600">
-            {residentError || "Loading resident portal..."}
-          </p>
-          {residentError && (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="mt-4 rounded-2xl bg-[#0EA5E9] px-4 py-2 text-sm font-bold text-white"
-            >
-              Back to Login
-            </button>
-          )}
-        </div>
-      </div>
+      <PortalLoader
+        label="Loading resident portal..."
+        error={residentError || undefined}
+        onRetry={residentError ? handleLogout : undefined}
+      />
     );
   }
 
