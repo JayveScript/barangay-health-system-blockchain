@@ -2157,7 +2157,9 @@ function ConditionHistoryModal({
   selfReportedBy: string;
   onClose: () => void;
 }) {
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
       onClick={onClose}
@@ -2243,7 +2245,8 @@ function ConditionHistoryModal({
           Close
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
