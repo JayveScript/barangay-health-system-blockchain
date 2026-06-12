@@ -963,100 +963,12 @@ export default function ResidentDashboard() {
     </div>
   }
 >
-                      <div className="grid gap-5 lg:grid-cols-3">
-                        <PersonalInfoCard
-  resident={editForm || resident}
-  fullName={fullName}
-  editMode={editMode}
-  onChange={updateEditForm}
-/>
-
-                        <InfoCard
-                          title="Contacts"
-                          icon={<PhoneIcon className="h-5 w-5" />}
-                        >
-                          <EditableMiniField
-  label="Contact No."
-  value={(editForm || resident).contactNumber}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("contactNumber", value)}
-/>
-
-<EditableMiniField
-  label="Email"
-  value={(editForm || resident).email}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("email", value)}
-/>
-
-<EditableMiniField
-  label="Accompanying Person"
-  value={(editForm || resident).accompanyingPerson}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("accompanyingPerson", value)}
-/>
-
-<EditableMiniField
-  label="Relationship"
-  value={(editForm || resident).relationship}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("relationship", value)}
-/>
-
-<EditableMiniField
-  label="Spouse Maiden Name"
-  value={(editForm || resident).spouseMaidenName}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("spouseMaidenName", value)}
-/>
-
-<EditableMiniField
-  label="Spouse Occupation"
-  value={(editForm || resident).spouseOccupation}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("spouseOccupation", value)}
-/>
-
-<EditableMiniField
-  label="Spouse Contact No."
-  value={(editForm || resident).spouseContactNumber}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("spouseContactNumber", value)}
-/>
-                        </InfoCard>
-
-                        <InfoCard
-                          title="Address"
-                          icon={<LocationIcon className="h-5 w-5" />}
-                        >
-                          <EditableMiniField
-  label="Street"
-  value={getStreetOnly((editForm || resident).completeAddress)}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("completeAddress", value)}
-/>
-
-<EditableMiniField
-  label="Barangay"
-  value={(editForm || resident).barangayName}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("barangayName", value)}
-/>
-
-<EditableMiniField
-  label="City"
-  value={(editForm || resident).city}
-  editMode={editMode}
-  onChange={(value) => updateEditForm("city", value)}
-/>
-
-<EditableMiniField
-  label="Province"
-  value="Davao del Norte"
-  editMode={false}
-/>
-                        </InfoCard>
-                      </div>
+                      <ResidentIdentityCard
+                        resident={editForm || resident}
+                        fullName={fullName}
+                        editMode={editMode}
+                        onChange={updateEditForm}
+                      />
                     </Section>
                   )}
 
@@ -2763,7 +2675,21 @@ function HealthLogoIcon({ className = "h-10 w-10" }: { className?: string }) {
   );
 }
 
-function PersonalInfoCard({
+type IdentityField = {
+  label: string;
+  value: unknown;
+  onChange?: (value: string) => void;
+  type?: string;
+  options?: string[];
+};
+
+type IdentityGroupData = {
+  title: string;
+  icon: React.ReactNode;
+  fields: IdentityField[];
+};
+
+function ResidentIdentityCard({
   resident,
   fullName,
   editMode,
@@ -2772,125 +2698,204 @@ function PersonalInfoCard({
   resident: ResidentData;
   fullName: string;
   editMode?: boolean;
-  onChange?: (key: keyof ResidentData, value: string | number) => void;
+  onChange: (key: keyof ResidentData, value: string | number) => void;
 }) {
+  const initials =
+    `${resident.firstName?.[0] ?? ""}${resident.lastName?.[0] ?? ""}`
+      .toUpperCase()
+      .trim() || "R";
+
+  const quickFacts = [
+    resident.age ? `${resident.age} yrs old` : null,
+    resident.sex,
+    resident.civilStatus,
+  ].filter(Boolean);
+
+  const groups: IdentityGroupData[] = [
+    {
+      title: "Personal Details",
+      icon: <UserIcon className="h-4 w-4" />,
+      fields: [
+        { label: "Full Name", value: fullName },
+        { label: "Age", value: resident.age, type: "number", onChange: (v) => onChange("age", Number(v)) },
+        { label: "Sex", value: resident.sex, options: ["MALE", "FEMALE"], onChange: (v) => onChange("sex", v) },
+        { label: "Birthday", value: resident.birthDate?.slice(0, 10), type: "date", onChange: (v) => onChange("birthDate", v) },
+        { label: "Civil Status", value: resident.civilStatus, onChange: (v) => onChange("civilStatus", v) },
+        { label: "Religion", value: resident.religion, onChange: (v) => onChange("religion", v) },
+        { label: "Education", value: resident.educationalAttainment, onChange: (v) => onChange("educationalAttainment", v) },
+        { label: "Occupation", value: resident.occupation, onChange: (v) => onChange("occupation", v) },
+      ],
+    },
+    {
+      title: "Contact & Family",
+      icon: <PhoneIcon className="h-4 w-4" />,
+      fields: [
+        { label: "Contact No.", value: resident.contactNumber, onChange: (v) => onChange("contactNumber", v) },
+        { label: "Email", value: resident.email, onChange: (v) => onChange("email", v) },
+        { label: "Accompanying Person", value: resident.accompanyingPerson, onChange: (v) => onChange("accompanyingPerson", v) },
+        { label: "Relationship", value: resident.relationship, onChange: (v) => onChange("relationship", v) },
+        { label: "Spouse Maiden Name", value: resident.spouseMaidenName, onChange: (v) => onChange("spouseMaidenName", v) },
+        { label: "Spouse Occupation", value: resident.spouseOccupation, onChange: (v) => onChange("spouseOccupation", v) },
+        { label: "Spouse Contact No.", value: resident.spouseContactNumber, onChange: (v) => onChange("spouseContactNumber", v) },
+      ],
+    },
+    {
+      title: "Address",
+      icon: <LocationIcon className="h-4 w-4" />,
+      fields: [
+        { label: "Street", value: getStreetOnly(resident.completeAddress), onChange: (v) => onChange("completeAddress", v) },
+        { label: "Barangay", value: resident.barangayName, onChange: (v) => onChange("barangayName", v) },
+        { label: "City", value: resident.city, onChange: (v) => onChange("city", v) },
+        { label: "Province", value: "Davao del Norte" },
+      ],
+    },
+  ];
+
   return (
-    <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-200">
-          <UserIcon className="h-5 w-5" />
+    <div className="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white shadow-sm">
+      {/* Identity band */}
+      <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-sky-50 via-white to-white px-5 py-6 sm:px-7">
+        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-sky-100/50 blur-2xl" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0EA5E9] to-[#0284C7] text-xl font-black text-white shadow-lg shadow-sky-500/25">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <h3 className="truncate text-xl font-black text-slate-900">
+                {fullName}
+              </h3>
+              {quickFacts.length > 0 && (
+                <p className="mt-0.5 text-sm font-semibold text-slate-500">
+                  {quickFacts.join("  •  ")}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {resident.isVerified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-bold text-white shadow-sm">
+                <VerifiedIcon className="h-3.5 w-3.5" />
+                Verified
+              </span>
+            )}
+            {resident.barangayName && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">
+                <MapPin className="h-3.5 w-3.5" />
+                {resident.barangayName}
+              </span>
+            )}
+          </div>
         </div>
-        <h3 className="text-lg font-bold text-slate-900">
-          Personal Information
-        </h3>
       </div>
 
-      <div className="grid gap-3">
-        <MiniField label="Full Name" value={fullName} />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <EditableMiniField
-            label="Age"
-            type="number"
-            value={resident.age}
-            editMode={editMode}
-            onChange={(value) => onChange?.("age", Number(value))}
-          />
-
-          <EditableMiniField
-            label="Sex"
-            value={resident.sex}
-            editMode={editMode}
-            selectOptions={["MALE", "FEMALE"]}
-            onChange={(value) => onChange?.("sex", value)}
-          />
+      {/* Detail groups — clean divider rows instead of nested cards */}
+      <div className="grid gap-x-12 gap-y-8 px-5 py-6 sm:px-7 lg:grid-cols-2">
+        <IdentityGroup group={groups[0]} editMode={editMode} />
+        <div className="space-y-8">
+          <IdentityGroup group={groups[1]} editMode={editMode} />
+          <IdentityGroup group={groups[2]} editMode={editMode} />
         </div>
-
-        <EditableMiniField
-          label="Birthday"
-          type="date"
-          value={resident.birthDate?.slice(0, 10)}
-          editMode={editMode}
-          onChange={(value) => onChange?.("birthDate", value)}
-        />
-
-        <EditableMiniField
-          label="Religion"
-          value={resident.religion}
-          editMode={editMode}
-          onChange={(value) => onChange?.("religion", value)}
-        />
-
-        <EditableMiniField
-          label="Civil Status"
-          value={resident.civilStatus}
-          editMode={editMode}
-          onChange={(value) => onChange?.("civilStatus", value)}
-        />
-
-        <EditableMiniField
-          label="Educational Attainment"
-          value={resident.educationalAttainment}
-          editMode={editMode}
-          onChange={(value) => onChange?.("educationalAttainment", value)}
-        />
-
-        <EditableMiniField
-          label="Occupation"
-          value={resident.occupation}
-          editMode={editMode}
-          onChange={(value) => onChange?.("occupation", value)}
-        />
       </div>
     </div>
   );
 }
 
-function EditableMiniField({
+function IdentityGroup({
+  group,
+  editMode,
+}: {
+  group: IdentityGroupData;
+  editMode?: boolean;
+}) {
+  const visibleFields = editMode
+    ? group.fields
+    : group.fields.filter((field) => hasDisplayValue(field.value));
+
+  if (visibleFields.length === 0) return null;
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+          {group.icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {group.title}
+        </h4>
+      </div>
+
+      <dl className="divide-y divide-slate-100">
+        {visibleFields.map((field) => (
+          <IdentityRow
+            key={field.label}
+            label={field.label}
+            value={field.value}
+            editMode={editMode && !!field.onChange}
+            onChange={field.onChange}
+            type={field.type}
+            options={field.options}
+          />
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function IdentityRow({
   label,
   value,
   editMode,
   onChange,
   type = "text",
-  selectOptions,
+  options,
 }: {
   label: string;
   value: unknown;
   editMode?: boolean;
   onChange?: (value: string) => void;
   type?: string;
-  selectOptions?: string[];
+  options?: string[];
 }) {
-  if (!editMode) {
-    return <MiniField label={label} value={value} />;
+  if (editMode) {
+    return (
+      <div className="py-3">
+        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          {label}
+        </label>
+        {options ? (
+          <select
+            value={String(value ?? "")}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
+          >
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            value={String(value ?? "")}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
+          />
+        )}
+      </div>
+    );
   }
 
-  return (
-    <div className="rounded-2xl border border-sky-100 bg-white/90 px-4 py-3 shadow-sm ring-1 ring-sky-100">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-        {label}
-      </p>
+  const display = hasDisplayValue(value) ? String(value).trim() : "—";
 
-      {selectOptions ? (
-        <select
-          value={String(value ?? "")}
-          onChange={(e) => onChange?.(e.target.value)}
-          className="mt-2 min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
-        >
-          {selectOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={String(value ?? "")}
-          onChange={(e) => onChange?.(e.target.value)}
-          className="mt-2 min-h-[42px] w-full rounded-xl border border-sky-200 bg-white px-3 text-[15px] font-semibold text-slate-900 outline-none focus:border-sky-500"
-        />
-      )}
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-3">
+      <dt className="shrink-0 text-sm text-slate-500">{label}</dt>
+      <dd className="break-words text-right text-sm font-bold text-slate-900">
+        {display}
+      </dd>
     </div>
   );
 }
