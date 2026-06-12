@@ -9,9 +9,8 @@ import { verifyAuthToken } from "@/lib/auth";
 //   2. record-update    — who changed their medical-record status (a diagnosis
 //                         that flipped a Past Medical History flag)
 //   3. suggestion       — checkup / appointment suggestions from a doctor
-//   4. availability      — doctors who posted upcoming available schedules
-//   5. announcement     — barangay health center announcements
-//   6. scan             — staff/admin who scanned & viewed their QR digital ID
+//   4. announcement     — barangay health center announcements
+//   5. scan             — staff/admin who scanned & viewed their QR digital ID
 
 type NotificationItem = {
   id: string;
@@ -19,7 +18,6 @@ type NotificationItem = {
     | "diagnosis"
     | "record-update"
     | "suggestion"
-    | "availability"
     | "announcement"
     | "scan";
   title: string;
@@ -87,16 +85,8 @@ export async function GET() {
       );
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const [
-      diagnoses,
-      suggestionAppointments,
-      availabilities,
-      announcements,
-      scanLogs,
-    ] = await Promise.all([
+    const [diagnoses, suggestionAppointments, announcements, scanLogs] =
+      await Promise.all([
         // Diagnoses made for this resident
         db.diagnosis.findMany({
           where: { residentId: resident.id },
@@ -129,20 +119,6 @@ export async function GET() {
           },
           orderBy: { createdAt: "desc" },
           take: 50,
-        }),
-        // Upcoming doctor availability in the resident's barangay
-        db.doctorAvailability.findMany({
-          where: { barangayId, date: { gte: today } },
-          include: {
-            doctor: {
-              select: {
-                fullName: true,
-                barangay: { select: { name: true } },
-              },
-            },
-          },
-          orderBy: { date: "asc" },
-          take: 30,
         }),
         // Health center announcements for the barangay
         db.announcement.findMany({
@@ -213,25 +189,6 @@ export async function GET() {
         doctorName,
         barangayName: a.doctor?.barangay?.name || null,
         createdAt: a.createdAt.toISOString(),
-      });
-    }
-
-    for (const av of availabilities) {
-      const doctorName = av.doctor?.fullName || "Doctor";
-      const dateLabel = new Date(av.date).toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-      items.push({
-        id: `availability-${av.id}`,
-        type: "availability",
-        title: "Doctor available for appointments",
-        message: `Dr. ${doctorName} is available on ${dateLabel} from ${av.startTime} to ${av.endTime}.`,
-        doctorName,
-        barangayName: av.doctor?.barangay?.name || null,
-        createdAt: av.createdAt.toISOString(),
       });
     }
 
