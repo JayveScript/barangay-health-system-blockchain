@@ -3,25 +3,43 @@ import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth";
 
-// Notification feed for the logged-in resident. Aggregates four sources into a
-// single, time-sorted list:
+// Notification feed for the logged-in resident. Aggregates several sources into
+// a single, time-sorted list:
 //   1. diagnosis        — who diagnosed their condition (doctor name + barangay)
 //   2. record-update    — who changed their medical-record status (a diagnosis
 //                         that flipped a Past Medical History flag)
 //   3. suggestion       — checkup / appointment suggestions from a doctor
 //   4. availability      — doctors who posted upcoming available schedules
 //   5. announcement     — barangay health center announcements
+//   6. scan             — staff/admin who scanned & viewed their QR digital ID
 
 type NotificationItem = {
   id: string;
-  type: "diagnosis" | "record-update" | "suggestion" | "availability" | "announcement";
+  type:
+    | "diagnosis"
+    | "record-update"
+    | "suggestion"
+    | "availability"
+    | "announcement"
+    | "scan";
   title: string;
   message: string;
   doctorName: string | null;
   barangayName: string | null;
   conditions?: string[];
+  actorName?: string | null;
+  actorRole?: string | null;
   createdAt: string;
 };
+
+function humanizeRole(role?: string | null): string {
+  if (!role) return "Staff";
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 const CONDITION_LABELS: Record<string, string> = {
   hasHypertension: "Hypertension",
@@ -72,8 +90,13 @@ export async function GET() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [diagnoses, suggestionAppointments, availabilities, announcements] =
-      await Promise.all([
+    const [
+      diagnoses,
+      suggestionAppointments,
+      availabilities,
+      announcements,
+      scanLogs,
+    ] = await Promise.all([
         // Diagnoses made for this resident
         db.diagnosis.findMany({
           where: { residentId: resident.id },
@@ -126,6 +149,13 @@ export async function GET() {
           where: { barangayId },
           orderBy: { publishDate: "desc" },
           take: 30,
+        }),
+        // Staff/admin who successfully scanned & viewed this resident's QR ID
+        db.qrScanAuditLog.findMany({
+          where: { residentId: resident.id, action: "ACCESS_GRANTED" },
+          include: { scannedBy: { select: { fullName: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 50,
         }),
       ]);
 
@@ -214,6 +244,22 @@ export async function GET() {
         doctorName: null,
         barangayName: null,
         createdAt: (an.publishDate || an.createdAt).toISOString(),
+      });
+    }
+
+    for (const log of scanLogs) {
+      const actorName = log.scannedBy?.fullName || "A staff member";
+      const actorRole = humanizeRole(log.role);
+      items.push({
+        id: `scan-${log.id}`,
+        type: "scan",
+        title: "Your QR ID was scanned",
+        message: `${actorRole} ${actorName} scanned and viewed your digital health ID.`,
+        doctorName: null,
+        barangayName: null,
+        actorName,
+        actorRole,
+        createdAt: log.createdAt.toISOString(),
       });
     }
 

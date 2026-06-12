@@ -19,6 +19,7 @@ X,
   Megaphone,
   IdCard,
   UserRound,
+  ScanLine,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
@@ -269,12 +270,20 @@ function ResidentAnnouncementsTab() {
 
 type ResidentNotification = {
   id: string;
-  type: "diagnosis" | "record-update" | "suggestion" | "availability" | "announcement";
+  type:
+    | "diagnosis"
+    | "record-update"
+    | "suggestion"
+    | "availability"
+    | "announcement"
+    | "scan";
   title: string;
   message: string;
   doctorName: string | null;
   barangayName: string | null;
   conditions?: string[];
+  actorName?: string | null;
+  actorRole?: string | null;
   createdAt: string;
 };
 
@@ -317,10 +326,18 @@ const NOTIFICATION_STYLES: Record<
     chip: "bg-sky-50 text-sky-600",
     iconWrap: "bg-sky-50 text-sky-600 ring-sky-200",
   },
+  scan: {
+    label: "QR Scan",
+    icon: <ScanLine className="h-5 w-5" />,
+    ring: "border-indigo-200",
+    chip: "bg-indigo-50 text-indigo-600",
+    iconWrap: "bg-indigo-50 text-indigo-600 ring-indigo-200",
+  },
 };
 
 const NOTIFICATION_FILTERS: { id: "all" | ResidentNotification["type"]; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "scan", label: "QR Scans" },
   { id: "diagnosis", label: "Diagnoses" },
   { id: "record-update", label: "Record Updates" },
   { id: "suggestion", label: "Suggestions" },
@@ -485,8 +502,23 @@ function ResidentNotificationsTab() {
                       {item.message}
                     </p>
 
-                    {(item.doctorName || item.barangayName) && (
+                    {(item.doctorName ||
+                      item.barangayName ||
+                      item.actorName ||
+                      item.actorRole) && (
                       <div className="mt-3 flex flex-wrap items-center gap-2">
+                        {item.actorRole && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600">
+                            <ScanLine className="h-3.5 w-3.5" />
+                            {item.actorRole}
+                          </span>
+                        )}
+                        {item.actorName && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
+                            <UserRound className="h-3.5 w-3.5 text-indigo-600" />
+                            {item.actorName}
+                          </span>
+                        )}
                         {item.doctorName && (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
                             <Stethoscope className="h-3.5 w-3.5 text-sky-600" />
