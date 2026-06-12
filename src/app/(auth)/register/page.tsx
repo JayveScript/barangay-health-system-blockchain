@@ -16,7 +16,6 @@ import {
   MapPin,
   Phone,
   ShieldCheck,
-  Smartphone,
   Stethoscope,
   UserRound,
   Users,
@@ -25,8 +24,6 @@ import {
   DEFAULT_BARANGAY_CITY,
   REGISTRATION_BARANGAY_OPTIONS,
 } from "@/lib/barangay-options";
-
-type VerificationMethod = "EMAIL" | "PHONE";
 
 type FormState = {
   lastName: string;
@@ -99,7 +96,6 @@ type FormState = {
   email: string;
   password: string;
   confirmPassword: string;
-  verificationMethod: VerificationMethod;
 };
 
 type ErrorState = Partial<Record<keyof FormState | "otp", string>>;
@@ -179,7 +175,6 @@ const initialForm: FormState = {
   email: "",
   password: "",
   confirmPassword: "",
-  verificationMethod: "EMAIL",
 };
 
 export default function RegisterPage() {
@@ -271,34 +266,24 @@ export default function RegisterPage() {
     }
 
     if (step === 5) {
-  if (!form.username.trim()) nextErrors.username = "Username is required.";
+      if (!form.username.trim()) nextErrors.username = "Username is required.";
 
-  if (form.verificationMethod === "EMAIL") {
-    if (!form.email.trim()) nextErrors.email = "Email is required.";
-    else if (!validateEmail(form.email.trim())) {
-      nextErrors.email = "Enter a valid email address.";
+      if (!form.email.trim()) nextErrors.email = "Email is required.";
+      else if (!validateEmail(form.email.trim())) {
+        nextErrors.email = "Enter a valid email address.";
+      }
+
+      if (!form.password) nextErrors.password = "Password is required.";
+      else if (form.password.length < 8) {
+        nextErrors.password = "Password must be at least 8 characters.";
+      }
+
+      if (!form.confirmPassword) {
+        nextErrors.confirmPassword = "Confirm your password.";
+      } else if (form.password !== form.confirmPassword) {
+        nextErrors.confirmPassword = "Passwords do not match.";
+      }
     }
-  }
-
-  if (form.verificationMethod === "PHONE") {
-    if (!form.contactNumber.trim()) {
-      nextErrors.contactNumber = "Phone number is required for phone verification.";
-    } else if (!validatePhone(form.contactNumber)) {
-      nextErrors.contactNumber = "Enter a valid phone number.";
-    }
-  }
-
-  if (!form.password) nextErrors.password = "Password is required.";
-  else if (form.password.length < 8) {
-    nextErrors.password = "Password must be at least 8 characters.";
-  }
-
-  if (!form.confirmPassword) {
-    nextErrors.confirmPassword = "Confirm your password.";
-  } else if (form.password !== form.confirmPassword) {
-    nextErrors.confirmPassword = "Passwords do not match.";
-  }
-}
 
     setErrors(nextErrors);
     setServerError("");
@@ -348,7 +333,6 @@ export default function RegisterPage() {
           username: form.username.trim(),
           contactNumber: form.contactNumber.trim(),
           barangayName: form.barangayName,
-          verificationMethod: form.verificationMethod,
         }),
       });
 
@@ -360,11 +344,7 @@ export default function RegisterPage() {
       }
 
       setOtpSent(true);
-      setServerMessage(
-        form.verificationMethod === "PHONE"
-          ? "Verification code sent to your phone number."
-          : "Verification code sent to your Gmail."
-      );
+      setServerMessage("Verification code sent to your Gmail.");
     } catch (error) {
       console.error("REGISTER_SUBMIT_ERROR", error);
       setServerError("Unable to connect to the registration server.");
@@ -396,7 +376,6 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: form.email.trim().toLowerCase(),
           code: otp.trim(),
-          verificationMethod: form.verificationMethod,
         }),
       });
 
@@ -891,57 +870,8 @@ export default function RegisterPage() {
   <StepSection
     icon={<Lock className="h-5 w-5" />}
     title="Account Setup & Verification"
-    subtitle="Choose how you want to verify your account, then complete your login details."
+    subtitle="Complete your account details. A verification code will be sent to your Gmail."
   >
-    <FormSection title="Verification Method">
-      <RadioGroup
-        label="Choose Verification Method"
-        required
-        value={form.verificationMethod}
-        onChange={(v) => {
-          updateField("verificationMethod", v as VerificationMethod);
-          setOtpSent(false);
-          setOtp("");
-          setServerError("");
-          setServerMessage("");
-        }}
-        options={[
-          { label: "Gmail OTP", value: "EMAIL" },
-          { label: "Phone Number OTP", value: "PHONE" },
-        ]}
-      />
-
-      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-        <div className="flex items-start gap-3">
-          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-sky-500 shadow-sm">
-            {form.verificationMethod === "PHONE" ? (
-              <Smartphone className="h-5 w-5" />
-            ) : (
-              <Mail className="h-5 w-5" />
-            )}
-          </div>
-
-          <div className="flex-1">
-            <p className="text-sm font-bold text-slate-900">
-              {form.verificationMethod === "PHONE"
-                ? "Phone Verification"
-                : "Gmail Verification"}
-            </p>
-
-            <p className="mt-1 text-sm text-slate-600">
-              Verification code will be sent to:
-            </p>
-
-            <p className="mt-2 break-all text-sm font-bold text-sky-600">
-              {form.verificationMethod === "PHONE"
-                ? form.contactNumber || "Please enter your contact number in Step 1"
-                : form.email || "Please enter your Gmail address below"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </FormSection>
-
     <FormSection title="Account Credentials">
       <div className="grid gap-4 md:grid-cols-2">
         <InputField
@@ -954,20 +884,18 @@ export default function RegisterPage() {
           status={getFieldStatus("username")}
         />
 
-        {form.verificationMethod === "EMAIL" && (
-          <InputField
-            label="Gmail Address"
-            required
-            type="email"
-            icon={<Mail className="h-4 w-4" />}
-            placeholder="example@gmail.com"
-            value={form.email}
-            onChange={(v) => updateField("email", v)}
-            error={errors.email}
-            status={getFieldStatus("email")}
-            helper="Use an active Gmail account to receive the OTP."
-          />
-        )}
+        <InputField
+          label="Gmail Address"
+          required
+          type="email"
+          icon={<Mail className="h-4 w-4" />}
+          placeholder="example@gmail.com"
+          value={form.email}
+          onChange={(v) => updateField("email", v)}
+          error={errors.email}
+          status={getFieldStatus("email")}
+          helper="Use an active Gmail account to receive the OTP."
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -1003,11 +931,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full rounded-2xl bg-[#0EA5E9] hover:bg-sky-600 px-5 py-4 text-base font-black text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-600 hover:to-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading
-            ? "Sending Verification Code..."
-            : form.verificationMethod === "PHONE"
-            ? "Send Code to Phone"
-            : "Send Code to Gmail"}
+          {loading ? "Sending Verification Code..." : "Send Code to Gmail"}
         </button>
       ) : (
         <div className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
