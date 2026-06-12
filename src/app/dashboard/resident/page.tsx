@@ -21,6 +21,11 @@ X,
   UserRound,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import {
+  buildConditionUpdates,
+  formatUpdateDate,
+  type ConditionUpdate,
+} from "@/lib/condition-updates";
 
 type ResidentData = {
   id: string;
@@ -1817,6 +1822,9 @@ function ResidentMedicalHistoryTab({
   const [error, setError] = useState("");
   const [bmiRecords, setBmiRecords] = useState<ResidentBMIRecord[]>([]);
   const [bmiLoading, setBmiLoading] = useState(true);
+  const [conditionUpdates, setConditionUpdates] = useState<
+    Record<string, ConditionUpdate>
+  >({});
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -1872,6 +1880,21 @@ function ResidentMedicalHistoryTab({
     fetchBMI();
   }, []);
 
+  useEffect(() => {
+    const fetchDiagnoses = async () => {
+      try {
+        const res = await fetch("/api/residents/me/diagnoses");
+        const json = await res.json();
+        if (res.ok && Array.isArray(json)) {
+          setConditionUpdates(buildConditionUpdates(json));
+        }
+      } catch {
+        /* silent */
+      }
+    };
+    fetchDiagnoses();
+  }, []);
+
   const sortedAppointments = useMemo(() => {
     return [...appointments].sort(
       (a, b) => getAppointmentSortValue(b) - getAppointmentSortValue(a)
@@ -1888,19 +1911,21 @@ function ResidentMedicalHistoryTab({
   );
 
   const medicalConditions = [
-    { label: "Hypertension", value: resident.medicalHistory?.hasHypertension },
-    { label: "Diabetes", value: resident.medicalHistory?.hasDiabetes },
-    { label: "STI / HIV", value: resident.medicalHistory?.hasStiHiv },
-    { label: "Heart Disease", value: resident.medicalHistory?.hasHeartDisease },
+    { label: "Hypertension", field: "hasHypertension", value: resident.medicalHistory?.hasHypertension },
+    { label: "Diabetes", field: "hasDiabetes", value: resident.medicalHistory?.hasDiabetes },
+    { label: "STI / HIV", field: "hasStiHiv", value: resident.medicalHistory?.hasStiHiv },
+    { label: "Heart Disease", field: "hasHeartDisease", value: resident.medicalHistory?.hasHeartDisease },
     {
       label: "Kidney Failure",
+      field: "hasKidneyFailure",
       value: resident.medicalHistory?.hasKidneyFailure,
     },
-    { label: "Tuberculosis", value: resident.medicalHistory?.hasTuberculosis },
-    { label: "Allergies", value: resident.medicalHistory?.hasAllergies },
-    { label: "Cancer", value: resident.medicalHistory?.hasCancer },
+    { label: "Tuberculosis", field: "hasTuberculosis", value: resident.medicalHistory?.hasTuberculosis },
+    { label: "Allergies", field: "hasAllergies", value: resident.medicalHistory?.hasAllergies },
+    { label: "Cancer", field: "hasCancer", value: resident.medicalHistory?.hasCancer },
     {
       label: "Other Conditions",
+      field: "hasOtherConditions",
       value: resident.medicalHistory?.hasOtherConditions,
     },
   ];
@@ -1968,13 +1993,18 @@ function ResidentMedicalHistoryTab({
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                {medicalConditions.map((item) => (
-                  <HistoryFlag
-                    key={item.label}
-                    label={item.label}
-                    value={item.value}
-                  />
-                ))}
+                {medicalConditions.map((item) => {
+                  const update = conditionUpdates[item.field];
+                  return (
+                    <HistoryFlag
+                      key={item.label}
+                      label={item.label}
+                      value={item.value}
+                      updatedBy={update?.by}
+                      updatedAt={update ? formatUpdateDate(update.at) : undefined}
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -2211,10 +2241,14 @@ function HistoryFlag({
   label,
   value,
   tone = "blue",
+  updatedBy,
+  updatedAt,
 }: {
   label: string;
   value?: boolean | null;
   tone?: "blue" | "emerald" | "amber" | "rose";
+  updatedBy?: string;
+  updatedAt?: string;
 }) {
   const recorded = value !== null && value !== undefined;
   const active = value === true;
@@ -2235,11 +2269,19 @@ function HistoryFlag({
     : "border-slate-200 bg-white text-slate-600";
 
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 ${className}`}>
-      <span className="text-sm font-bold text-slate-800">{label}</span>
-      <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-xs font-black">
-        {!recorded ? "Not recorded" : active ? "Yes" : "No"}
-      </span>
+    <div className={`rounded-2xl border px-3 py-2.5 ${className}`}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-bold text-slate-800">{label}</span>
+        <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-xs font-black">
+          {!recorded ? "Not recorded" : active ? "Yes" : "No"}
+        </span>
+      </div>
+      {active && updatedBy && (
+        <p className="mt-1.5 text-[11px] font-semibold leading-tight text-slate-500">
+          Status set by Dr. {updatedBy}
+          {updatedAt ? ` · ${updatedAt}` : ""}
+        </p>
+      )}
     </div>
   );
 }

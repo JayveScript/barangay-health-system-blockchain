@@ -8,6 +8,10 @@ import { logQrScanActivity } from "@/lib/qr-audit";
 import { formatWelcomeLine } from "@/lib/role-labels";
 import { SecureScanGate } from "@/components/SecureScanGate";
 import { ShieldCheck } from "lucide-react";
+import {
+  buildConditionUpdates,
+  formatUpdateDate,
+} from "@/lib/condition-updates";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -108,7 +112,7 @@ export default async function PublicResidentPage({ params }: PageProps) {
     );
   }
 
-  const [resident, appointments, bmiRecords] = await Promise.all([
+  const [resident, appointments, bmiRecords, diagnoses] = await Promise.all([
   prisma.resident.findUnique({
     where: { id },
     select: {
@@ -221,7 +225,18 @@ export default async function PublicResidentPage({ params }: PageProps) {
     },
     orderBy: { createdAt: "desc" },
   }),
+  prisma.diagnosis.findMany({
+    where: { residentId: id },
+    select: {
+      conditions: true,
+      createdAt: true,
+      diagnosedBy: { select: { fullName: true } },
+    },
+    orderBy: { createdAt: "asc" },
+  }),
 ]);
+
+  const conditionUpdates = buildConditionUpdates(diagnoses);
 
   if (!resident) {
     return (
@@ -414,27 +429,37 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">Recorded Conditions</p>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {[
-                      { label: "Hypertension", value: resident.medicalHistory?.hasHypertension },
-                      { label: "Diabetes", value: resident.medicalHistory?.hasDiabetes },
-                      { label: "STI / HIV", value: resident.medicalHistory?.hasStiHiv },
-                      { label: "Heart Disease", value: resident.medicalHistory?.hasHeartDisease },
-                      { label: "Kidney Failure", value: resident.medicalHistory?.hasKidneyFailure },
-                      { label: "Tuberculosis", value: resident.medicalHistory?.hasTuberculosis },
-                      { label: "Allergies", value: resident.medicalHistory?.hasAllergies },
-                      { label: "Cancer", value: resident.medicalHistory?.hasCancer },
-                      { label: "Other Conditions", value: resident.medicalHistory?.hasOtherConditions },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
-                          item.value
-                            ? "border border-red-200 bg-red-50 text-red-700"
-                            : "border border-slate-200 bg-slate-50 text-slate-400"
-                        }`}
-                      >
-                        {item.label}
-                      </div>
-                    ))}
+                      { label: "Hypertension", key: "hasHypertension", value: resident.medicalHistory?.hasHypertension },
+                      { label: "Diabetes", key: "hasDiabetes", value: resident.medicalHistory?.hasDiabetes },
+                      { label: "STI / HIV", key: "hasStiHiv", value: resident.medicalHistory?.hasStiHiv },
+                      { label: "Heart Disease", key: "hasHeartDisease", value: resident.medicalHistory?.hasHeartDisease },
+                      { label: "Kidney Failure", key: "hasKidneyFailure", value: resident.medicalHistory?.hasKidneyFailure },
+                      { label: "Tuberculosis", key: "hasTuberculosis", value: resident.medicalHistory?.hasTuberculosis },
+                      { label: "Allergies", key: "hasAllergies", value: resident.medicalHistory?.hasAllergies },
+                      { label: "Cancer", key: "hasCancer", value: resident.medicalHistory?.hasCancer },
+                      { label: "Other Conditions", key: "hasOtherConditions", value: resident.medicalHistory?.hasOtherConditions },
+                    ].map((item) => {
+                      const update = conditionUpdates[item.key];
+                      return (
+                        <div
+                          key={item.label}
+                          className={`rounded-2xl px-3 py-2 text-center text-xs font-black ${
+                            item.value
+                              ? "border border-red-200 bg-red-50 text-red-700"
+                              : "border border-slate-200 bg-slate-50 text-slate-400"
+                          }`}
+                        >
+                          {item.label}
+                          {item.value && update && (
+                            <span className="mt-1 block text-[10px] font-semibold leading-tight text-red-500/80">
+                              by Dr. {update.by}
+                              <br />
+                              {formatUpdateDate(update.at)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
