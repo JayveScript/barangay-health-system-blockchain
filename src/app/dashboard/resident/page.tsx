@@ -899,17 +899,15 @@ export default function ResidentDashboard() {
             {sidebarTab === "personal" && (
               <>
                 <div className="mb-6">
-                  <div className="grid grid-cols-4 gap-2 rounded-2xl border border-sky-200 bg-sky-50 p-2 shadow-sm">
+                  <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm">
                     {tabs.map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         aria-label={tab.label}
                         title={tab.label}
-                        className={`flex h-12 items-center justify-center rounded-xl px-2 text-sm font-semibold transition sm:h-auto sm:px-4 sm:py-3 ${
-                          activeTab === tab.id
-                            ? "bg-white text-sky-600 shadow-md ring-1 ring-sky-200"
-                            : "text-slate-500 hover:bg-white/80 hover:text-sky-600"
+                        className={`flex h-12 items-center justify-center gap-2 rounded-xl px-2 text-sm font-bold transition sm:h-auto sm:px-4 sm:py-3 ${
+                          activeTab === tab.id ? tab.activeClass : tab.idleClass
                         }`}
                       >
                         <span className="sm:hidden">{tab.icon}</span>
@@ -978,46 +976,23 @@ export default function ResidentDashboard() {
                       subtitle="Recorded hereditary or family-related health conditions."
                       icon={<FamilyIcon className="h-5 w-5" />}
                     >
-                      <div className="grid gap-5 lg:grid-cols-3">
-                        <InfoCard
-                          title="Family History"
-                          icon={<FamilyIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Asthma / Allergies"
-                            value={bool(
-                              resident.familyHistory?.asthmaAllergies
-                            )}
-                          />
-                          <MiniField
-                            label="Birth Defects"
-                            value={bool(resident.familyHistory?.birthDefects)}
-                          />
-                          <MiniField
-                            label="Cancer"
-                            value={bool(resident.familyHistory?.cancer)}
-                          />
-                          <MiniField
-                            label="Dementia"
-                            value={bool(resident.familyHistory?.dementia)}
-                          />
-                          <MiniField
-                            label="Diabetes"
-                            value={bool(resident.familyHistory?.diabetes)}
-                          />
-                          <MiniField
-                            label="Hypertension"
-                            value={bool(resident.familyHistory?.hypertension)}
-                          />
-                          <MiniField
-                            label="Kidney Disease"
-                            value={bool(resident.familyHistory?.kidneyDisease)}
-                          />
-                          <MiniField
-                            label="Mental Illness"
-                            value={bool(resident.familyHistory?.mentalIllness)}
-                          />
-                        </InfoCard>
+                      <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+                        <HealthInfoGroup
+                          title="Hereditary Conditions"
+                          icon={<FamilyIcon className="h-4 w-4" />}
+                          tone="bad"
+                          columns={2}
+                          items={[
+                            { label: "Asthma / Allergies", value: resident.familyHistory?.asthmaAllergies },
+                            { label: "Birth Defects", value: resident.familyHistory?.birthDefects },
+                            { label: "Cancer", value: resident.familyHistory?.cancer },
+                            { label: "Dementia", value: resident.familyHistory?.dementia },
+                            { label: "Diabetes", value: resident.familyHistory?.diabetes },
+                            { label: "Hypertension", value: resident.familyHistory?.hypertension },
+                            { label: "Kidney Disease", value: resident.familyHistory?.kidneyDisease },
+                            { label: "Mental Illness", value: resident.familyHistory?.mentalIllness },
+                          ]}
+                        />
                       </div>
                     </Section>
                   )}
@@ -1028,88 +1003,35 @@ export default function ResidentDashboard() {
                       subtitle="Lifestyle, daily habits, and social health information."
                       icon={<LifestyleIcon className="h-5 w-5" />}
                     >
-                      <div className="grid gap-5 lg:grid-cols-3">
-                        <InfoCard
-                          title="Lifestyle Information"
-                          icon={<LifestyleIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Eats Healthy Diet"
-                            value={bool(
-                              resident.personalSocialHistory?.eatsHealthyDiet
-                            )}
+                      <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+                        <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
+                          <HealthInfoGroup
+                            title="Healthy Lifestyle"
+                            icon={<LifestyleIcon className="h-4 w-4" />}
+                            tone="good"
+                            items={[
+                              { label: "Eats Healthy Diet", value: resident.personalSocialHistory?.eatsHealthyDiet },
+                              { label: "Adequate Physical Activity", value: resident.personalSocialHistory?.adequatePhysicalActivity },
+                              { label: "Sufficient Rest / Sleep", value: resident.personalSocialHistory?.sufficientRestSleep },
+                              { label: "Normal Growth & Development", value: resident.personalSocialHistory?.normalGrowthDevelopment },
+                              { label: "Multiple Sex Partners", value: resident.personalSocialHistory?.multipleSexPartners, tone: "bad" },
+                            ]}
                           />
-                          <MiniField
-                            label="Adequate Physical Activity"
-                            value={bool(
-                              resident.personalSocialHistory
-                                ?.adequatePhysicalActivity
-                            )}
-                          />
-                          <MiniField
-                            label="Sufficient Rest / Sleep"
-                            value={bool(
-                              resident.personalSocialHistory
-                                ?.sufficientRestSleep
-                            )}
-                          />
-                          <MiniField
-                            label="Normal Growth & Development"
-                            value={bool(
-                              resident.personalSocialHistory
-                                ?.normalGrowthDevelopment
-                            )}
-                          />
-                          <MiniField
-                            label="Multiple Sex Partners"
-                            value={bool(
-                              resident.personalSocialHistory
-                                ?.multipleSexPartners
-                            )}
-                          />
-                        </InfoCard>
 
-                        <InfoCard
-                          title="Risk Factors"
-                          icon={<ShieldIcon className="h-5 w-5" />}
-                        >
-                          <MiniField
-                            label="Smokes Tobacco"
-                            value={bool(
-                              resident.personalSocialHistory?.smokesTobacco
-                            )}
+                          <HealthInfoGroup
+                            title="Risk Factors"
+                            icon={<ShieldIcon className="h-4 w-4" />}
+                            tone="bad"
+                            items={[
+                              { label: "Smokes Tobacco", value: resident.personalSocialHistory?.smokesTobacco },
+                              { label: "Packs / Year", value: resident.personalSocialHistory?.tobaccoPacksPerYear },
+                              { label: "Drinks Alcohol", value: resident.personalSocialHistory?.drinksAlcohol },
+                              { label: "Bottles / Day", value: resident.personalSocialHistory?.alcoholBottlesPerDay },
+                              { label: "Takes Illicit Drugs", value: resident.personalSocialHistory?.takesIllicitDrugs },
+                              { label: "Drug Details", value: resident.personalSocialHistory?.illicitDrugsDetails },
+                            ]}
                           />
-                          <MiniField
-                            label="Packs / Year"
-                            value={
-                              resident.personalSocialHistory?.tobaccoPacksPerYear
-                            }
-                          />
-                          <MiniField
-                            label="Drinks Alcohol"
-                            value={bool(
-                              resident.personalSocialHistory?.drinksAlcohol
-                            )}
-                          />
-                          <MiniField
-                            label="Bottles / Day"
-                            value={
-                              resident.personalSocialHistory?.alcoholBottlesPerDay
-                            }
-                          />
-                          <MiniField
-                            label="Takes Illicit Drugs"
-                            value={bool(
-                              resident.personalSocialHistory?.takesIllicitDrugs
-                            )}
-                          />
-                          <MiniField
-                            label="Drug Details"
-                            value={
-                              resident.personalSocialHistory?.illicitDrugsDetails
-                            }
-                          />
-                        </InfoCard>
+                        </div>
                       </div>
                     </Section>
                   )}
@@ -2700,17 +2622,6 @@ function ResidentIdentityCard({
   editMode?: boolean;
   onChange: (key: keyof ResidentData, value: string | number) => void;
 }) {
-  const initials =
-    `${resident.firstName?.[0] ?? ""}${resident.lastName?.[0] ?? ""}`
-      .toUpperCase()
-      .trim() || "R";
-
-  const quickFacts = [
-    resident.age ? `${resident.age} yrs old` : null,
-    resident.sex,
-    resident.civilStatus,
-  ].filter(Boolean);
-
   const groups: IdentityGroupData[] = [
     {
       title: "Personal Details",
@@ -2752,46 +2663,8 @@ function ResidentIdentityCard({
   ];
 
   return (
-    <div className="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white shadow-sm">
-      {/* Identity band */}
-      <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-sky-50 via-white to-white px-5 py-6 sm:px-7">
-        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-sky-100/50 blur-2xl" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0EA5E9] to-[#0284C7] text-xl font-black text-white shadow-lg shadow-sky-500/25">
-              {initials}
-            </div>
-            <div className="min-w-0">
-              <h3 className="truncate text-xl font-black text-slate-900">
-                {fullName}
-              </h3>
-              {quickFacts.length > 0 && (
-                <p className="mt-0.5 text-sm font-semibold text-slate-500">
-                  {quickFacts.join("  •  ")}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {resident.isVerified && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-bold text-white shadow-sm">
-                <VerifiedIcon className="h-3.5 w-3.5" />
-                Verified
-              </span>
-            )}
-            {resident.barangayName && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">
-                <MapPin className="h-3.5 w-3.5" />
-                {resident.barangayName}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Detail groups — clean divider rows instead of nested cards */}
-      <div className="grid gap-x-12 gap-y-8 px-5 py-6 sm:px-7 lg:grid-cols-2">
+    <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+      <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
         <IdentityGroup group={groups[0]} editMode={editMode} />
         <div className="space-y-8">
           <IdentityGroup group={groups[1]} editMode={editMode} />
@@ -2900,21 +2773,110 @@ function IdentityRow({
   );
 }
 
+type HealthFlagItem = {
+  label: string;
+  value: unknown;
+  tone?: "good" | "bad";
+};
+
+function HealthInfoGroup({
+  title,
+  icon,
+  items,
+  tone = "good",
+  columns = 1,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  items: HealthFlagItem[];
+  tone?: "good" | "bad";
+  columns?: 1 | 2;
+}) {
+  const visible = items.filter((item) =>
+    typeof item.value === "boolean" ? true : hasDisplayValue(item.value)
+  );
+
+  if (visible.length === 0) return null;
+
+  const headerBadge =
+    tone === "bad"
+      ? "bg-rose-50 text-rose-600 ring-rose-100"
+      : "bg-emerald-50 text-emerald-600 ring-emerald-100";
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${headerBadge}`}
+        >
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </h4>
+      </div>
+
+      <div className={columns === 2 ? "grid sm:grid-cols-2 sm:gap-x-10" : ""}>
+        {visible.map((item) => {
+          const isBool = typeof item.value === "boolean";
+          const itemTone = item.tone ?? tone;
+
+          return (
+            <div
+              key={item.label}
+              className="flex items-center justify-between gap-4 border-b border-slate-100 py-3"
+            >
+              <span className="text-sm text-slate-500">{item.label}</span>
+
+              {isBool ? (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${
+                    item.value === true
+                      ? itemTone === "good"
+                        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                        : "bg-rose-50 text-rose-700 ring-rose-100"
+                      : "bg-slate-100 text-slate-500 ring-slate-200"
+                  }`}
+                >
+                  {item.value === true ? "Yes" : "No"}
+                </span>
+              ) : (
+                <span className="break-words text-right text-sm font-bold text-slate-900">
+                  {String(item.value)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const tabs = [
   {
     id: "identifying",
     label: "Identifying Data",
     icon: <UserIcon className="h-5 w-5" />,
+    activeClass:
+      "bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/30",
+    idleClass: "text-sky-600 hover:bg-sky-50",
   },
   {
     id: "family",
     label: "Family History",
     icon: <FamilyIcon className="h-5 w-5" />,
+    activeClass:
+      "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-md shadow-violet-500/30",
+    idleClass: "text-violet-600 hover:bg-violet-50",
   },
   {
     id: "personal",
     label: "Personal / Social History",
     icon: <LifestyleIcon className="h-5 w-5" />,
+    activeClass:
+      "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/30",
+    idleClass: "text-emerald-600 hover:bg-emerald-50",
   },
 ];
 
@@ -2958,54 +2920,6 @@ function Section({
   );
 }
 
-function InfoCard({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  const visibleChildren = React.Children.toArray(children).filter((child) => {
-    if (!React.isValidElement(child)) return false;
-    const props = child.props as { value?: unknown };
-    return hasDisplayValue(props.value);
-  });
-
-  if (visibleChildren.length === 0) return null;
-
-  return (
-    <div className="rounded-[26px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-200">
-          {icon}
-        </div>
-        <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-      </div>
-
-      <div className="grid gap-3">{visibleChildren}</div>
-    </div>
-  );
-}
-
-function MiniField({ label, value }: { label: string; value: unknown }) {
-  if (!hasDisplayValue(value)) return null;
-
-  const displayValue = String(value).trim();
-
-  return (
-    <div className="rounded-2xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm ring-1 ring-slate-100/80">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-        {label}
-      </p>
-      <p className="mt-2 break-words text-[15px] font-semibold text-slate-900">
-        {displayValue}
-      </p>
-    </div>
-  );
-}
-
 function hasDisplayValue(value: unknown) {
   if (value === null || value === undefined) return false;
   return String(value).trim() !== "";
@@ -3033,11 +2947,6 @@ function formatDate(date?: string | null) {
 function formatIdName(resident: ResidentData) {
   const middle = resident.middleName ? ` ${resident.middleName}` : "";
   return `${resident.lastName}, ${resident.firstName}${middle}`.trim();
-}
-
-function bool(value?: boolean | null) {
-  if (value === null || value === undefined) return null;
-  return value ? "Yes" : "No";
 }
 
 function formatLongDate(value: string) {
