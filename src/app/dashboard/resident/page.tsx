@@ -274,7 +274,6 @@ type ResidentNotification = {
     | "diagnosis"
     | "record-update"
     | "suggestion"
-    | "availability"
     | "announcement"
     | "scan";
   title: string;
@@ -312,13 +311,6 @@ const NOTIFICATION_STYLES: Record<
     chip: "bg-amber-50 text-amber-600",
     iconWrap: "bg-amber-50 text-amber-600 ring-amber-200",
   },
-  availability: {
-    label: "Doctor Availability",
-    icon: <CalendarCheck className="h-5 w-5" />,
-    ring: "border-emerald-200",
-    chip: "bg-emerald-50 text-emerald-600",
-    iconWrap: "bg-emerald-50 text-emerald-600 ring-emerald-200",
-  },
   announcement: {
     label: "Announcement",
     icon: <Megaphone className="h-5 w-5 stroke-[2.6]" />,
@@ -341,7 +333,6 @@ const NOTIFICATION_FILTERS: { id: "all" | ResidentNotification["type"]; label: s
   { id: "diagnosis", label: "Diagnoses" },
   { id: "record-update", label: "Record Updates" },
   { id: "suggestion", label: "Suggestions" },
-  { id: "availability", label: "Availability" },
   { id: "announcement", label: "Announcements" },
 ];
 
