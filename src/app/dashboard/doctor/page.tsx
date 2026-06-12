@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { PortalLoader } from "@/components/PortalLoader";
 import {
   Activity,
   BarChart3,
@@ -199,13 +200,7 @@ export default function DoctorDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <main className="h-screen overflow-hidden bg-[#EFF6FF] p-6">
-        <div className="mx-auto max-w-7xl rounded-[30px] border border-[#DCEAF7] bg-white p-8 shadow-2xl shadow-sky-900/10">
-          <p className="text-sm text-slate-500">Loading Doctor dashboard...</p>
-        </div>
-      </main>
-    );
+    return <PortalLoader label="Loading doctor dashboard..." />;
   }
 
   if (!user) return null;

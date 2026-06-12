@@ -56,6 +56,7 @@ import {
   formatUpdateDate,
   type ConditionUpdate,
 } from "@/lib/condition-updates";
+import { PortalLoader } from "@/components/PortalLoader";
 
 type ResidentRecord = {
   id: string;
@@ -895,7 +896,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {loading ? (
-              <p className="text-sm text-slate-500">Loading dashboard...</p>
+              <PortalLoader label="Loading dashboard..." inline />
             ) : (
               <>
                 {error && !data && (
