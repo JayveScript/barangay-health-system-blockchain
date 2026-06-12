@@ -20,12 +20,21 @@ export const CONDITION_FIELD_LABELS: Record<string, string> = {
 export type DiagnosisLike = {
   conditions?: string[] | null;
   createdAt: string | Date;
-  diagnosedBy?: { fullName?: string | null } | null;
+  diagnosedBy?: {
+    fullName?: string | null;
+    barangay?: { name?: string | null } | null;
+  } | null;
 };
 
 export type ConditionUpdate = {
   by: string; // staff/doctor full name
   at: string; // ISO timestamp
+};
+
+export type ConditionDiagnosis = {
+  by: string; // doctor / staff full name
+  at: string; // ISO timestamp
+  barangayName?: string | null; // barangay the diagnoser is assigned to
 };
 
 // Maps each condition field key -> the latest diagnosis that recorded it.
@@ -48,6 +57,36 @@ export function buildConditionUpdates(
   }
 
   return updates;
+}
+
+// Maps each condition field key -> the FULL list of diagnoses that recorded it,
+// newest first. Used to show every doctor (and date) who diagnosed a condition,
+// since diagnoses are append-only — a new doctor adds a record rather than
+// editing an existing one.
+export function buildConditionHistory(
+  diagnoses: DiagnosisLike[] | null | undefined
+): Record<string, ConditionDiagnosis[]> {
+  const history: Record<string, ConditionDiagnosis[]> = {};
+  if (!Array.isArray(diagnoses)) return history;
+
+  for (const diagnosis of diagnoses) {
+    const at = new Date(diagnosis.createdAt).toISOString();
+    const by = diagnosis.diagnosedBy?.fullName?.trim() || "Health Worker";
+    const barangayName = diagnosis.diagnosedBy?.barangay?.name ?? null;
+
+    for (const key of diagnosis.conditions || []) {
+      if (!history[key]) history[key] = [];
+      history[key].push({ by, at, barangayName });
+    }
+  }
+
+  for (const key of Object.keys(history)) {
+    history[key].sort(
+      (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()
+    );
+  }
+
+  return history;
 }
 
 export function formatUpdateDate(iso: string): string {

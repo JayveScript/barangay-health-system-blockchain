@@ -20,13 +20,14 @@ X,
   IdCard,
   UserRound,
   ScanLine,
+  ChevronRight,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import {
-  buildConditionUpdates,
+  buildConditionHistory,
   formatUpdateDate,
-  type ConditionUpdate,
+  type ConditionDiagnosis,
 } from "@/lib/condition-updates";
 
 type ResidentData = {
@@ -1669,9 +1670,13 @@ function ResidentMedicalHistoryTab({
   const [error, setError] = useState("");
   const [bmiRecords, setBmiRecords] = useState<ResidentBMIRecord[]>([]);
   const [bmiLoading, setBmiLoading] = useState(true);
-  const [conditionUpdates, setConditionUpdates] = useState<
-    Record<string, ConditionUpdate>
+  const [conditionHistory, setConditionHistory] = useState<
+    Record<string, ConditionDiagnosis[]>
   >({});
+  const [activeCondition, setActiveCondition] = useState<{
+    label: string;
+    field: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -1733,7 +1738,7 @@ function ResidentMedicalHistoryTab({
         const res = await fetch("/api/residents/me/diagnoses");
         const json = await res.json();
         if (res.ok && Array.isArray(json)) {
-          setConditionUpdates(buildConditionUpdates(json));
+          setConditionHistory(buildConditionHistory(json));
         }
       } catch {
         /* silent */
@@ -1788,11 +1793,17 @@ function ResidentMedicalHistoryTab({
   const latestRecordDate = useMemo(() => {
     const times = [
       ...appointments.map((a) => new Date(a.date).getTime()),
-      ...Object.values(conditionUpdates).map((u) => new Date(u.at).getTime()),
+      ...Object.values(conditionHistory)
+        .flat()
+        .map((d) => new Date(d.at).getTime()),
     ].filter((t) => !Number.isNaN(t));
 
     return times.length ? new Date(Math.max(...times)) : null;
-  }, [appointments, conditionUpdates]);
+  }, [appointments, conditionHistory]);
+
+  const residentName = `${resident.firstName} ${resident.lastName}`
+    .replace(/\s+/g, " ")
+    .trim();
 
   return (
     <Section
@@ -1857,17 +1868,23 @@ function ResidentMedicalHistoryTab({
 
               <div className="grid gap-2 sm:grid-cols-2">
                 {medicalConditions.map((item) => {
-                  const update = conditionUpdates[item.field];
+                  const diagnosisCount = (conditionHistory[item.field] || [])
+                    .length;
                   return (
                     <HistoryFlag
                       key={item.label}
                       label={item.label}
                       value={item.value}
-                      updatedBy={update?.by}
-                      updatedAt={update ? formatUpdateDate(update.at) : undefined}
-                      selfReportedBy={`${resident.firstName} ${resident.lastName}`
-                        .replace(/\s+/g, " ")
-                        .trim()}
+                      diagnosisCount={diagnosisCount}
+                      onView={
+                        item.value === true
+                          ? () =>
+                              setActiveCondition({
+                                label: item.label,
+                                field: item.field,
+                              })
+                          : undefined
+                      }
                     />
                   );
                 })}
@@ -2015,6 +2032,15 @@ function ResidentMedicalHistoryTab({
           )}
         </div>
       </div>
+
+      {activeCondition && (
+        <ConditionHistoryModal
+          label={activeCondition.label}
+          history={conditionHistory[activeCondition.field] || []}
+          selfReportedBy={residentName}
+          onClose={() => setActiveCondition(null)}
+        />
+      )}
     </Section>
   );
 }
@@ -2056,16 +2082,14 @@ function HistoryFlag({
   label,
   value,
   tone = "blue",
-  updatedBy,
-  updatedAt,
-  selfReportedBy,
+  diagnosisCount = 0,
+  onView,
 }: {
   label: string;
   value?: boolean | null;
   tone?: "blue" | "emerald" | "amber" | "rose";
-  updatedBy?: string;
-  updatedAt?: string;
-  selfReportedBy?: string;
+  diagnosisCount?: number;
+  onView?: () => void;
 }) {
   const recorded = value !== null && value !== undefined;
   const active = value === true;
@@ -2085,24 +2109,140 @@ function HistoryFlag({
     ? activeClass
     : "border-slate-200 bg-white text-slate-600";
 
-  return (
-    <div className={`rounded-2xl border px-3 py-2.5 ${className}`}>
+  const body = (
+    <>
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-bold text-slate-800">{label}</span>
         <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-xs font-black">
           {!recorded ? "Not recorded" : active ? "Yes" : "No"}
         </span>
       </div>
-      {active && (updatedBy ? (
-        <p className="mt-1.5 text-[11px] font-semibold leading-tight text-slate-500">
-          Status set by Dr. {updatedBy}
-          {updatedAt ? ` · ${updatedAt}` : ""}
+      {active && onView && (
+        <div className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-sky-600">
+          <Stethoscope className="h-3 w-3" />
+          {diagnosisCount > 0
+            ? `${diagnosisCount} diagnosis record${diagnosisCount > 1 ? "s" : ""}`
+            : "View source"}
+          <ChevronRight className="h-3 w-3" />
+        </div>
+      )}
+    </>
+  );
+
+  if (active && onView) {
+    return (
+      <button
+        type="button"
+        onClick={onView}
+        className={`w-full rounded-2xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5 hover:shadow-md hover:ring-2 hover:ring-sky-200/70 ${className}`}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <div className={`rounded-2xl border px-3 py-2.5 ${className}`}>{body}</div>
+  );
+}
+
+function ConditionHistoryModal({
+  label,
+  history,
+  selfReportedBy,
+  onClose,
+}: {
+  label: string;
+  history: ConditionDiagnosis[];
+  selfReportedBy: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-[28px] bg-white p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+              <Stethoscope className="h-5 w-5 stroke-[2.6]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">{label}</h3>
+              <p className="text-xs font-semibold text-slate-500">
+                Diagnosis history
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {history.length === 0 ? (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4">
+              <p className="text-sm font-black text-slate-900">
+                Self-reported
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-600">
+                {selfReportedBy} reported this condition during registration.
+              </p>
+            </div>
+          ) : (
+            history.map((entry, index) => (
+              <div
+                key={`${entry.by}-${entry.at}-${index}`}
+                className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-black text-slate-900">
+                    Dr. {entry.by}
+                  </p>
+                  {index === 0 && history.length > 1 && (
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-emerald-600">
+                      Latest
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarCheck className="h-3.5 w-3.5" />
+                    {formatUpdateDate(entry.at)}
+                  </span>
+                  {entry.barangayName && (
+                    <span className="inline-flex items-center gap-1 text-sky-600">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {entry.barangayName}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <p className="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-[11px] font-semibold leading-relaxed text-slate-400">
+          Each diagnosis is a permanent record. A doctor can add a new diagnosis
+          but cannot edit or remove another doctor&apos;s entry.
         </p>
-      ) : selfReportedBy ? (
-        <p className="mt-1.5 text-[11px] font-semibold leading-tight text-slate-500">
-          Self-reported by {selfReportedBy} at registration
-        </p>
-      ) : null)}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 w-full rounded-2xl bg-slate-900 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 }
