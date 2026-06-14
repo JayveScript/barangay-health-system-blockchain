@@ -1024,7 +1024,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 {tab === "residents" && (
-                  <div className="rounded-[24px] border border-sky-200 bg-white p-5">
+                  <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
                    <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
   {/* LEFT SIDE */}
   <div className="flex items-center gap-3">
@@ -1072,31 +1072,35 @@ export default function AdminDashboardPage() {
             {filteredResidents.map((resident) => (
               <div
                 key={resident.id}
-                className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-3 py-2.5 shadow-sm"
+                className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-2.5 py-2.5 shadow-sm"
               >
                 <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
                   {formatShortName(resident)}
                 </p>
 
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="flex shrink-0 items-center gap-0.5">
                   <IconActionButton
                     label="View"
+                    dense
                     icon={<Eye className="h-3.5 w-3.5" />}
                     onClick={() => openSecureModal(resident, "view")}
                   />
                   <IconActionButton
                     label="Digital ID"
+                    dense
                     icon={<IdCard className="h-3.5 w-3.5" />}
                     onClick={() => openSecureModal(resident, "digital-id")}
                   />
                   <IconActionButton
                     label="Edit"
+                    dense
                     icon={<Edit className="h-3.5 w-3.5" />}
                     variant="warning"
                     onClick={() => openSecureModal(resident, "edit")}
                   />
                   <IconActionButton
                     label={resident.isArchived ? "Unarchive" : "Archive"}
+                    dense
                     icon={<Archive className="h-3.5 w-3.5" />}
                     variant="danger"
                     onClick={() => openSecureModal(resident, "archive")}
@@ -1251,7 +1255,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 {tab === "staff-users" && (
-                  <div className="rounded-[24px] border border-sky-200 bg-white p-5">
+                  <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
                     <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                       {/* LEFT SIDE */}
                       <div className="flex items-center gap-3">
@@ -1299,26 +1303,29 @@ export default function AdminDashboardPage() {
                       {filteredStaffUsers.map((user) => (
                         <div
                           key={user.id}
-                          className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-3 py-2.5 shadow-sm"
+                          className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-2.5 py-2.5 shadow-sm"
                         >
                           <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
                             {user.fullName || user.username}
                           </p>
 
-                          <div className="flex shrink-0 items-center gap-1">
+                          <div className="flex shrink-0 items-center gap-0.5">
                             <IconActionButton
                               label="View"
+                              dense
                               icon={<Eye className="h-3.5 w-3.5" />}
                               onClick={() => openStaffView(user)}
                             />
                             <IconActionButton
                               label="Edit"
+                              dense
                               icon={<Edit className="h-3.5 w-3.5" />}
                               variant="warning"
                               onClick={() => openStaffEdit(user)}
                             />
                             <IconActionButton
                               label="Delete"
+                              dense
                               icon={<Trash2 className="h-3.5 w-3.5" />}
                               variant="danger"
                               onClick={() => openStaffDelete(user)}
@@ -1508,11 +1515,13 @@ function IconActionButton({
   icon,
   label,
   variant = "primary",
+  dense = false,
   onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   variant?: "primary" | "warning" | "danger";
+  dense?: boolean;
   onClick: () => void;
 }) {
   const color =
@@ -1527,7 +1536,7 @@ function IconActionButton({
       type="button"
       title={label}
       onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${color}`}
+      className={`inline-flex ${dense ? "h-8 w-8" : "h-10 w-10"} items-center justify-center rounded-xl transition ${color}`}
     >
       {icon}
     </button>
