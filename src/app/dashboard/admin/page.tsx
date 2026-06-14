@@ -1132,8 +1132,7 @@ export default function AdminDashboardPage() {
         <tr key={resident.id} className="bg-sky-50 shadow-sm">
           <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-900">
             <span className="block truncate whitespace-nowrap">
-              {resident.firstName} {resident.middleName ?? ""}{" "}
-              {resident.lastName}
+              {formatShortName(resident)}
             </span>
           </td>
           <td className="px-3 py-3 text-sm text-slate-600">{resident.sex}</td>
