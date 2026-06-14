@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { ProgressBar } from "@/components/dashboard/Charts";
 import {
   Activity,
   BarChart3,
@@ -488,23 +489,6 @@ function Panel({
         </div>
       </div>
       {children}
-    </div>
-  );
-}
-
-function ProgressBar({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-semibold text-slate-700">{label}</span>
-        <span className="font-bold text-sky-600">{value}%</span>
-      </div>
-      <div className="h-3 overflow-hidden rounded-full bg-sky-50">
-        <div
-          className="h-full rounded-full bg-[#0EA5E9]"
-          style={{ width: `${value}%` }}
-        />
-      </div>
     </div>
   );
 }

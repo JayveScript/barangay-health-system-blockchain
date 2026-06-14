@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
+import { DonutChart, BarList } from "@/components/dashboard/Charts";
 import {
   Activity,
   BarChart3,
@@ -1052,7 +1053,7 @@ function OverviewTab() {
           title="Resident Gender Overview"
           subtitle="Male, female, and other resident records"
         >
-          <ResponsivePieChart data={genderData} />
+          <DonutChart data={genderData} />
         </Panel>
 
         <Panel
@@ -1060,7 +1061,7 @@ function OverviewTab() {
           title="Appointment Status"
           subtitle="Pending, accepted, and rejected appointment requests"
         >
-          <ResponsiveBarChart data={appointmentData} />
+          <BarList data={appointmentData} />
         </Panel>
       </div>
 
@@ -1070,7 +1071,7 @@ function OverviewTab() {
           title="Common Medical Conditions"
           subtitle="Based on resident medical history records"
         >
-          <ResponsiveBarChart data={conditionData} />
+          <BarList data={conditionData} />
         </Panel>
 
         <Panel
@@ -1078,7 +1079,7 @@ function OverviewTab() {
           title="Slot Usage Overview"
           subtitle="Booked and available doctor appointment slots"
         >
-          <ResponsivePieChart data={slotData} />
+          <DonutChart data={slotData} />
         </Panel>
       </div>
 
@@ -1100,107 +1101,6 @@ function OverviewTab() {
     </div>
   );
 }
-function ResponsiveBarChart({
-  data,
-}: {
-  data: { label: string; value: number }[];
-}) {
-  const max = Math.max(...data.map((item) => item.value), 1);
-
-  return (
-    <div className="space-y-4">
-      {data.map((item) => {
-        const width = Math.round((item.value / max) * 100);
-
-        return (
-          <div key={item.label}>
-            <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-              <span className="font-bold text-slate-700">{item.label}</span>
-              <span className="font-black text-sky-600">{item.value}</span>
-            </div>
-
-            <div className="h-4 overflow-hidden rounded-full bg-sky-50">
-              <div
-                className="h-full rounded-full bg-[#0EA5E9] transition-all duration-500"
-                style={{ width: `${width}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function ResponsivePieChart({
-  data,
-}: {
-  data: { label: string; value: number }[];
-}) {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-
-  let currentPercent = 0;
-
-  const chartColors = ["#0EA5E9", "#EC4899", "#94A3B8", "#10B981", "#F59E0B"];
-
-  const gradient =
-    total === 0
-      ? "#E0F2FE 0% 100%"
-      : data
-          .map((item, index) => {
-            const percent = (item.value / total) * 100;
-            const start = currentPercent;
-            const end = currentPercent + percent;
-            currentPercent = end;
-
-            return `${chartColors[index % chartColors.length]} ${start}% ${end}%`;
-          })
-          .join(", ");
-
-  return (
-    <div className="grid items-center gap-6 md:grid-cols-[220px_1fr]">
-      <div className="relative mx-auto flex h-52 w-52 items-center justify-center rounded-full bg-sky-50">
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: `conic-gradient(${gradient})`,
-          }}
-        />
-
-        <div className="relative flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white shadow-sm">
-          <p className="text-xs font-black uppercase text-slate-400">Total</p>
-          <p className="text-3xl font-black text-slate-900">{total}</p>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {data.map((item, index) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{
-                  backgroundColor: chartColors[index % chartColors.length],
-                }}
-              />
-              <span className="text-sm font-bold text-slate-700">
-                {item.label}
-              </span>
-            </div>
-
-            <span className="text-lg font-black text-sky-600">
-              {item.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 type Announcement = {
   id: string;
   title: string;
@@ -1445,24 +1345,6 @@ function Panel({
       </div>
 
       {children}
-    </div>
-  );
-}
-
-function ProgressBar({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-semibold text-slate-700">{label}</span>
-        <span className="font-bold text-sky-600">{value}%</span>
-      </div>
-
-      <div className="h-3 overflow-hidden rounded-full bg-sky-50">
-        <div
-          className="h-full rounded-full bg-[#0EA5E9]"
-          style={{ width: `${value}%` }}
-        />
-      </div>
     </div>
   );
 }
