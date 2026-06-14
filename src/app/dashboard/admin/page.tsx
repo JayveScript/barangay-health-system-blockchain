@@ -5,6 +5,7 @@ import * as htmlToImage from "html-to-image";
 import {
   Activity,
   Archive,
+  ArrowLeft,
   ClipboardList,
   IdCard,
   Edit,
@@ -168,6 +169,17 @@ type SecureAction = "view" | "edit" | "digital-id" | "archive" | "delete" | null
 
 const sexDistributionColors = ["#075985", "#7DD3FC", "#94A3B8"];
 const FALLBACK_BARANGAY_LABEL = "Assigned Barangay";
+
+// Compact, consistent resident name: "LASTNAME JL." (last name + given initials).
+function formatShortName(r: {
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+}) {
+  const initials = `${r.firstName?.[0] ?? ""}${r.middleName?.[0] ?? ""}`.toUpperCase();
+  const last = (r.lastName ?? "").toUpperCase();
+  return initials ? `${last} ${initials}.` : last;
+}
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { useSecureQrUrl } from "@/hooks/useSecureQrUrl";
@@ -346,7 +358,7 @@ export default function AdminDashboardPage() {
   }, [data]);
 
   const recentResidents = useMemo(() => {
-    return [...(data?.residents ?? [])].slice(0, 5);
+    return [...(data?.residents ?? [])].slice(0, 10);
   }, [data]);
 
   const filteredResidents = useMemo(() => {
@@ -664,7 +676,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#EFF6FF] p-4 pb-20 sm:p-6 lg:pb-6 lg:h-screen lg:overflow-hidden">
+    <main className="min-h-screen overflow-x-hidden bg-[#EFF6FF] p-4 pb-20 sm:p-6 lg:pb-6 lg:h-screen lg:overflow-hidden">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -839,7 +851,7 @@ export default function AdminDashboardPage() {
           </div>
         </aside>
 
-        <div className="flex-1 overflow-y-auto lg:h-full">
+        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden lg:h-full">
           <div className="rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 sm:p-6">
             <div className="mb-5 rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 sm:p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -952,15 +964,15 @@ export default function AdminDashboardPage() {
                         title="Recent Registered Residents"
                         subtitle="Latest verified resident accounts"
                       >
-                        <div className="space-y-3">
+                        <div className="max-h-[330px] space-y-3 overflow-y-auto pr-1">
                           {recentResidents.map((resident) => (
                             <div
                               key={resident.id}
-                              className="flex items-center justify-between rounded-2xl bg-sky-50 p-4"
+                              className="flex items-center justify-between gap-3 rounded-2xl bg-sky-50 p-4"
                             >
                               <div className="min-w-0">
                                 <p className="truncate font-semibold text-slate-900">
-                                  {resident.firstName} {resident.lastName}
+                                  {formatShortName(resident)}
                                 </p>
 
                                 <p className="truncate text-sm text-slate-500">
@@ -969,7 +981,7 @@ export default function AdminDashboardPage() {
                                 </p>
                               </div>
 
-                              <span className="ml-3 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                              <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
                                 {resident.user?.isVerified ? "Verified" : "Pending"}
                               </span>
                             </div>
@@ -1045,11 +1057,12 @@ export default function AdminDashboardPage() {
   </div>
 </div>
                     {/* Mobile compact list - Name + Actions on one line */}
-          <div className="space-y-2 md:hidden">
-            <div className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          <div className="md:hidden">
+            <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               Resident Name
             </div>
 
+            <div className="max-h-[340px] space-y-2 overflow-y-auto pr-1">
             {filteredResidents.length === 0 && (
               <div className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
                 No resident found.
@@ -1062,7 +1075,7 @@ export default function AdminDashboardPage() {
                 className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-3 py-2.5 shadow-sm"
               >
                 <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
-                  {resident.lastName}, {resident.firstName?.[0]}.{resident.middleName ? ` ${resident.middleName[0]}.` : ""}
+                  {formatShortName(resident)}
                 </p>
 
                 <div className="flex shrink-0 items-center gap-1">
@@ -1091,6 +1104,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             ))}
+            </div>
           </div>
 
           {/* Desktop full table */}
@@ -1831,14 +1845,14 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[24px] border border-sky-200 bg-white p-5">
+    <div className="min-w-0 overflow-hidden rounded-[24px] border border-sky-200 bg-white p-5">
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
           {icon}
         </div>
 
-        <div>
-          <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+        <div className="min-w-0">
+          <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{title}</h3>
           <p className="text-sm text-slate-500">{subtitle}</p>
         </div>
       </div>
@@ -2091,67 +2105,67 @@ function ResidentDetailsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6 backdrop-blur-sm">
       <div className="w-full max-w-6xl overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.28)]">
-        <div className="border-b border-slate-200 bg-gradient-to-r from-[#F8FBFF] via-white to-[#F8FBFF] px-6 py-5 sm:px-7">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+        <div className="border-b border-slate-200 bg-gradient-to-r from-[#F8FBFF] via-white to-[#F8FBFF] px-4 py-4 sm:px-7 sm:py-5">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Back"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-lg font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                 {fullName || "Resident Details"}
               </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="truncate text-xs text-slate-500 sm:text-sm">
                 {editMode
                   ? "Edit resident registration information"
                   : "Full resident registration information"}
               </p>
             </div>
 
-            <div className="flex gap-2">
-              {editMode && (
-                <button
-                  type="button"
-                  onClick={saveResident}
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[#0EA5E9] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600 disabled:opacity-60"
-                >
-                  <Save className="h-4 w-4" />
-                  {saving ? "Saving..." : "Save"}
-                </button>
-              )}
-
+            {editMode && (
               <button
                 type="button"
-                onClick={onClose}
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                onClick={saveResident}
+                disabled={saving}
+                className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-[#0EA5E9] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600 disabled:opacity-60"
               >
-                Close
+                <Save className="h-4 w-4" />
+                <span className="hidden sm:inline">{saving ? "Saving..." : "Save"}</span>
               </button>
-            </div>
+            )}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <ModalTabButton
-              active={activeTab === "identifying"}
-              label="Identifying Data"
-              onClick={() => onTabChange("identifying")}
-            />
-
-            <ModalTabButton
-              active={activeTab === "medical"}
-              label="Past Medical History"
-              onClick={() => onTabChange("medical")}
-            />
-
-            <ModalTabButton
-              active={activeTab === "family"}
-              label="Family History"
-              onClick={() => onTabChange("family")}
-            />
-
-            <ModalTabButton
-              active={activeTab === "personal"}
-              label="Personal / Social History"
-              onClick={() => onTabChange("personal")}
-            />
+          {/* One-line icon tab strip */}
+          <div className="mt-4 flex items-stretch gap-1 rounded-2xl bg-sky-50 p-1">
+            {[
+              { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
+              { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
+              { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
+              { id: "personal", label: "Personal", icon: <ClipboardList className="h-5 w-5" /> },
+            ].map((t) => {
+              const active = activeTab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onTabChange(t.id as typeof activeTab)}
+                  aria-label={t.label}
+                  className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold transition ${
+                    active
+                      ? "bg-[#0EA5E9] text-white shadow-sm"
+                      : "text-slate-500 hover:bg-white"
+                  }`}
+                >
+                  {t.icon}
+                  <span className="max-w-full truncate leading-none">{t.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {modalError && (
@@ -2161,7 +2175,7 @@ function ResidentDetailsModal({
           )}
         </div>
 
-        <div className="max-h-[72vh] overflow-y-auto bg-sky-50 p-6 sm:p-7">
+        <div className="max-h-[72vh] overflow-y-auto bg-sky-50 p-4 sm:p-7">
           {activeTab === "identifying" && (
             <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
               <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
@@ -2786,30 +2800,6 @@ function InfoSection({
 
       <div className="space-y-4">{children}</div>
     </section>
-  );
-}
-
-function ModalTabButton({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-2xl px-5 py-3 text-sm font-semibold transition ${
-        active
-          ? "bg-[#0EA5E9] text-white shadow-sm"
-          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 
