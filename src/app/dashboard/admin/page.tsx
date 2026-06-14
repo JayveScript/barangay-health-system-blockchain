@@ -54,6 +54,7 @@ import {
 import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { PortalLoader } from "@/components/PortalLoader";
+import { DonutChart, BarList } from "@/components/dashboard/Charts";
 
 type ResidentRecord = {
   id: string;
@@ -165,7 +166,6 @@ type DashboardData = {
 
 type SecureAction = "view" | "edit" | "digital-id" | "archive" | "delete" | null;
 
-const chartColors = ["#0EA5E9", "#38BDF8", "#10B981", "#F59E0B", "#EF4444"];
 const sexDistributionColors = ["#075985", "#7DD3FC", "#94A3B8"];
 const FALLBACK_BARANGAY_LABEL = "Assigned Barangay";
 
@@ -930,7 +930,7 @@ export default function AdminDashboardPage() {
                         title="Resident Sex Distribution"
                         subtitle="Current registered resident demographics"
                       >
-                        <DashboardPieChart
+                        <DonutChart
                           data={sexData}
                           colors={sexDistributionColors}
                         />
@@ -942,7 +942,7 @@ export default function AdminDashboardPage() {
                         title="Age Group Distribution"
                         subtitle="Resident population by age group"
                       >
-                        <DashboardBarChart data={ageGroupData} />
+                        <BarList data={ageGroupData} />
                       </ChartCard>
                     </div>
 
@@ -982,7 +982,7 @@ export default function AdminDashboardPage() {
                         title="Staff Role Distribution"
                         subtitle="Created health center user accounts"
                       >
-                        <DashboardBarChart data={roleData} />
+                        <BarList data={roleData} />
                       </ChartCard>
                     </div>
                   </div>
@@ -2593,108 +2593,6 @@ function formatResidentDate(date?: string | null) {
 function formatResidentIdName(resident: ResidentRecord) {
   const middle = resident.middleName ? ` ${resident.middleName}` : "";
   return `${resident.lastName}, ${resident.firstName}${middle}`.trim();
-}
-
-function DashboardPieChart({
-  data,
-  colors = chartColors,
-}: {
-  data: { name: string; value: number }[];
-  colors?: string[];
-}) {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-
-  let currentPercent = 0;
-
-  const gradient =
-    total === 0
-      ? "#E0F2FE 0% 100%"
-      : data
-          .map((item, index) => {
-            const percent = (item.value / total) * 100;
-            const start = currentPercent;
-            const end = currentPercent + percent;
-            currentPercent = end;
-
-            return `${colors[index % colors.length]} ${start}% ${end}%`;
-          })
-          .join(", ");
-
-  return (
-    <div className="grid items-center gap-6 md:grid-cols-[220px_1fr]">
-      <div className="relative mx-auto flex h-52 w-52 items-center justify-center rounded-full bg-sky-50">
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: `conic-gradient(${gradient})`,
-          }}
-        />
-
-        <div className="relative flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white shadow-sm">
-          <p className="text-xs font-black uppercase text-slate-400">Total</p>
-          <p className="text-3xl font-black text-slate-900">{total}</p>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {data.map((item, index) => (
-          <div
-            key={item.name}
-            className="flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{
-                  backgroundColor: colors[index % colors.length],
-                }}
-              />
-
-              <span className="text-sm font-bold text-slate-700">
-                {item.name}
-              </span>
-            </div>
-
-            <span className="text-lg font-black text-sky-600">
-              {item.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DashboardBarChart({
-  data,
-}: {
-  data: { name: string; total: number }[];
-}) {
-  const max = Math.max(...data.map((item) => item.total), 1);
-
-  return (
-    <div className="space-y-4">
-      {data.map((item) => {
-        const width = Math.round((item.total / max) * 100);
-
-        return (
-          <div key={item.name}>
-            <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-              <span className="font-bold text-slate-700">{item.name}</span>
-              <span className="font-black text-sky-600">{item.total}</span>
-            </div>
-
-            <div className="h-4 overflow-hidden rounded-full bg-sky-50">
-              <div
-                className="h-full rounded-full bg-[#0EA5E9] transition-all duration-500"
-                style={{ width: `${width}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 function ModalCleanGroup({

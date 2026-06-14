@@ -35,6 +35,12 @@ button, a, [role="button"] {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ── Chart containment — never bleed past the card on mobile ─ */
+.chart-safe {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* ── Scrollbars ───────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 999px; }

@@ -468,12 +468,12 @@ function Panel({
 
 function ProgressBar({ label, value }: { label: string; value: number }) {
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-semibold text-slate-700">{label}</span>
-        <span className="font-bold text-[#2563EB]">{value}%</span>
+    <div className="min-w-0">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <span className="min-w-0 truncate font-semibold text-slate-700">{label}</span>
+        <span className="shrink-0 font-bold text-[#2563EB]">{value}%</span>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-[#DBEAFE]">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-[#DBEAFE]">
         <div
           className="h-full rounded-full bg-[#2563EB]"
           style={{ width: `${value}%` }}
