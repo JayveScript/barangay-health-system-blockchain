@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ProgressBar } from "@/components/dashboard/Charts";
+import { PasswordGate } from "@/components/dashboard/ReferralInbox";
 import { PortalLoader } from "@/components/PortalLoader";
 import {
   Activity,
@@ -650,6 +651,8 @@ function StaffReferralsTab() {
   const [selectedReferral, setSelectedReferral] =
     useState<ResidentReferral | null>(null);
   const [busyReferralId, setBusyReferralId] = useState<string | null>(null);
+  const [pendingReferral, setPendingReferral] =
+    useState<ResidentReferral | null>(null);
 
   const selectedTargetBarangay = targetBarangays.find(
     (barangay) => barangay.id === selectedTargetBarangayId
@@ -927,7 +930,7 @@ function StaffReferralsTab() {
             emptyText="No received referrals."
             referrals={receivedReferrals}
             direction="received"
-            onView={setSelectedReferral}
+            onView={setPendingReferral}
             onAct={actOnReferral}
             busyId={busyReferralId}
           />
@@ -943,7 +946,7 @@ function StaffReferralsTab() {
             emptyText="No sent referrals."
             referrals={sentReferrals}
             direction="sent"
-            onView={setSelectedReferral}
+            onView={setPendingReferral}
           />
         </Panel>
       </div>
@@ -952,6 +955,17 @@ function StaffReferralsTab() {
         <ReferralDetailsModal
           referral={selectedReferral}
           onClose={() => setSelectedReferral(null)}
+        />
+      )}
+
+      {pendingReferral && (
+        <PasswordGate
+          residentName={getReferralResidentName(pendingReferral)}
+          onCancel={() => setPendingReferral(null)}
+          onVerified={() => {
+            setSelectedReferral(pendingReferral);
+            setPendingReferral(null);
+          }}
         />
       )}
     </div>
