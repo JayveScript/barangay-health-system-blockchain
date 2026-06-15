@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
+import { ReferralInbox } from "@/components/dashboard/ReferralInbox";
 import {
   Activity,
   BarChart3,
@@ -15,6 +16,7 @@ import {
   Clock,
   Eye,
   HeartPulse,
+  Inbox,
   LogOut,
   MapPin,
   Menu,
@@ -151,7 +153,7 @@ import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "appointments" | "diagnose" | "announcements" | "scan-qr"
+  "overview" | "personal" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -265,6 +267,16 @@ export default function DoctorDashboardPage() {
             />
 
             <SidebarButton
+              active={activeTab === "referrals"}
+              icon={<Inbox className="h-5 w-5" />}
+              label="Referrals"
+              onClick={() => {
+                setActiveTab("referrals");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={activeTab === "diagnose"}
               icon={<Stethoscope className="h-5 w-5" />}
               label="Diagnose Patient"
@@ -333,6 +345,13 @@ export default function DoctorDashboardPage() {
                 icon={<CalendarCheck className="h-5 w-5" />}
                 label="Appointments"
                 onClick={() => setActiveTab("appointments")}
+              />
+
+              <SidebarButton
+                active={activeTab === "referrals"}
+                icon={<Inbox className="h-5 w-5" />}
+                label="Referrals"
+                onClick={() => setActiveTab("referrals")}
               />
 
               <SidebarButton
@@ -426,6 +445,13 @@ export default function DoctorDashboardPage() {
 
             {activeTab === "appointments" && <AppointmentsTab />}
 
+            {activeTab === "referrals" && (
+              <ReferralInbox
+                title="Referred Residents"
+                subtitle="Residents referred to your barangay — accept or reject."
+              />
+            )}
+
             {activeTab === "diagnose" && <DiagnoseTab />}
 
             {activeTab === "announcements" && <DoctorAnnouncementsTab />}
@@ -447,6 +473,7 @@ export default function DoctorDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "appointments", label: "Schedule", icon: <CalendarCheck className="h-5 w-5" /> },
+          { id: "referrals", label: "Referrals", icon: <Inbox className="h-5 w-5" /> },
           { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },

@@ -648,6 +648,7 @@ function StaffReferralsTab() {
   const [notes, setNotes] = useState("");
   const [selectedReferral, setSelectedReferral] =
     useState<ResidentReferral | null>(null);
+  const [busyReferralId, setBusyReferralId] = useState<string | null>(null);
 
   const selectedTargetBarangay = targetBarangays.find(
     (barangay) => barangay.id === selectedTargetBarangayId
@@ -702,6 +703,29 @@ function StaffReferralsTab() {
   useEffect(() => {
     loadReferrals();
   }, []);
+
+  const actOnReferral = async (id: string, action: "accept" | "reject") => {
+    try {
+      setBusyReferralId(id);
+      setError("");
+      const res = await fetch(`/api/referrals/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Failed to update referral.");
+        return;
+      }
+      await loadReferrals();
+      setSelectedReferral(null);
+    } catch {
+      setError("Unable to connect to the server.");
+    } finally {
+      setBusyReferralId(null);
+    }
+  };
 
   const submitReferral = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -903,6 +927,8 @@ function StaffReferralsTab() {
             referrals={receivedReferrals}
             direction="received"
             onView={setSelectedReferral}
+            onAct={actOnReferral}
+            busyId={busyReferralId}
           />
         </Panel>
 
@@ -1020,12 +1046,16 @@ function ReferralList({
   referrals,
   direction,
   onView,
+  onAct,
+  busyId,
 }: {
   loading: boolean;
   emptyText: string;
   referrals: ResidentReferral[];
   direction: "received" | "sent";
   onView: (referral: ResidentReferral) => void;
+  onAct?: (id: string, action: "accept" | "reject") => void;
+  busyId?: string | null;
 }) {
   if (loading) {
     return (
@@ -1051,6 +1081,8 @@ function ReferralList({
           referral={referral}
           direction={direction}
           onView={onView}
+          onAct={onAct}
+          busy={busyId === referral.id}
         />
       ))}
     </div>
@@ -1061,10 +1093,14 @@ function ReferralCard({
   referral,
   direction,
   onView,
+  onAct,
+  busy,
 }: {
   referral: ResidentReferral;
   direction: "received" | "sent";
   onView: (referral: ResidentReferral) => void;
+  onAct?: (id: string, action: "accept" | "reject") => void;
+  busy?: boolean;
 }) {
   const residentName = getReferralResidentName(referral);
   const barangayLabel =
@@ -1105,6 +1141,29 @@ function ReferralCard({
           <Eye className="h-4 w-4" />
         </button>
       </div>
+
+      {direction === "received" && referral.status === "PENDING" && onAct && (
+        <div className="mt-3 flex gap-2 border-t border-sky-100 pt-3">
+          <button
+            type="button"
+            onClick={() => onAct(referral.id, "accept")}
+            disabled={busy}
+            className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:opacity-60"
+          >
+            <Check className="h-4 w-4" />
+            {busy ? "..." : "Accept"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onAct(referral.id, "reject")}
+            disabled={busy}
+            className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+          >
+            <X className="h-4 w-4" />
+            Reject
+          </button>
+        </div>
+      )}
     </div>
   );
 }
