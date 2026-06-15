@@ -51,7 +51,7 @@ export function MobileBottomNav({ items, active, onChange }: MobileBottomNavProp
                 {item.icon}
               </span>
             </span>
-            <span className="leading-none">{item.label}</span>
+            <span className="max-w-full truncate px-0.5 leading-none">{item.label}</span>
           </button>
         );
       })}
