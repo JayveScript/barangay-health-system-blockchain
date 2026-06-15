@@ -161,6 +161,32 @@ function LoginForm() {
           background: rgba(14, 165, 233, 0.15);
           animation: iconPulseRing2 2.4s ease-out 0.4s infinite;
         }
+
+        /* ── Circular seal logo (replaces the heart) ── */
+        @keyframes logoFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes logoGlow {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 10px 30px rgba(15, 23, 42, 0.18);
+          }
+          50% {
+            box-shadow: 0 0 30px 8px rgba(56, 189, 248, 0.4), 0 10px 30px rgba(15, 23, 42, 0.22);
+          }
+        }
+        .logo-float { animation: logoFloat 4s ease-in-out infinite; }
+        .logo-glow { animation: logoGlow 2.8s ease-in-out infinite; }
+        .logo-ring-1 {
+          position: absolute; inset: 0; border-radius: 9999px;
+          background: rgba(56, 189, 248, 0.22);
+          animation: iconPulseRing 2.8s ease-out infinite;
+        }
+        .logo-ring-2 {
+          position: absolute; inset: 0; border-radius: 9999px;
+          background: rgba(56, 189, 248, 0.14);
+          animation: iconPulseRing2 2.8s ease-out 0.5s infinite;
+        }
       `}</style>
       <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
         <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
@@ -215,11 +241,15 @@ function LoginForm() {
         <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:w-[40%] lg:px-10">
           <div className="w-full max-w-md">
             <div className="mb-8 flex justify-center">
-              <div className="relative">
-                <span className="icon-ring-1" />
-                <span className="icon-ring-2" />
-                <div className="icon-beat icon-glow relative flex h-20 w-20 items-center justify-center rounded-[28px] bg-[#0EA5E9] text-white">
-                  <HeartPulse className="h-10 w-10 drop-shadow-md" />
+              <div className="logo-float relative">
+                <span className="logo-ring-1" />
+                <span className="logo-ring-2" />
+                <div className="logo-glow relative flex h-24 w-24 items-center justify-center rounded-full bg-white p-1.5 ring-1 ring-sky-100 sm:h-28 sm:w-28">
+                  <img
+                    src="/images/davao-logo.png"
+                    alt="Lungsod ng Dabaw — Official Seal"
+                    className="h-full w-full rounded-full object-contain"
+                  />
                 </div>
               </div>
             </div>
