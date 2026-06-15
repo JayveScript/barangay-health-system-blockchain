@@ -487,9 +487,9 @@ function DetailInfo({ label, value }: { label: string; value: unknown }) {
   );
 }
 
-// Password confirmation gate — the doctor must re-enter their password before
-// the referral's full record is revealed.
-function PasswordGate({
+// Password confirmation gate — the user must re-enter their password before
+// the referral's full record is revealed. Exported for reuse (staff + doctor).
+export function PasswordGate({
   residentName,
   onCancel,
   onVerified,
