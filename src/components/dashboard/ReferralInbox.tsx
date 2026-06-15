@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   IdCard,
@@ -303,7 +304,9 @@ function ReferralModal({
     { id: "social", label: "Social", icon: <ClipboardList className="h-5 w-5" /> },
   ];
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-sky-200 bg-white shadow-2xl">
         <div className="border-b border-slate-200 bg-gradient-to-r from-[#F8FBFF] via-white to-[#F8FBFF] px-4 py-4 sm:px-7 sm:py-5">
@@ -448,7 +451,8 @@ function ReferralModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -525,7 +529,9 @@ function PasswordGate({
     }
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">
         <div className="mb-4 flex flex-col items-center text-center">
@@ -577,6 +583,7 @@ function PasswordGate({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
