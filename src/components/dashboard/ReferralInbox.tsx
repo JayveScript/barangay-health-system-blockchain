@@ -12,6 +12,7 @@ import {
   X,
   Inbox,
   RefreshCw,
+  Lock,
 } from "lucide-react";
 
 // ── Types (mirror the referral JSON returned by the API) ──────────────────────
@@ -99,6 +100,7 @@ export function ReferralInbox({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<InboxReferral | null>(null);
+  const [pendingView, setPendingView] = useState<InboxReferral | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -212,9 +214,9 @@ export function ReferralInbox({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelected(r)}
-                    aria-label="View full info"
-                    title="View full info"
+                    onClick={() => setPendingView(r)}
+                    aria-label="View full info (password required)"
+                    title="View full info (password required)"
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-sky-600 hover:bg-sky-100"
                   >
                     <Eye className="h-4 w-4" />
@@ -256,6 +258,17 @@ export function ReferralInbox({
           onAccept={() => act(selected.id, "accept")}
           onReject={() => act(selected.id, "reject")}
           onClose={() => setSelected(null)}
+        />
+      )}
+
+      {pendingView && (
+        <PasswordGate
+          residentName={residentName(pendingView)}
+          onCancel={() => setPendingView(null)}
+          onVerified={() => {
+            setSelected(pendingView);
+            setPendingView(null);
+          }}
         />
       )}
     </div>
@@ -466,6 +479,104 @@ function DetailInfo({ label, value }: { label: string; value: unknown }) {
     <div className="min-w-0 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3">
       <p className="text-[11px] font-black uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-1 break-words text-sm font-semibold text-slate-900">{fmtValue(value)}</p>
+    </div>
+  );
+}
+
+// Password confirmation gate — the doctor must re-enter their password before
+// the referral's full record is revealed.
+function PasswordGate({
+  residentName,
+  onCancel,
+  onVerified,
+}: {
+  residentName: string;
+  onCancel: () => void;
+  onVerified: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [err, setErr] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password.trim()) {
+      setErr("Password is required.");
+      return;
+    }
+    try {
+      setVerifying(true);
+      setErr("");
+      const res = await fetch("/api/verify-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setErr(json.error || "Invalid password.");
+        return;
+      }
+      onVerified();
+    } catch {
+      setErr("Unable to connect to the server.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex flex-col items-center text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+            <Lock className="h-7 w-7" />
+          </div>
+          <h3 className="text-lg font-black text-slate-900">Confirm your password</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Enter your password to view{" "}
+            <span className="font-semibold text-slate-700">{residentName}</span>&apos;s
+            referral record.
+          </p>
+        </div>
+
+        <form onSubmit={submit} className="space-y-3">
+          <div className="flex min-h-[52px] items-center rounded-2xl border border-sky-200 bg-white px-4 transition focus-within:border-[#0EA5E9]">
+            <Lock className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
+            <input
+              type="password"
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+            />
+          </div>
+
+          {err && (
+            <div className="rounded-2xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600">
+              {err}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="min-h-[48px] flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={verifying}
+              className="min-h-[48px] flex-1 rounded-2xl bg-[#0EA5E9] px-4 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
+            >
+              {verifying ? "Verifying..." : "Unlock"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

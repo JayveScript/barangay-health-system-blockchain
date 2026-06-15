@@ -42,6 +42,7 @@ const LIMITS: Record<string, { max: number; windowMs: number }> = {
   "/api/verify-code":                  { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
   "/api/register":                     { max: 10, windowMs: 60 * 60 * 1000 }, // 10 / hour
   "/api/admin/verify-password":        { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
+  "/api/verify-password":              { max: 10, windowMs: 15 * 60 * 1000 }, // 10 / 15 min
 };
 
 export function middleware(req: NextRequest) {
@@ -80,5 +81,6 @@ export const config = {
     "/api/forgot-password/reset",
     "/api/verify-code",
     "/api/admin/verify-password",
+    "/api/verify-password",
   ],
 };
