@@ -181,6 +181,19 @@ function formatShortName(r: {
   return initials ? `${last} ${initials}.` : last;
 }
 
+// Formal desktop name: "LASTNAME, FIRSTNAME M." (last name first, middle as initial).
+function formatTableName(r: {
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+}) {
+  const last = (r.lastName ?? "").trim();
+  const first = (r.firstName ?? "").trim();
+  const mid = (r.middleName ?? "").trim();
+  const afterComma = `${first}${mid ? ` ${mid[0]}.` : ""}`.trim();
+  return (afterComma ? `${last}, ${afterComma}` : last).toUpperCase();
+}
+
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { useSecureQrUrl } from "@/hooks/useSecureQrUrl";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
@@ -1116,18 +1129,17 @@ export default function AdminDashboardPage() {
   <table className="min-w-[800px] w-full table-fixed border-separate border-spacing-y-2">
     <thead>
       <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-        <th className="w-[38%] px-3">Resident Name</th>
+        <th className="w-[44%] px-3">Resident Name</th>
         <th className="w-[12%] px-3">Sex</th>
         <th className="w-[10%] px-3">Age</th>
-        <th className="w-[18%] px-3">Contact</th>
-        <th className="w-[12%] px-3">Status</th>
-        <th className="w-[10%] px-3 text-center">Actions</th>
+        <th className="w-[20%] px-3">Contact</th>
+        <th className="w-[14%] px-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
     {filteredResidents.length === 0 && (
   <tr>
-    <td colSpan={6} className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
+    <td colSpan={5} className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
       No resident found.
     </td>
   </tr>
@@ -1136,18 +1148,12 @@ export default function AdminDashboardPage() {
         <tr key={resident.id} className="bg-sky-50 shadow-sm">
           <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-900">
             <span className="block truncate whitespace-nowrap">
-              {resident.firstName} {resident.middleName ?? ""}{" "}
-              {resident.lastName}
+              {formatTableName(resident)}
             </span>
           </td>
           <td className="px-3 py-3 text-sm text-slate-600">{resident.sex}</td>
           <td className="px-3 py-3 text-sm text-slate-600">{resident.age}</td>
           <td className="px-3 py-3 text-sm text-slate-600">{resident.contactNumber || "\u2014"}</td>
-          <td className="px-3 py-3">
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-              {resident.user?.isVerified ? "Verified" : "Pending"}
-            </span>
-          </td>
           <td className="rounded-r-2xl px-3 py-3">
             <div className="flex items-center justify-center gap-2">
               <IconActionButton label="View Details" icon={<Eye className="h-4 w-4" />} onClick={() => openSecureModal(resident, "view")} />
