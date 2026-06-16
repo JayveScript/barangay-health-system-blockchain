@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ProgressBar } from "@/components/dashboard/Charts";
 import { PasswordGate } from "@/components/dashboard/ReferralInbox";
+import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
 import { PortalLoader } from "@/components/PortalLoader";
 import {
   Activity,
@@ -396,73 +397,7 @@ export default function StaffDashboardPage() {
 }
 
 function OverviewTab() {
-  return (
-    <div className="space-y-5 pb-4">
-      <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard
-          icon={<Users className="h-5 w-5" />}
-          label="Residents Assisted"
-          value="84"
-        />
-        <MetricCard
-          icon={<FileText className="h-5 w-5" />}
-          label="Records Encoded"
-          value="57"
-        />
-        <MetricCard
-          icon={<ClipboardList className="h-5 w-5" />}
-          label="Pending Tasks"
-          value="14"
-        />
-        <MetricCard
-          icon={<CalendarDays className="h-5 w-5" />}
-          label="Daily Reports"
-          value="6"
-        />
-      </div>
-
-      <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel
-          icon={<BarChart3 className="h-5 w-5" />}
-          title="Staff Activity"
-          subtitle="Monthly administrative support progress"
-        >
-          <div className="space-y-5">
-            <ProgressBar label="Resident Assistance" value={80} />
-            <ProgressBar label="Record Encoding" value={73} />
-            <ProgressBar label="Document Preparation" value={61} />
-            <ProgressBar label="Health Center Support" value={58} />
-          </div>
-        </Panel>
-
-        <Panel
-          icon={<Activity className="h-5 w-5" />}
-          title="Staff Service Analytics"
-          subtitle="Current health center support workload"
-        >
-          <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Open Tasks" value="14" />
-            <MiniStat label="Completed Tasks" value="39" />
-            <MiniStat label="Updated Records" value="57" />
-            <MiniStat label="Prepared Forms" value="22" />
-          </div>
-        </Panel>
-      </div>
-
-      <Panel
-        icon={<HeartPulse className="h-5 w-5" />}
-        title="Health Center Staff Summary"
-        subtitle="Assigned barangay support operations overview"
-      >
-        <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Resident Requests" value="31" />
-          <SummaryBox title="Encoded Profiles" value="57" />
-          <SummaryBox title="Reports Filed" value="12" />
-          <SummaryBox title="Assisted Visits" value="26" />
-        </div>
-      </Panel>
-    </div>
-  );
+  return <ResidentStatsOverview />;
 }
 
 function PersonalInfoTab({

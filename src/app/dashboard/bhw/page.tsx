@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ProgressBar } from "@/components/dashboard/Charts";
+import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
 import {
   Activity,
   BarChart3,
@@ -346,57 +347,7 @@ export default function BHWDashboardPage() {
 }
 
 function OverviewTab() {
-  return (
-    <div className="space-y-5 pb-4">
-      <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard icon={<Users className="h-5 w-5" />} label="Residents Monitored" value="128" />
-        <MetricCard icon={<Home className="h-5 w-5" />} label="Home Visits" value="34" />
-        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label="Follow-ups" value="18" />
-        <MetricCard icon={<CalendarDays className="h-5 w-5" />} label="Monthly Reports" value="9" />
-      </div>
-
-      <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel
-          icon={<BarChart3 className="h-5 w-5" />}
-          title="Community Health Activity"
-          subtitle="BHW monthly work progress"
-        >
-          <div className="space-y-5">
-            <ProgressBar label="Household Visits" value={82} />
-            <ProgressBar label="Resident Monitoring" value={74} />
-            <ProgressBar label="Health Record Updates" value={66} />
-            <ProgressBar label="Referral Assistance" value={48} />
-          </div>
-        </Panel>
-
-        <Panel
-          icon={<Activity className="h-5 w-5" />}
-          title="BHW Service Analytics"
-          subtitle="Current barangay workload overview"
-        >
-          <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Priority Cases" value="5" />
-            <MiniStat label="Pending Visits" value="12" />
-            <MiniStat label="Completed Visits" value="34" />
-            <MiniStat label="Updated Records" value="76" />
-          </div>
-        </Panel>
-      </div>
-
-      <Panel
-        icon={<HeartPulse className="h-5 w-5" />}
-        title="Health Center Summary"
-        subtitle="Assigned barangay resident monitoring overview"
-      >
-        <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Active Families" value="92" />
-          <SummaryBox title="Senior Citizens" value="31" />
-          <SummaryBox title="Pregnant Residents" value="7" />
-          <SummaryBox title="For Follow-up" value="18" />
-        </div>
-      </Panel>
-    </div>
-  );
+  return <ResidentStatsOverview />;
 }
 
 function PersonalInfoTab({
