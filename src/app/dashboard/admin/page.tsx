@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import * as htmlToImage from "html-to-image";
 import {
   Activity,
@@ -12,7 +13,7 @@ import {
   Eye,
   FileText,
   HeartPulse,
-  KeyRound,
+  Lock,
   LogOut,
   MapPin,
   Menu,
@@ -1617,54 +1618,65 @@ function PasswordConfirmModal({
 
   const m = action ? meta[action] : null;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.30)]">
-        <div className="mb-5 flex items-center gap-3">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${m?.iconBg ?? "bg-sky-50"} ${m?.iconColor ?? "text-sky-600"}`}>
-            <KeyRound className="h-6 w-6" />
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex flex-col items-center text-center">
+          <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-2xl ${m?.iconBg ?? "bg-sky-50"} ${m?.iconColor ?? "text-sky-600"}`}>
+            <Lock className="h-7 w-7" />
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              {m?.title ?? "Confirm Action"}
-            </h2>
-            <p className="text-sm text-slate-500">{m?.desc}</p>
-          </div>
+          <h3 className="text-lg font-black text-slate-900">Confirm your password</h3>
+          <p className="mt-1 text-sm text-slate-500">{m?.desc}</p>
         </div>
 
-        <Input
-          label="Admin Password"
-          type="password"
-          value={password}
-          onChange={onPasswordChange}
-        />
-
-        {error && (
-          <div className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!loading) onConfirm();
+          }}
+          className="space-y-3"
+        >
+          <div className="flex min-h-[52px] items-center rounded-2xl border border-sky-200 bg-white px-4 transition focus-within:border-[#0EA5E9]">
+            <Lock className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
+            <input
+              type="password"
+              autoFocus
+              value={password}
+              onChange={(e) => onPasswordChange(e.target.value)}
+              placeholder="Your password"
+              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+            />
           </div>
-        )}
 
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={loading}
-            className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:opacity-60 ${m?.btnClass ?? "bg-[#0EA5E9] hover:bg-sky-600"}`}
-          >
-            {loading ? "Verifying…" : (m?.btnLabel ?? "Continue")}
-          </button>
-        </div>
+          {error && (
+            <div className="rounded-2xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600">
+              {error}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={loading}
+              className="min-h-[48px] flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`min-h-[48px] flex-1 rounded-2xl px-4 text-sm font-bold text-white transition disabled:opacity-60 ${m?.btnClass ?? "bg-[#0EA5E9] hover:bg-sky-600"}`}
+            >
+              {loading ? "Verifying…" : (m?.btnLabel ?? "Unlock")}
+            </button>
+          </div>
+        </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
