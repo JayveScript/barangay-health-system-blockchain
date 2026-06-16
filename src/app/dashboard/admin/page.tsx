@@ -260,7 +260,9 @@ export default function AdminDashboardPage() {
   const [staffDeleteError, setStaffDeleteError] = useState("");
 
   const [form, setForm] = useState({
-    fullName: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     username: "",
     password: "",
     role: "STAFF",
@@ -411,8 +413,17 @@ export default function AdminDashboardPage() {
     setMessage("");
     setError("");
 
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError("First name and last name are required.");
+      return;
+    }
+
     try {
       setFormLoading(true);
+
+      const fullName = `${form.firstName} ${form.middleName} ${form.lastName}`
+        .replace(/\s+/g, " ")
+        .trim();
 
       const res = await fetch("/api/admin/create-user", {
         method: "POST",
@@ -420,8 +431,10 @@ export default function AdminDashboardPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...form,
+          fullName,
           username: normalizeBarangayHcmsUsername(form.username),
+          password: form.password,
+          role: form.role,
         }),
       });
 
@@ -435,7 +448,9 @@ export default function AdminDashboardPage() {
       setMessage("User created successfully.");
 
       setForm({
-        fullName: "",
+        firstName: "",
+        middleName: "",
+        lastName: "",
         username: "",
         password: "",
         role: "STAFF",
@@ -1190,16 +1205,38 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
-                      <form onSubmit={handleCreateUser} className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <Input
-                            label="Full Name"
-                            value={form.fullName}
-                            onChange={(v) =>
-                              setForm((p) => ({ ...p, fullName: v }))
-                            }
-                          />
+                      <form onSubmit={handleCreateUser} className="space-y-5">
+                        {/* Full name — first / middle / last */}
+                        <div>
+                          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Full Name
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            <Input
+                              label="First Name"
+                              value={form.firstName}
+                              onChange={(v) =>
+                                setForm((p) => ({ ...p, firstName: v }))
+                              }
+                            />
+                            <Input
+                              label="Middle Name (Optional)"
+                              value={form.middleName}
+                              onChange={(v) =>
+                                setForm((p) => ({ ...p, middleName: v }))
+                              }
+                            />
+                            <Input
+                              label="Last Name"
+                              value={form.lastName}
+                              onChange={(v) =>
+                                setForm((p) => ({ ...p, lastName: v }))
+                              }
+                            />
+                          </div>
+                        </div>
 
+                        <div className="grid gap-4 md:grid-cols-2">
                           <Input
                             label="Username"
                             value={form.username}
@@ -1211,9 +1248,7 @@ export default function AdminDashboardPage() {
                             }
                             fixedSuffix={BARANGAY_ADMIN_USERNAME_SUFFIX}
                           />
-                        </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
                           <Input
                             label="Password"
                             type="password"
@@ -1222,16 +1257,16 @@ export default function AdminDashboardPage() {
                               setForm((p) => ({ ...p, password: v }))
                             }
                           />
+                        </div>
 
+                        <div className="grid gap-4 md:grid-cols-2">
                           <Select
                             label="Role"
                             value={form.role}
                             onChange={(v) => setForm((p) => ({ ...p, role: v }))}
                             options={["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
                           />
-                        </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
                           <ReadonlyBadgeInput
                             label="Barangay"
                             value={currentBarangayName}
