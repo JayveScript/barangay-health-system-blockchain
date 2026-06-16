@@ -1211,7 +1211,7 @@ export default function AdminDashboardPage() {
                           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
                             Full Name
                           </p>
-                          <div className="grid gap-3 sm:grid-cols-3">
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <Input
                               label="First Name"
                               value={form.firstName}
@@ -1236,7 +1236,7 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <Input
                             label="Username"
                             value={form.username}
@@ -1259,7 +1259,7 @@ export default function AdminDashboardPage() {
                           />
                         </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <Select
                             label="Role"
                             value={form.role}
