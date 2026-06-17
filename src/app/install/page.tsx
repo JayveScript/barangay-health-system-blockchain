@@ -10,7 +10,7 @@ import {
   Share2,
   MoreVertical,
   PlusSquare,
-  Chrome,
+  Globe,
   CheckCircle2,
 } from "lucide-react";
 
@@ -19,14 +19,14 @@ type Platform = "android" | "ios" | "desktop";
 const steps: Record<Platform, { icon: React.ReactNode; title: string; desc: string }[]> = {
   android: [
     {
-      icon: <Chrome className="h-5 w-5" />,
-      title: "Open in Chrome",
-      desc: "Visit this website using Google Chrome on your Android phone.",
+      icon: <Globe className="h-5 w-5" />,
+      title: "Open in Globe",
+      desc: "Visit this website using Google Globe on your Android phone.",
     },
     {
       icon: <MoreVertical className="h-5 w-5" />,
       title: 'Tap the 3-dot menu "⋮"',
-      desc: 'Tap the three-dot menu at the top-right corner of Chrome.',
+      desc: 'Tap the three-dot menu at the top-right corner of Globe.',
     },
     {
       icon: <Download className="h-5 w-5" />,
@@ -63,9 +63,9 @@ const steps: Record<Platform, { icon: React.ReactNode; title: string; desc: stri
   ],
   desktop: [
     {
-      icon: <Chrome className="h-5 w-5" />,
-      title: "Open in Chrome or Edge",
-      desc: "Visit this website using Google Chrome or Microsoft Edge on your computer.",
+      icon: <Globe className="h-5 w-5" />,
+      title: "Open in Globe or Edge",
+      desc: "Visit this website using Google Globe or Microsoft Edge on your computer.",
     },
     {
       icon: <Monitor className="h-5 w-5" />,
