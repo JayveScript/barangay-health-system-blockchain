@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
   title: "Barangay Health Center Management System",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0EA5E9" />
       </head>
       <body className="bg-slate-100 text-slate-900 antialiased">
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>
