@@ -10,7 +10,8 @@ export default function InstallPage() {
   const [active, setActive]           = useState<Platform>("desktop");
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installed, setInstalled]     = useState(false);
-  const [showIOSHint, setShowIOSHint] = useState(false);
+  const [showIOSHint, setShowIOSHint]         = useState(false);
+  const [showAndroidHint, setShowAndroidHint] = useState(false);
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -51,6 +52,42 @@ export default function InstallPage() {
         @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(14,165,233,.5);}70%{box-shadow:0 0 0 14px rgba(14,165,233,0);}}
         .btn-pulse{animation:btnPulse 2s ease-out infinite;}
       `}</style>
+
+      {/* Android hint overlay */}
+      {showAndroidHint && active === "android" && (
+        <div className="slide-up fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-slate-200 bg-white pb-10 pt-5 shadow-2xl">
+          <button onClick={() => setShowAndroidHint(false)} className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 text-lg">×</button>
+          <div className="flex flex-col items-center gap-3 px-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[20px] shadow-lg">
+              <img src="/icons/icon-192.png" alt="Kalyo" className="h-full w-full object-cover" />
+            </div>
+            <p className="text-lg font-extrabold text-slate-800">Add Kalyo to Home Screen</p>
+            <div className="w-full space-y-2">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500 shadow shadow-sky-500/30">
+                  <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-slate-800">Tap ⋮ Menu</p>
+                  <p className="text-xs text-slate-500">Top-right of Chrome</p>
+                </div>
+              </div>
+              <div className="flex justify-center text-slate-400">↓</div>
+              <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-200 shadow">
+                  <svg viewBox="0 0 24 24" className="h-7 w-7 fill-slate-600"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3v10M9 6l3-3 3 3"/></svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-slate-800">Add to Home Screen</p>
+                  <p className="text-xs text-slate-500">Then tap Install to confirm</p>
+                </div>
+              </div>
+            </div>
+            <div className="bounce-arrow text-3xl text-sky-400">↓</div>
+            <p className="text-xs text-slate-400">The menu ⋮ is at the top-right corner of Chrome</p>
+          </div>
+        </div>
+      )}
 
       {/* iOS share hint overlay */}
       {showIOSHint && active === "ios" && (
@@ -200,6 +237,10 @@ export default function InstallPage() {
                     🤖 &nbsp;Open in Chrome to Install
                   </button>
                 )}
+                <button onClick={() => setShowAndroidHint(true)}
+                  className="w-full rounded-2xl border-2 border-sky-400 bg-sky-50 py-4 text-base font-extrabold text-sky-600 transition hover:bg-sky-100 active:scale-95">
+                  🤖 &nbsp;Show Me How
+                </button>
                 <p className="text-xs text-slate-400">The Kalyo icon will appear on your Android home screen.</p>
               </div>
             )}
