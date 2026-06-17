@@ -121,41 +121,28 @@ export default function InstallPage() {
                 <p className="text-xl font-extrabold text-emerald-700">Kalyo Installed!</p>
                 <p className="text-sm text-slate-500">Find it in your Start Menu. Right-click → Pin to Desktop or Taskbar.</p>
               </div>
-            ) : installPrompt ? (
-              <div className="flex flex-col items-center gap-4 py-2">
-                <p className="text-center text-sm text-slate-500">Click below — Kalyo installs with its own icon, no browser bar.</p>
-                <button onClick={handleInstall}
-                  className="btn-pulse w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-5 text-lg font-extrabold text-white transition hover:-translate-y-1 hover:shadow-2xl">
-                  🖥️ &nbsp;Install Kalyo on Desktop
-                </button>
-              </div>
             ) : (
-              <div className="flex flex-col gap-4">
-                <p className="text-center text-sm text-slate-500">Open this page in <strong>Chrome</strong> or <strong>Edge</strong>, then click the install icon in the address bar.</p>
-                {/* Address bar mockup */}
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="flex items-center gap-2 bg-slate-100 px-3 py-2">
-                    <div className="h-3 w-3 rounded-full bg-red-400" /><div className="h-3 w-3 rounded-full bg-yellow-400" /><div className="h-3 w-3 rounded-full bg-green-400" />
-                    <div className="ml-1 flex flex-1 items-center justify-between rounded-md bg-white px-3 py-1.5 text-xs text-slate-400 ring-1 ring-slate-200">
-                      <span>your-site.vercel.app</span>
-                      <div className="relative flex items-center gap-1">
-                        <div className="flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-white text-xs font-bold shadow">⊕</div>
-                        <div className="absolute -top-9 right-0 flex flex-col items-center">
-                          <span className="whitespace-nowrap rounded-lg bg-sky-500 px-2 py-1 text-[10px] font-bold text-white shadow">Tap here!</span>
-                          <span className="bounce-arrow text-sky-500 text-sm leading-none">▼</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex flex-col items-center gap-5 py-2">
+                <div className="flex h-20 w-20 overflow-hidden rounded-[22px] shadow-lg">
+                  <img src="/icons/icon-512.png" alt="Kalyo" className="h-full w-full object-cover" />
                 </div>
-                <div className="space-y-2.5">
-                  {["Open in Chrome or Edge.", 'Click the ⊕ icon in the address bar (top right).', 'Click "Install" → Kalyo icon appears on your desktop.'].map((t, i) => (
-                    <div key={i} className="flex gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-100 text-xs font-extrabold text-sky-600">{i + 1}</span>
-                      <p className="text-sm text-slate-600">{t}</p>
-                    </div>
-                  ))}
+                <div className="text-center">
+                  <p className="font-extrabold text-slate-800 text-lg">Install on your Desktop</p>
+                  <p className="mt-1 text-sm text-slate-500">Opens with the Kalyo icon — no browser bar.</p>
                 </div>
+                <button
+                  onClick={installPrompt ? handleInstall : () => {
+                    window.open(window.location.href.replace("/install", "/login"), "_blank");
+                    alert('Look for the install icon ⊕ in your Chrome or Edge address bar, then click Install.');
+                  }}
+                  className="btn-pulse w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-5 text-lg font-extrabold text-white shadow-xl shadow-sky-500/30 transition hover:-translate-y-1 hover:shadow-2xl active:scale-95">
+                  🖥️ &nbsp;{installPrompt ? "Install Kalyo Now" : "Install Kalyo on Desktop"}
+                </button>
+                {!installPrompt && (
+                  <p className="text-xs text-slate-400 text-center">
+                    Open this page in <strong className="text-slate-600">Chrome</strong> or <strong className="text-slate-600">Edge</strong> — the button will trigger the install automatically.
+                  </p>
+                )}
               </div>
             )}
           </div>
