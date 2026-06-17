@@ -157,26 +157,50 @@ export default function InstallPage() {
                 <p className="text-xl font-extrabold text-emerald-700">Kalyo Installed!</p>
                 <p className="text-sm text-slate-500">The Kalyo icon is now on your home screen.</p>
               </div>
-            ) : installPrompt ? (
-              <div className="flex flex-col items-center gap-4 py-2">
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-center">
                 <div className="flex h-20 w-20 overflow-hidden rounded-[24px] shadow-lg">
                   <img src="/icons/icon-192.png" alt="Kalyo" className="h-full w-full object-cover" />
                 </div>
-                <p className="text-center text-sm text-slate-500">
-                  Tap the button — Kalyo downloads and goes straight to your home screen.
-                </p>
-                <button onClick={handleInstall}
-                  className="btn-pulse w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-5 text-lg font-extrabold text-white transition hover:shadow-2xl active:scale-95">
-                  🤖 &nbsp;Add to Home Screen
-                </button>
-                <p className="text-xs text-slate-400">No app store. Installs directly with the Kalyo icon.</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4 py-2 text-center">
-                <div className="rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 text-sm text-amber-700">
-                  <strong>Open this page in Google Chrome</strong> on your Android phone to get the install button.
+                <div>
+                  <p className="text-lg font-extrabold text-slate-800">Add Kalyo to Your Home Screen</p>
+                  <p className="mt-1 text-sm text-slate-500">Android Chrome — two taps to install.</p>
                 </div>
-                <p className="text-sm text-slate-500">Then tap the <strong>3-dot menu ⋮</strong> → <strong>"Add to Home Screen"</strong></p>
+
+                <div className="w-full rounded-2xl bg-gradient-to-br from-sky-50 to-blue-100 border border-sky-200 p-5">
+                  <p className="mb-4 text-sm font-semibold text-sky-800">In Chrome, do this:</p>
+                  <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-500 shadow-lg shadow-sky-500/40">
+                      <svg viewBox="0 0 24 24" className="h-8 w-8 fill-white"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-extrabold text-slate-800">Tap Menu ⋮</p>
+                      <p className="text-xs text-slate-500">Top-right corner of Chrome</p>
+                    </div>
+                  </div>
+                  <div className="my-2 flex justify-center text-slate-400 text-xl">↓</div>
+                  <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 shadow">
+                      <svg viewBox="0 0 24 24" className="h-8 w-8 fill-slate-600"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3v10M9 6l3-3 3 3"/></svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-extrabold text-slate-800">Add to Home Screen</p>
+                      <p className="text-xs text-slate-500">Tap Install to confirm</p>
+                    </div>
+                  </div>
+                </div>
+
+                {installPrompt ? (
+                  <button onClick={handleInstall}
+                    className="btn-pulse w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-base font-extrabold text-white shadow-xl shadow-sky-500/30 transition hover:shadow-2xl active:scale-95">
+                    🤖 &nbsp;Install Now
+                  </button>
+                ) : (
+                  <button className="w-full rounded-2xl border-2 border-sky-400 bg-sky-50 py-4 text-base font-extrabold text-sky-600 transition hover:bg-sky-100 active:scale-95" disabled>
+                    🤖 &nbsp;Open in Chrome to Install
+                  </button>
+                )}
+                <p className="text-xs text-slate-400">The Kalyo icon will appear on your Android home screen.</p>
               </div>
             )}
           </div>
