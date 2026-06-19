@@ -195,13 +195,13 @@ function LoginForm() {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-blue-950/70 to-sky-900/65" />
           <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-transparent to-slate-950/30" />
 
-          <div className="relative z-10 flex h-full flex-col justify-center p-12 text-white">
+          <div className="relative z-10 flex h-full flex-col items-start justify-start p-10 pt-10 text-white">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold shadow-lg shadow-slate-950/20 backdrop-blur-md">
                 <ShieldCheck className="h-4 w-4" />
                 Secure Health Center Access
               </div>
 
-              <div className="mt-8 max-w-2xl">
+              <div className="mt-8 w-full max-w-2xl">
                 <div className="flex items-center gap-6">
                   {/* Davao logo beside the title */}
                   <div className="logo-float relative flex-shrink-0">
@@ -227,7 +227,7 @@ function LoginForm() {
                 </p>
               </div>
 
-            <div className="mt-8 grid gap-5 xl:grid-cols-3">
+            <div className="mt-8 w-full grid gap-5 xl:grid-cols-3">
               <InfoCard
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
