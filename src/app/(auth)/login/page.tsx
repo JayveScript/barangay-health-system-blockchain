@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -138,37 +138,7 @@ function LoginForm() {
           70% { transform: scale(1.85); opacity: 0; }
           100% { transform: scale(1.85); opacity: 0; }
         }
-        @keyframes iconBeat {
-          0%, 100% { transform: scale(1); }
-          14% { transform: scale(1.08); }
-          28% { transform: scale(1); }
-          42% { transform: scale(1.05); }
-          56% { transform: scale(1); }
-        }
-        @keyframes iconGlow {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0),
-                        0 8px 24px rgba(14, 165, 233, 0.3);
-          }
-          50% {
-            box-shadow: 0 0 28px 8px rgba(14, 165, 233, 0.45),
-                        0 8px 24px rgba(14, 165, 233, 0.4);
-          }
-        }
-        .icon-beat { animation: iconBeat 2.4s ease-in-out infinite; }
-        .icon-glow { animation: iconGlow 2.4s ease-in-out infinite; }
-        .icon-ring-1 {
-          position: absolute; inset: 0; border-radius: 28px;
-          background: rgba(14, 165, 233, 0.25);
-          animation: iconPulseRing 2.4s ease-out infinite;
-        }
-        .icon-ring-2 {
-          position: absolute; inset: 0; border-radius: 28px;
-          background: rgba(14, 165, 233, 0.15);
-          animation: iconPulseRing2 2.4s ease-out 0.4s infinite;
-        }
 
-        /* ── Circular seal logo (replaces the heart) ── */
         @keyframes logoFloat {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
@@ -181,8 +151,18 @@ function LoginForm() {
             box-shadow: 0 0 30px 8px rgba(56, 189, 248, 0.4), 0 10px 30px rgba(15, 23, 42, 0.22);
           }
         }
+        @keyframes appGlow {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0), 0 10px 30px rgba(14, 165, 233, 0.25);
+          }
+          50% {
+            box-shadow: 0 0 36px 10px rgba(14, 165, 233, 0.45), 0 10px 30px rgba(14, 165, 233, 0.35);
+          }
+        }
         .logo-float { animation: logoFloat 4s ease-in-out infinite; }
-        .logo-glow { animation: logoGlow 2.8s ease-in-out infinite; }
+        .logo-glow  { animation: logoGlow  2.8s ease-in-out infinite; }
+        .app-float  { animation: logoFloat 4s ease-in-out 0.3s infinite; }
+        .app-glow   { animation: appGlow   2.8s ease-in-out 0.3s infinite; }
         .logo-ring-1 {
           position: absolute; inset: 0; border-radius: 9999px;
           background: rgba(56, 189, 248, 0.22);
@@ -193,8 +173,20 @@ function LoginForm() {
           background: rgba(56, 189, 248, 0.14);
           animation: iconPulseRing2 2.8s ease-out 0.5s infinite;
         }
+        .app-ring-1 {
+          position: absolute; inset: 0; border-radius: 9999px;
+          background: rgba(14, 165, 233, 0.25);
+          animation: iconPulseRing 2.8s ease-out 0.3s infinite;
+        }
+        .app-ring-2 {
+          position: absolute; inset: 0; border-radius: 9999px;
+          background: rgba(14, 165, 233, 0.15);
+          animation: iconPulseRing2 2.8s ease-out 0.8s infinite;
+        }
       `}</style>
       <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+
+        {/* ── LEFT PANEL ── */}
         <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -211,16 +203,26 @@ function LoginForm() {
               </div>
 
               <div className="mt-12 max-w-2xl">
-                <div className="mb-3 inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-sm">
-                  <span className="text-xs font-black tracking-[0.25em] text-white/90">K · A · L · Y · O</span>
+                <div className="flex items-center gap-6">
+                  {/* Davao logo beside the title */}
+                  <div className="logo-float relative flex-shrink-0">
+                    <span className="logo-ring-1" />
+                    <span className="logo-ring-2" />
+                    <div className="logo-glow relative flex h-[88px] w-[88px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
+                      <img
+                        src="/images/davao-logo.png"
+                        alt="Lungsod ng Dabaw — Official Seal"
+                        className="h-full w-full rounded-full object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
+                    Barangay Health Center Management System
+                  </h1>
                 </div>
-                <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
-                  Barangay Health Center Management System
-                </h1>
-                <p className="mt-3 text-sm font-semibold text-white/75 drop-shadow-sm">
-                  <span className="font-black text-white/90">Kalusugan At Ligtas Yang Obyektibo</span> — Health and Safety as Our Objective
-                </p>
-                <p className="mt-4 max-w-xl text-xl leading-9 text-white/95 drop-shadow-md">
+
+                <p className="mt-6 max-w-xl text-xl leading-9 text-white/95 drop-shadow-md">
                   A secure and modern platform for managing patient records,
                   consultations, and daily barangay health center operations.
                 </p>
@@ -250,19 +252,44 @@ function LoginForm() {
           </div>
         </section>
 
+        {/* ── RIGHT PANEL ── */}
         <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:w-[40%] lg:px-10">
           <div className="w-full max-w-md">
-            <div className="mb-8 flex justify-center">
-              <div className="logo-float relative">
-                <span className="logo-ring-1" />
-                <span className="logo-ring-2" />
-                <div className="logo-glow relative flex h-24 w-24 items-center justify-center rounded-full bg-white p-1.5 ring-1 ring-sky-100 sm:h-28 sm:w-28">
+
+            {/* Kalyo app icon + KALYO letters + meaning */}
+            <div className="mb-6 flex flex-col items-center gap-3">
+              <div className="app-float relative">
+                <span className="app-ring-1" />
+                <span className="app-ring-2" />
+                <div className="app-glow relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 ring-2 ring-sky-300/50 sm:h-28 sm:w-28">
                   <img
-                    src="/images/davao-logo.png"
-                    alt="Lungsod ng Dabaw — Official Seal"
-                    className="h-full w-full rounded-full object-contain"
+                    src="/icons/icon-512.png"
+                    alt="Kalyo App"
+                    className="h-full w-full object-cover"
                   />
                 </div>
+              </div>
+
+              {/* KALYO letter badges */}
+              <div className="flex items-center gap-1.5">
+                {["K", "A", "L", "Y", "O"].map((letter, i) => (
+                  <span
+                    key={i}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-base font-black text-white shadow-lg shadow-sky-400/35"
+                  >
+                    {letter}
+                  </span>
+                ))}
+              </div>
+
+              {/* Meaning */}
+              <div className="text-center">
+                <p className="text-sm font-bold text-sky-600 tracking-wide">
+                  Kalusugan At Ligtas Yang Obyektibo
+                </p>
+                <p className="mt-0.5 text-xs italic text-slate-400">
+                  &ldquo;Health and Safety as Our Objective&rdquo;
+                </p>
               </div>
             </div>
 
@@ -270,12 +297,12 @@ function LoginForm() {
               <h2 className="text-4xl font-extrabold text-[#0EA5E9] sm:text-5xl">
                 Welcome
               </h2>
-              <p className="mt-3 text-lg text-slate-500">
+              <p className="mt-2 text-base text-slate-500">
                 Log in to your health center account
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-10 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
               <Input
                 label="Username or Email"
                 icon={<User className="h-5 w-5" />}
