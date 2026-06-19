@@ -188,6 +188,7 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState("");
   const [serverMessage, setServerMessage] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const progress = useMemo(() => (step / 5) * 100, [step]);
 
@@ -387,11 +388,7 @@ export default function RegisterPage() {
       }
 
       setVerified(true);
-      setServerMessage("Account verified and created successfully.");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1200);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("VERIFY_ERROR", error);
       setServerError("Unable to connect to the verification server.");
@@ -1015,6 +1012,56 @@ export default function RegisterPage() {
           </form>
         </div>
       </div>
+      {/* Registration Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-2xl">
+            {/* Green top bar */}
+            <div className="flex flex-col items-center bg-gradient-to-br from-emerald-400 to-teal-500 px-6 pb-8 pt-10 text-white">
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
+                <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-white stroke-[2.5]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-extrabold tracking-tight">Registration Complete!</h2>
+              <p className="mt-2 text-center text-sm text-white/85">
+                Your account has been verified and successfully created.
+              </p>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-6">
+              <div className="mb-5 space-y-3">
+                <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-emerald-600 stroke-2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-800">Email verified</p>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-emerald-600 stroke-2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-800">Account created successfully</p>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-sky-600 stroke-2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+                  </div>
+                  <p className="text-sm font-semibold text-sky-800">You can now log in to your account</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => { window.location.href = "/login"; }}
+                className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-base font-extrabold text-white shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:shadow-xl active:scale-95"
+              >
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
