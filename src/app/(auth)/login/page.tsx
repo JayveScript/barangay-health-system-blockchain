@@ -246,6 +246,7 @@ function LoginForm() {
                 text="Blockchain-powered security for tamper-proof and trusted health records."
                 animClass="info-card-anim-d2"
               />
+            </div>
           </div>
         </section>
 
