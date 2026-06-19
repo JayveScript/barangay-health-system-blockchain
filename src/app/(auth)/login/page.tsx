@@ -195,19 +195,19 @@ function LoginForm() {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-blue-950/70 to-sky-900/65" />
           <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-transparent to-slate-950/30" />
 
-          <div className="relative z-10 flex h-full flex-col items-start justify-start p-10 pt-10 text-white">
+          <div className="relative z-10 flex h-full flex-col items-start justify-start p-8 text-white">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold shadow-lg shadow-slate-950/20 backdrop-blur-md">
                 <ShieldCheck className="h-4 w-4" />
                 Secure Health Center Access
               </div>
 
-              <div className="mt-8 w-full max-w-2xl">
+              <div className="mt-5 w-full max-w-2xl">
                 <div className="flex items-center gap-6">
                   {/* Davao logo beside the title */}
                   <div className="logo-float relative flex-shrink-0">
                     <span className="logo-ring-1" />
                     <span className="logo-ring-2" />
-                    <div className="logo-glow relative flex h-[88px] w-[88px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
+                    <div className="logo-glow relative flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
                       <img
                         src="/images/davao-logo.png"
                         alt="Lungsod ng Dabaw — Official Seal"
@@ -216,18 +216,18 @@ function LoginForm() {
                     </div>
                   </div>
 
-                  <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
+                  <h1 className="text-4xl font-extrabold leading-tight drop-shadow-lg">
                     Barangay Health Center Management System
                   </h1>
                 </div>
 
-                <p className="mt-6 max-w-xl text-xl leading-9 text-white/95 drop-shadow-md">
+                <p className="mt-3 max-w-xl text-base leading-7 text-white/95 drop-shadow-md">
                   A secure and modern platform for managing patient records,
                   consultations, and daily barangay health center operations.
                 </p>
               </div>
 
-            <div className="mt-14 w-full grid gap-5 xl:grid-cols-3">
+            <div className="mt-8 w-full grid gap-4 xl:grid-cols-3">
               <InfoCard
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
@@ -273,15 +273,15 @@ function LoginForm() {
         </section>
 
         {/* ── RIGHT PANEL ── */}
-        <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:w-[40%] lg:px-10">
+        <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:w-[40%] lg:px-10">
           <div className="w-full max-w-md">
 
             {/* Kalyo app icon + KALYO letters + meaning */}
-            <div className="mb-6 flex flex-col items-center gap-3">
+            <div className="mb-4 flex flex-col items-center gap-2">
               <div className="app-float relative">
                 <span className="app-ring-1" />
                 <span className="app-ring-2" />
-                <div className="app-glow relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 ring-2 ring-sky-300/50 sm:h-28 sm:w-28">
+                <div className="app-glow relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 ring-2 ring-sky-300/50 sm:h-24 sm:w-24">
                   <img
                     src="/icons/icon-512.png"
                     alt="Kalyo App"
@@ -295,7 +295,7 @@ function LoginForm() {
                 {["K", "A", "L", "Y", "O"].map((letter, i) => (
                   <span
                     key={i}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-base font-black text-white shadow-lg shadow-sky-400/35"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-sm font-black text-white shadow-lg shadow-sky-400/35"
                   >
                     {letter}
                   </span>
@@ -313,16 +313,7 @@ function LoginForm() {
               </div>
             </div>
 
-            <div className="text-center">
-              <h2 className="text-4xl font-extrabold text-[#0EA5E9] sm:text-5xl">
-                Welcome
-              </h2>
-              <p className="mt-2 text-base text-slate-500">
-                Log in to your health center account
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="mt-2 space-y-4">
               <Input
                 label="Username or Email"
                 icon={<User className="h-5 w-5" />}
