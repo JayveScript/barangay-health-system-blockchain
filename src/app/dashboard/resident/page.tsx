@@ -2698,16 +2698,10 @@ function DigitalIdCard({
                 </div>
               </div>
 
-              {/* Occupation + Agency Code */}
-              <div className="flex items-end justify-between gap-2">
-                <div className="flex flex-col">
-                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Occupation</p>
-                  <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.occupation || "-"}</p>
-                </div>
-                <div className="shrink-0 rounded-md bg-sky-900 px-1.5 py-0.5 text-right shadow-sm sm:rounded-lg sm:px-2.5 sm:py-1 lg:rounded-xl lg:px-3.5 lg:py-1.5">
-                  <p className="text-[4px] font-black uppercase text-sky-100 sm:text-[6px] lg:text-[9px]">Agency Code</p>
-                  <p className="text-[7px] font-black uppercase text-white sm:text-[10px] lg:text-[14px]">B19B</p>
-                </div>
+              {/* Occupation */}
+              <div className="flex flex-col">
+                <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Occupation</p>
+                <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.occupation || "-"}</p>
               </div>
             </div>
           </div>
