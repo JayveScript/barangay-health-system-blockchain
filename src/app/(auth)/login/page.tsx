@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,11 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,13 +326,15 @@ function LoginForm() {
                 </Link>
               </p>
 
-              <Link
-                href="/install"
-                className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3.5 text-sm font-semibold text-[#0EA5E9] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-100 hover:shadow-md"
-              >
-                <Download className="h-4 w-4" />
-                Get the Kalyo App
-              </Link>
+              {!isStandalone && (
+                <Link
+                  href="/install"
+                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3.5 text-sm font-semibold text-[#0EA5E9] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-100 hover:shadow-md"
+                >
+                  <Download className="h-4 w-4" />
+                  Get the Kalyo App
+                </Link>
+              )}
             </form>
           </div>
         </section>
