@@ -211,10 +211,16 @@ function LoginForm() {
               </div>
 
               <div className="mt-12 max-w-2xl">
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-sm">
+                  <span className="text-xs font-black tracking-[0.25em] text-white/90">K · A · L · Y · O</span>
+                </div>
                 <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
                   Barangay Health Center Management System
                 </h1>
-                <p className="mt-6 max-w-xl text-xl leading-9 text-white/95 drop-shadow-md">
+                <p className="mt-3 text-sm font-semibold text-white/75 drop-shadow-sm">
+                  <span className="font-black text-white/90">Kalusugan At Ligtas Yang Obyektibo</span> — Health and Safety as Our Objective
+                </p>
+                <p className="mt-4 max-w-xl text-xl leading-9 text-white/95 drop-shadow-md">
                   A secure and modern platform for managing patient records,
                   consultations, and daily barangay health center operations.
                 </p>

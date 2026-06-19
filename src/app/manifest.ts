@@ -1,10 +1,10 @@
-import type { MetadataRoute } from "next";
+﻿import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Kalyo - Barangay Health Center Blockchain System",
     short_name: "Kalyo",
-    description: "Kalyo: Secure blockchain-backed portal for the Barangay Health Center System.",
+    description: "KALYO — Kalusugan At Ligtas Yang Obyektibo. Secure blockchain-backed portal for the Barangay Health Center System.",
     id: "/",
     start_url: "/login",
     scope: "/",
