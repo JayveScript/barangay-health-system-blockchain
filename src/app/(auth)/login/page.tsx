@@ -207,7 +207,7 @@ function LoginForm() {
                   <div className="logo-float relative flex-shrink-0">
                     <span className="logo-ring-1" />
                     <span className="logo-ring-2" />
-                    <div className="logo-glow relative flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
+                    <div className="logo-glow relative flex h-[104px] w-[104px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
                       <img
                         src="/images/davao-logo.png"
                         alt="Lungsod ng Dabaw — Official Seal"
@@ -216,18 +216,18 @@ function LoginForm() {
                     </div>
                   </div>
 
-                  <h1 className="text-4xl font-extrabold leading-tight drop-shadow-lg">
+                  <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
                     Barangay Health Center Management System
                   </h1>
                 </div>
 
-                <p className="mt-3 max-w-xl text-base leading-7 text-white/95 drop-shadow-md">
+                <p className="mt-4 max-w-xl text-lg leading-8 text-white/95 drop-shadow-md">
                   A secure and modern platform for managing patient records,
                   consultations, and daily barangay health center operations.
                 </p>
               </div>
 
-            <div className="mt-8 w-full grid gap-4 xl:grid-cols-3">
+            <div className="mt-10 w-full grid gap-5 xl:grid-cols-3">
               <InfoCard
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
@@ -441,12 +441,12 @@ function InfoCard({
   animClass: string;
 }) {
   return (
-    <div className={`${animClass} group rounded-[24px] border border-white/20 bg-white/15 p-5 shadow-lg shadow-slate-950/20 backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-sky-200/70 hover:bg-white/20`}>
-      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
+    <div className={`${animClass} group rounded-[24px] border border-white/20 bg-white/15 p-6 shadow-lg shadow-slate-950/20 backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-sky-200/70 hover:bg-white/20`}>
+      <div className="mb-3 flex h-13 w-13 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
         {icon}
       </div>
-      <h3 className="text-lg font-bold text-white drop-shadow-sm">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-white/90 drop-shadow-sm">
+      <h3 className="text-xl font-bold text-white drop-shadow-sm">{title}</h3>
+      <p className="mt-2 text-base leading-6 text-white/90 drop-shadow-sm">
         {text}
       </p>
     </div>
