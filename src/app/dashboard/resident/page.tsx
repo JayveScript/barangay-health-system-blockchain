@@ -2597,9 +2597,9 @@ function DigitalIdCard({
 
   return (
     <div className="flex flex-col items-center justify-center pb-6 pt-2">
-      <div 
+      <div
         ref={cardRef}
-        className="relative h-[215px] w-[340px] overflow-hidden rounded-[18px] border border-sky-200 bg-white font-sans shadow-[0_18px_45px_rgba(14,165,233,0.18)] sm:h-[316px] sm:w-[500px] sm:rounded-[24px] lg:aspect-[760/480] lg:h-auto lg:w-full lg:max-w-[760px] lg:rounded-[30px]"
+        className="relative w-[340px] overflow-hidden rounded-[18px] border border-sky-200 bg-white font-sans shadow-[0_18px_45px_rgba(14,165,233,0.18)] sm:w-[500px] sm:rounded-[24px] lg:aspect-[760/480] lg:h-auto lg:w-full lg:max-w-[760px] lg:rounded-[30px]"
       >
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#F8FBFF_0%,#FFFFFF_42%,#EEF6FF_100%)]" />
         <div className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,#0EA5E9_0%,#38BDF8_55%,#BAE6FD_100%)] sm:h-2 lg:h-2.5" />
@@ -2636,73 +2636,77 @@ function DigitalIdCard({
             </div>
           </div>
 
-          <div className="flex flex-1 gap-3 pt-3 sm:gap-5 sm:pt-5 lg:gap-8 lg:pt-6">
-            <div className="flex w-[92px] shrink-0 flex-col items-center sm:w-[142px] lg:w-[205px]">
+          <div className="flex flex-1 gap-2 pt-2 sm:gap-4 sm:pt-4 lg:gap-8 lg:pt-6">
+            {/* Left column — QR + barcode */}
+            <div className="flex w-[80px] shrink-0 flex-col items-center sm:w-[130px] lg:w-[200px]">
               <div className="w-full rounded-xl border border-sky-100 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3">
                 {qrImageUrl ? (
-                  <img
-                    src={qrImageUrl}
-                    alt="Encrypted health record QR code"
-                    className="aspect-square h-auto w-full object-contain"
-                  />
+                  <img src={qrImageUrl} alt="Encrypted health record QR code" className="aspect-square h-auto w-full object-contain" />
                 ) : (
                   <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-slate-100 text-[8px] font-bold text-slate-400">
-                    {qrLoading ? "Securing QR..." : "QR unavailable"}
+                    {qrLoading ? "Loading..." : "QR N/A"}
                   </div>
                 )}
               </div>
-              <p className="mt-1.5 text-center text-[7px] font-bold leading-tight text-slate-500 sm:mt-2 sm:text-[10px] lg:mt-3 lg:text-[13px]">Scan for Health Record</p>
+              <p className="mt-1 text-center text-[6px] font-bold leading-tight text-slate-500 sm:mt-1.5 sm:text-[9px] lg:mt-2 lg:text-[12px]">Scan for Health Record</p>
+              {/* Barcode */}
+              <div className="mt-1.5 w-full sm:mt-2 lg:mt-3">
+                <IdBarcode seed={resident.id ?? "B19B-HC"} />
+                <p className="mt-0.5 text-center text-[5px] font-bold text-slate-400 sm:text-[7px] lg:text-[9px]">B19B-HC</p>
+              </div>
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col justify-start">
-              <div className="mb-1.5 rounded-lg border border-sky-100/70 bg-white/70 px-2 py-1.5 shadow-sm backdrop-blur-sm sm:mb-2.5 sm:rounded-xl sm:px-3 sm:py-2 lg:mb-4 lg:rounded-2xl lg:px-4 lg:py-3">
-                <p className="text-[6px] font-black uppercase text-sky-900 sm:text-[8px] lg:text-[11px]">Last Name, First Name, Middle Name</p>
-                <h3 className="text-[12px] font-black uppercase leading-tight text-slate-950 sm:text-[18px] lg:text-[27px]">
-                  {formatIdName(resident)}
-                </h3>
+            {/* Right column */}
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2 lg:gap-3">
+              {/* Name */}
+              <div className="rounded-lg border border-sky-100/70 bg-white/70 px-2 py-1 shadow-sm backdrop-blur-sm sm:rounded-xl sm:px-3 sm:py-1.5 lg:rounded-2xl lg:px-4 lg:py-2.5">
+                <p className="text-[5px] font-black uppercase text-sky-900 sm:text-[7px] lg:text-[10px]">Last Name, First Name, Middle Name</p>
+                <h3 className="text-[10px] font-black uppercase leading-tight text-slate-950 sm:text-[16px] lg:text-[24px]">{formatIdName(resident)}</h3>
               </div>
 
-              <div className="mb-1.5 grid grid-cols-[30%_24%_46%] gap-x-1 sm:mb-2.5 sm:gap-x-2 lg:mb-4 lg:gap-x-4">
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Nationality</p>
-                  <p className="text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">PHL</p>
+              {/* Nationality | Sex | DOB */}
+              <div className="grid grid-cols-3 gap-x-1 sm:gap-x-2 lg:gap-x-3">
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Nationality</p>
+                  <p className="text-[8px] font-black uppercase text-slate-950 sm:text-[12px] lg:text-[17px]">PHL</p>
                 </div>
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Sex</p>
-                  <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.sex}</p>
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Sex</p>
+                  <p className="text-[8px] font-black uppercase text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.sex}</p>
                 </div>
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Date of Birth</p>
-                  <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{formatDate(resident.birthDate)}</p>
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Date of Birth</p>
+                  <p className="text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{formatDate(resident.birthDate)}</p>
                 </div>
               </div>
 
-              <div className="mb-1.5 sm:mb-2.5 lg:mb-4">
-                <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Address</p>
-                <p className="line-clamp-2 text-[9px] font-black uppercase leading-[1.2] text-slate-950 sm:text-[13px] lg:text-[20px]">
-                  {resident.completeAddress}
-                </p>
+              {/* Address */}
+              <div>
+                <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Address</p>
+                <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[11px] lg:text-[16px]">{resident.completeAddress}</p>
               </div>
 
-              <div className="grid grid-cols-[30%_32%_38%] gap-x-1 sm:gap-x-2 lg:gap-x-4">
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Civil Status</p>
-                  <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.civilStatus || "-"}</p>
+              {/* Civil Status | Religion */}
+              <div className="grid grid-cols-2 gap-x-1 sm:gap-x-2 lg:gap-x-3">
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Civil Status</p>
+                  <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.civilStatus || "-"}</p>
                 </div>
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Religion</p>
-                  <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.religion || "-"}</p>
-                </div>
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Occupation</p>
-                  <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.occupation || "-"}</p>
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Religion</p>
+                  <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.religion || "-"}</p>
                 </div>
               </div>
-              
-              <div className="mt-auto flex justify-end">
-                <div className="rounded-lg bg-sky-900 px-2 py-1 text-right shadow-sm sm:rounded-xl sm:px-3 sm:py-1.5 lg:rounded-2xl lg:px-4 lg:py-2">
-                  <p className="text-[5px] font-black uppercase text-sky-100 sm:text-[7px] lg:text-[10px]">Agency Code</p>
-                  <p className="text-[8px] font-black uppercase text-white sm:text-[11px] lg:text-[16px]">B19B</p>
+
+              {/* Occupation + Agency Code */}
+              <div className="flex items-end justify-between gap-2">
+                <div className="flex flex-col">
+                  <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Occupation</p>
+                  <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.occupation || "-"}</p>
+                </div>
+                <div className="shrink-0 rounded-md bg-sky-900 px-1.5 py-0.5 text-right shadow-sm sm:rounded-lg sm:px-2.5 sm:py-1 lg:rounded-xl lg:px-3.5 lg:py-1.5">
+                  <p className="text-[4px] font-black uppercase text-sky-100 sm:text-[6px] lg:text-[9px]">Agency Code</p>
+                  <p className="text-[7px] font-black uppercase text-white sm:text-[10px] lg:text-[14px]">B19B</p>
                 </div>
               </div>
             </div>
@@ -2710,7 +2714,7 @@ function DigitalIdCard({
         </div>
       </div>
 
-      <div className="mt-5 w-[340px] sm:w-[500px] lg:w-full lg:max-w-[760px]">
+      <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
         <button
           onClick={handleDownload}
           disabled={downloading}
@@ -2720,6 +2724,26 @@ function DigitalIdCard({
         </button>
       </div>
     </div>
+  );
+}
+
+function IdBarcode({ seed }: { seed: string }) {
+  const bars: { x: number; w: number }[] = [];
+  let x = 0;
+  // Start/end guard bars
+  const push = (w: number, gap: number) => { bars.push({ x, w }); x += w + gap; };
+  push(2, 1); push(1, 1); push(2, 1);
+  for (let i = 0; i < seed.length; i++) {
+    const c = seed.charCodeAt(i);
+    push(((c >> 4) % 3) + 1, ((c >> 2) % 2) + 1);
+    push(((c)      % 2) + 1, ((c >> 1) % 2) + 1);
+    push(((c * 3)  % 3) + 1, 1);
+  }
+  push(2, 1); push(1, 1); push(2, 0);
+  return (
+    <svg viewBox={`0 0 ${x} 22`} preserveAspectRatio="none" className="h-5 w-full sm:h-7 lg:h-10">
+      {bars.map((b, i) => <rect key={i} x={b.x} y={0} width={b.w} height={22} fill="#1e293b" />)}
+    </svg>
   );
 }
 
