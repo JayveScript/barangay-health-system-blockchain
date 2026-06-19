@@ -125,7 +125,16 @@ export default function InstallPage() {
             </div>
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800">Kalyo App</h1>
-          <p className="mt-1.5 text-base text-slate-500">Barangay Health Center · Blockchain</p>
+          <div className="mt-2 flex flex-wrap justify-center gap-1 text-center">
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-black tracking-widest text-sky-700">K</span>
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-black tracking-widest text-sky-700">A</span>
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-black tracking-widest text-sky-700">L</span>
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-black tracking-widest text-sky-700">Y</span>
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-black tracking-widest text-sky-700">O</span>
+          </div>
+          <p className="mt-1 text-sm font-semibold text-sky-700">Kalusugan At Ligtas Yang Obyektibo</p>
+          <p className="text-xs text-slate-400 italic">"Health and Safety as Our Objective"</p>
+          <p className="mt-1 text-sm text-slate-500">Barangay Health Center · Blockchain System</p>
           <div className="mt-3 flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
             <CheckCircle2 className="h-3.5 w-3.5" /> Free · No app store needed
           </div>
