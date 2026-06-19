@@ -256,11 +256,11 @@ function LoginForm() {
           <div className="w-full max-w-md">
 
             {/* Kalyo app icon + KALYO letters + meaning */}
-            <div className="mb-8 flex flex-col items-center gap-5 lg:mb-4 lg:gap-2">
+            <div className="mb-4 flex flex-col items-center gap-3 lg:mb-4 lg:gap-2">
               <div className="app-float relative">
                 <span className="app-ring-1" />
                 <span className="app-ring-2" />
-                <div className="app-glow relative flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 ring-2 ring-sky-300/50 sm:h-32 sm:w-32 lg:h-20 lg:w-20">
+                <div className="app-glow relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 ring-2 ring-sky-300/50 lg:h-20 lg:w-20">
                   <img
                     src="/icons/icon-512.png"
                     alt="Kalyo App"
@@ -270,11 +270,11 @@ function LoginForm() {
               </div>
 
               {/* KALYO letter badges */}
-              <div className="flex items-center gap-3 lg:gap-1.5">
+              <div className="flex items-center gap-2 lg:gap-1.5">
                 {["K", "A", "L", "Y", "O"].map((letter, i) => (
                   <span
                     key={i}
-                    className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-2xl font-black text-white shadow-lg shadow-sky-400/35 lg:h-9 lg:w-9 lg:rounded-xl lg:text-sm"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-lg font-black text-white shadow-lg shadow-sky-400/35 lg:h-9 lg:w-9 lg:text-sm"
                   >
                     {letter}
                   </span>
@@ -283,25 +283,25 @@ function LoginForm() {
 
               {/* Meaning */}
               <div className="text-center">
-                <p className="text-base font-bold text-sky-600 tracking-wide lg:text-sm">
+                <p className="text-sm font-bold text-sky-600 tracking-wide">
                   Kalusugan At Ligtas Yang Obyektibo
                 </p>
-                <p className="mt-1 text-sm italic text-slate-400 lg:mt-0.5 lg:text-xs">
+                <p className="mt-0.5 text-xs italic text-slate-400">
                   &ldquo;Health and Safety as Our Objective&rdquo;
                 </p>
               </div>
             </div>
 
-            <div className="mb-6 text-center lg:hidden">
-              <h2 className="text-5xl font-extrabold text-[#0EA5E9]">
+            <div className="mb-4 text-center lg:hidden">
+              <h2 className="text-4xl font-extrabold text-[#0EA5E9]">
                 Welcome
               </h2>
-              <p className="mt-2 text-lg text-slate-500">
+              <p className="mt-1 text-base text-slate-500">
                 Log in to your health center account
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-2 space-y-5 lg:space-y-4">
+            <form onSubmit={handleSubmit} className="mt-2 space-y-4">
               <Input
                 label="Username or Email"
                 icon={<User className="h-5 w-5" />}
