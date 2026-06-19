@@ -885,7 +885,7 @@ export default function ResidentDashboard() {
 
                 <div className="min-w-0 flex-1 basis-0">
                   <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                    <h2 className="max-w-full whitespace-nowrap text-base font-bold tracking-tight text-slate-900 min-[380px]:text-lg sm:text-2xl">
+                    <h2 className="max-w-full break-words text-base font-bold leading-tight tracking-tight text-slate-900 min-[380px]:text-lg sm:text-2xl">
                       {fullName}
                     </h2>
 
