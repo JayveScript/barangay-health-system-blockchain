@@ -227,7 +227,7 @@ function LoginForm() {
                 </p>
               </div>
 
-            <div className="mt-8 w-full grid gap-5 xl:grid-cols-3">
+            <div className="mt-14 w-full grid gap-5 xl:grid-cols-3">
               <InfoCard
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
