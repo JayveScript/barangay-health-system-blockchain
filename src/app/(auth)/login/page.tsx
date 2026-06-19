@@ -313,6 +313,15 @@ function LoginForm() {
               </div>
             </div>
 
+            <div className="text-center lg:hidden">
+              <h2 className="text-4xl font-extrabold text-[#0EA5E9] sm:text-5xl">
+                Welcome
+              </h2>
+              <p className="mt-2 text-base text-slate-500">
+                Log in to your health center account
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="mt-2 space-y-4">
               <Input
                 label="Username or Email"
