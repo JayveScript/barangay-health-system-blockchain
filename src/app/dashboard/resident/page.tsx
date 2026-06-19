@@ -2569,6 +2569,21 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+async function toDataUrl(src: string): Promise<string> {
+  try {
+    const res = await fetch(src, { cache: "force-cache" });
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return src;
+  }
+}
+
 function DigitalIdCard({
   resident,
 }: {
@@ -2576,12 +2591,21 @@ function DigitalIdCard({
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [logoDataUrl, setLogoDataUrl] = useState("/images/davao-logo.png");
+
+  useEffect(() => {
+    toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
+  }, []);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
       setDownloading(true);
-      const dataUrl = await htmlToImage.toPng(cardRef.current, { pixelRatio: 3 });
+      const dataUrl = await htmlToImage.toPng(cardRef.current, {
+        pixelRatio: 3,
+        cacheBust: true,
+        includeQueryParams: true,
+      });
       const link = document.createElement("a");
       link.download = `digital-id-${resident.lastName || "resident"}.png`;
       link.href = dataUrl;
@@ -2609,11 +2633,11 @@ function DigitalIdCard({
         <div className="absolute inset-0 opacity-[0.18]">
           <div className="h-full w-full bg-[repeating-linear-gradient(125deg,rgba(37,99,235,0.16)_0px,rgba(37,99,235,0.16)_1px,transparent_1px,transparent_12px)] lg:bg-[repeating-linear-gradient(125deg,rgba(37,99,235,0.15)_0px,rgba(37,99,235,0.15)_1px,transparent_1px,transparent_16px)]" />
         </div>
-        <div className="absolute left-[56%] top-[53%] -translate-x-1/2 -translate-y-1/2 opacity-[0.16] mix-blend-multiply [mask-image:radial-gradient(circle,black_0%,black_50%,transparent_76%)]">
+        <div className="absolute left-[56%] top-[53%] -translate-x-1/2 -translate-y-1/2 opacity-[0.10]">
           <img
-            src="/images/davao-logo.png"
+            src={logoDataUrl}
             alt="Watermark"
-            className="h-[250px] w-[250px] object-contain contrast-125 saturate-75 sm:h-[380px] sm:w-[380px] lg:h-[540px] lg:w-[540px]"
+            className="h-[250px] w-[250px] object-contain sm:h-[380px] sm:w-[380px] lg:h-[540px] lg:w-[540px]"
           />
         </div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_53%,rgba(219,234,254,0.08)_0%,rgba(255,255,255,0.20)_38%,rgba(248,251,255,0.84)_74%,rgba(248,251,255,0.94)_100%)]" />
@@ -2622,7 +2646,7 @@ function DigitalIdCard({
         <div className="relative z-10 flex h-full flex-col p-3 pl-4 sm:p-5 sm:pl-6 lg:p-7 lg:pl-9">
           <div className="flex items-center justify-between border-b border-sky-100/90 pb-2 sm:pb-3 lg:pb-4">
             <img
-              src="/images/davao-logo.png"
+              src={logoDataUrl}
               alt="Barangay logo"
               className="h-9 w-9 object-contain drop-shadow-sm sm:h-14 sm:w-14 lg:h-[74px] lg:w-[74px]"
             />
