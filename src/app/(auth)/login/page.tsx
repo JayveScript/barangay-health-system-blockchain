@@ -248,27 +248,6 @@ function LoginForm() {
               />
             </div>
 
-            {/* Bottom feature strip */}
-            <div className="mt-auto pt-8">
-              <div className="mb-4 h-px bg-white/10" />
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-sm">
-                  <ShieldCheck className="h-3.5 w-3.5 text-sky-300" />
-                  Blockchain Secured
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-sm">
-                  <HeartPulse className="h-3.5 w-3.5 text-emerald-300" />
-                  Digital Health Records
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-sm">
-                  <Stethoscope className="h-3.5 w-3.5 text-purple-300" />
-                  PWA Mobile App
-                </span>
-              </div>
-              <p className="mt-3 text-center text-[11px] text-white/30">
-                © {new Date().getFullYear()} Kalyo · Barangay Health Center Blockchain System
-              </p>
-            </div>
           </div>
         </section>
 
