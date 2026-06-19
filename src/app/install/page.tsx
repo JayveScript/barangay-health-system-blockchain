@@ -242,7 +242,14 @@ export default function InstallPage() {
                     🤖 &nbsp;Install Now
                   </button>
                 ) : (
-                  <button className="w-full rounded-2xl border-2 border-sky-400 bg-sky-50 py-4 text-base font-extrabold text-sky-600 transition hover:bg-sky-100 active:scale-95" disabled>
+                  <button
+                    onClick={() => {
+                      const url = window.location.href;
+                      const noProto = url.replace(/^https?:\/\//, "");
+                      const scheme = url.startsWith("https") ? "https" : "http";
+                      window.location.href = `intent://${noProto}#Intent;scheme=${scheme};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+                    }}
+                    className="w-full rounded-2xl border-2 border-sky-400 bg-sky-50 py-4 text-base font-extrabold text-sky-600 transition hover:bg-sky-100 active:scale-95">
                     🤖 &nbsp;Open in Chrome to Install
                   </button>
                 )}
