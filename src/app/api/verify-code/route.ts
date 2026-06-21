@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { DEFAULT_BARANGAY_CITY } from "@/lib/barangay-options";
 import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
+import { sendRegistrationWelcomeEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
   try {
@@ -214,6 +215,27 @@ export async function POST(req: Request) {
         residentId: resident.id,
       };
     });
+
+    // ── Welcome email (fire-and-forget) ─────────────────────────────────────
+    // Confirms to the resident that their account is registered in the
+    // Barangay Health Center Blockchain. Failures never block registration.
+    {
+      const residentFullName = `${pending.firstName} ${
+        pending.middleName ?? ""
+      } ${pending.lastName}`
+        .replace(/\s+/g, " ")
+        .trim();
+
+      sendRegistrationWelcomeEmail(
+        normalizedEmail,
+        residentFullName,
+        pending.barangayName,
+        pending.username
+      ).catch((err) =>
+        console.error("[mail] registration welcome email failed:", err)
+      );
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // ── Blockchain: anchor health records (fire-and-forget, non-blocking) ───
     // Failures here do NOT affect the registration response.

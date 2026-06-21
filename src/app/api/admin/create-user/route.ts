@@ -83,20 +83,29 @@ export async function POST(req: Request) {
     }
 
     if (email) {
-      const emailTaken = await db.user.findUnique({ where: { email } });
-      if (emailTaken) {
+      const [emailTakenByUser, emailTakenByResident] = await Promise.all([
+        db.user.findUnique({ where: { email } }),
+        db.resident.findUnique({ where: { email } }),
+      ]);
+      if (emailTakenByUser || emailTakenByResident) {
         return NextResponse.json(
-          { error: "Email is already in use." },
+          { error: "Email is already in use by another account or resident." },
           { status: 400 }
         );
       }
     }
 
     if (phoneNumber) {
-      const phoneTaken = await db.user.findUnique({ where: { phoneNumber } });
-      if (phoneTaken) {
+      const [phoneTakenByUser, phoneTakenByResident] = await Promise.all([
+        db.user.findUnique({ where: { phoneNumber } }),
+        db.resident.findFirst({ where: { phoneNumber } }),
+      ]);
+      if (phoneTakenByUser || phoneTakenByResident) {
         return NextResponse.json(
-          { error: "Phone number is already in use." },
+          {
+            error:
+              "Phone number is already in use by another account or resident.",
+          },
           { status: 400 }
         );
       }

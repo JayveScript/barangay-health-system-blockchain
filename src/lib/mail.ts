@@ -130,6 +130,58 @@ export async function sendDoctorAvailabilityEmail(
   });
 }
 
+export async function sendRegistrationWelcomeEmail(
+  to: string,
+  fullName: string,
+  barangayName: string,
+  username?: string | null
+) {
+  const safeName = fullName?.trim() || "Resident";
+
+  await transporter.sendMail({
+    from: `"${barangayName} Health Center" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: "You're registered — Barangay Health Center Blockchain",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a;">
+        <div style="background: #0EA5E9; padding: 16px 24px; border-radius: 8px 8px 0 0;">
+          <h2 style="color: #ffffff; margin: 0;">🏥 ${barangayName} Health Center</h2>
+          <p style="color: #e0f2fe; margin: 4px 0 0;">Registration Successful</p>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
+          <h3 style="color: #0EA5E9; margin-top: 0;">Welcome, ${safeName}!</h3>
+          <p style="line-height: 1.6;">
+            Your account has been successfully registered in the
+            <strong>Barangay Health Center Blockchain</strong> system. Your
+            health records are now securely stored and verifiable.
+          </p>
+          ${
+            username
+              ? `<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                  <tr>
+                    <td style="padding: 8px 12px; background: #f1f5f9; border-radius: 4px; font-weight: 600; width: 140px;">Username</td>
+                    <td style="padding: 8px 12px;">${username}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 12px; background: #f1f5f9; border-radius: 4px; font-weight: 600;">Barangay</td>
+                    <td style="padding: 8px 12px;">${barangayName}</td>
+                  </tr>
+                </table>`
+              : ""
+          }
+          <p style="background: #ecfdf5; color: #065f46; padding: 12px 16px; border-radius: 6px; line-height: 1.6;">
+            You can now log in to the Barangay Health Center portal to view your
+            digital ID, medical history, and book appointments.
+          </p>
+          <p style="margin-top: 24px; font-size: 12px; color: #94a3b8;">
+            This message was sent by your barangay health center. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
 export async function sendOtpEmail(to: string, otp: string) {
   await transporter.sendMail({
     from: `"Barangay Health Center" <${process.env.EMAIL_USER}>`,
