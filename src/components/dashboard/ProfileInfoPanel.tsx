@@ -6,7 +6,6 @@ import {
   Mail,
   MapPin,
   Phone,
-  ShieldCheck,
   UserRound,
 } from "lucide-react";
 
@@ -38,7 +37,6 @@ function formatProfileDate(value?: string | Date | null) {
 
 export function ProfileInfoPanel({
   fullName,
-  initials,
   roleLabel,
   username,
   email,
@@ -46,7 +44,6 @@ export function ProfileInfoPanel({
   barangayName,
   isVerified,
   createdAt,
-  eyebrow = "Personal Info",
 }: ProfileInfoPanelProps) {
   const displayName = fullName?.trim() || "Unnamed User";
   const displayBarangay = barangayName?.trim() || "Assigned Barangay";
@@ -54,39 +51,13 @@ export function ProfileInfoPanel({
 
   return (
     <section className="overflow-hidden rounded-[28px] border border-sky-200 bg-white shadow-sm">
-      <div className="bg-gradient-to-br from-[#0369A1] via-[#0EA5E9] to-[#38BDF8] px-5 py-6 text-white sm:px-7">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] bg-white/15 text-3xl font-black ring-1 ring-white/35 shadow-lg shadow-sky-950/20">
-              {initials}
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-100">
-                {eyebrow}
-              </p>
-
-              <h2 className="mt-2 truncate text-2xl font-black text-white sm:text-4xl">
-                {displayName}
-              </h2>
-
-              <p className="mt-2 text-sm font-semibold text-sky-50">
-                {roleLabel}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-white/15 px-3 text-xs font-bold text-white ring-1 ring-white/30">
-              <ShieldCheck className="h-4 w-4" />
-              {statusLabel}
-            </span>
-
-            <span className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-white/15 px-3 text-xs font-bold text-white ring-1 ring-white/30">
-              <MapPin className="h-4 w-4" />
-              {displayBarangay}
-            </span>
-          </div>
+      <div className="flex items-center gap-3 border-b border-sky-100 px-5 py-4 sm:px-7">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+          <UserRound className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-lg font-black text-slate-900">Account Details</h2>
+          <p className="text-sm text-slate-500">{roleLabel}</p>
         </div>
       </div>
 
