@@ -263,6 +263,8 @@ export default function AdminDashboardPage() {
     firstName: "",
     middleName: "",
     lastName: "",
+    email: "",
+    phoneNumber: "",
     username: "",
     password: "",
     role: "STAFF",
@@ -432,6 +434,8 @@ export default function AdminDashboardPage() {
         },
         body: JSON.stringify({
           fullName,
+          email: form.email,
+          phoneNumber: form.phoneNumber,
           username: normalizeBarangayHcmsUsername(form.username),
           password: form.password,
           role: form.role,
@@ -451,6 +455,8 @@ export default function AdminDashboardPage() {
         firstName: "",
         middleName: "",
         lastName: "",
+        email: "",
+        phoneNumber: "",
         username: "",
         password: "",
         role: "STAFF",
@@ -1234,6 +1240,25 @@ export default function AdminDashboardPage() {
                               }
                             />
                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <Input
+                            label="Email"
+                            type="email"
+                            value={form.email}
+                            onChange={(v) =>
+                              setForm((p) => ({ ...p, email: v }))
+                            }
+                          />
+
+                          <Input
+                            label="Phone Number"
+                            value={form.phoneNumber}
+                            onChange={(v) =>
+                              setForm((p) => ({ ...p, phoneNumber: v }))
+                            }
+                          />
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

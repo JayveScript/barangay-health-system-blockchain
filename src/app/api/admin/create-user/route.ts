@@ -24,6 +24,8 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const fullName = String(body.fullName || "").trim();
+    const email = String(body.email || "").trim().toLowerCase() || null;
+    const phoneNumber = String(body.phoneNumber || "").trim() || null;
     const username = normalizeBarangayHcmsUsername(
       String(body.username || "")
     );
@@ -60,6 +62,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
     const existingUser = await db.user.findUnique({
       where: {
         username,
@@ -73,11 +82,33 @@ export async function POST(req: Request) {
       );
     }
 
+    if (email) {
+      const emailTaken = await db.user.findUnique({ where: { email } });
+      if (emailTaken) {
+        return NextResponse.json(
+          { error: "Email is already in use." },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (phoneNumber) {
+      const phoneTaken = await db.user.findUnique({ where: { phoneNumber } });
+      if (phoneTaken) {
+        return NextResponse.json(
+          { error: "Phone number is already in use." },
+          { status: 400 }
+        );
+      }
+    }
+
     const passwordHash = await hash(password, 10);
 
     const user = await db.user.create({
       data: {
         fullName,
+        email,
+        phoneNumber,
         username,
         password: passwordHash,
         role,
@@ -87,6 +118,8 @@ export async function POST(req: Request) {
       select: {
         id: true,
         fullName: true,
+        email: true,
+        phoneNumber: true,
         username: true,
         role: true,
         isVerified: true,
