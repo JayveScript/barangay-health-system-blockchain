@@ -56,6 +56,7 @@ import {
 } from "@/lib/username-validation";
 import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
+import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { PortalLoader } from "@/components/PortalLoader";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
 
@@ -208,6 +209,7 @@ export default function AdminDashboardPage() {
   | "residents"
   | "create-user"
   | "staff-users"
+  | "activity-logs"
   | "announcements"
   | "scan-qr"
 >("overview");
@@ -776,6 +778,7 @@ export default function AdminDashboardPage() {
     { id: "overview",      label: "Overview",   icon: <Activity className="h-5 w-5" /> },
     { id: "residents",     label: "Residents",  icon: <Users className="h-5 w-5" /> },
     { id: "create-user",   label: "Add User",   icon: <UserPlus className="h-5 w-5" /> },
+    { id: "activity-logs", label: "Activity",   icon: <ClipboardList className="h-5 w-5" /> },
     { id: "announcements", label: "News",       icon: <Megaphone className="h-5 w-5" /> },
     { id: "scan-qr",       label: "Scan QR",    icon: <ScanLine className="h-5 w-5" /> },
   ];
@@ -867,6 +870,16 @@ export default function AdminDashboardPage() {
             />
 
             <SidebarButton
+              active={tab === "activity-logs"}
+              icon={<ClipboardList className="h-5 w-5 shrink-0" />}
+              label="Activity Logs"
+              onClick={() => {
+                setTab("activity-logs");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={tab === "announcements"}
               icon={<Megaphone className="h-5 w-5 shrink-0" />}
               label="Announcements"
@@ -936,6 +949,13 @@ export default function AdminDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5 shrink-0" />}
                 label="Staff Users"
                 onClick={() => setTab("staff-users")}
+              />
+
+              <SidebarButton
+                active={tab === "activity-logs"}
+                icon={<ClipboardList className="h-5 w-5 shrink-0" />}
+                label="Activity Logs"
+                onClick={() => setTab("activity-logs")}
               />
 
               <SidebarButton
@@ -1127,6 +1147,8 @@ export default function AdminDashboardPage() {
                     <QrScannerTab />
                   </div>
                 )}
+
+                {tab === "activity-logs" && <ActivityLogsTab />}
 
                 {tab === "residents" && (
                   <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
