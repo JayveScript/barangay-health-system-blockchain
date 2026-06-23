@@ -127,12 +127,14 @@ export function ActivityLogsTab() {
     <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-            <Activity className="h-6 w-6" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 sm:h-12 sm:w-12">
+            <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Activity Logs</h2>
-            <p className="text-sm text-slate-500">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+              Activity Logs
+            </h2>
+            <p className="text-xs text-slate-500 sm:text-sm">
               What staff, nurses, doctors, and BHWs have been doing.
             </p>
           </div>
@@ -217,23 +219,23 @@ export function ActivityLogsTab() {
             return (
               <div
                 key={log.id}
-                className="flex items-start gap-3 rounded-[20px] border border-slate-100 bg-white p-3.5 shadow-sm sm:p-4"
+                className="flex items-start gap-2.5 rounded-[20px] border border-slate-100 bg-white p-3 shadow-sm sm:gap-3 sm:p-4"
               >
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${style.wrap}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 sm:h-11 sm:w-11 sm:rounded-2xl ${style.wrap}`}
                 >
                   {style.icon}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-black text-slate-900">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="break-words text-sm font-black text-slate-900">
                       {log.actorName}
                     </span>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">
                       {humanizeRole(log.actorRole)}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 sm:text-xs">
                       <Clock className="h-3.5 w-3.5" />
                       {relativeTime(log.createdAt)}
                     </span>
@@ -241,7 +243,9 @@ export function ActivityLogsTab() {
                   <p className="mt-1 text-sm font-bold text-slate-800">
                     {log.action}
                   </p>
-                  <p className="text-sm text-slate-500">{log.detail}</p>
+                  <p className="break-words text-xs text-slate-500 sm:text-sm">
+                    {log.detail}
+                  </p>
                 </div>
               </div>
             );
