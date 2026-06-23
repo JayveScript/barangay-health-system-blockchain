@@ -13,6 +13,7 @@ import {
   Eye,
   FileText,
   HeartPulse,
+  KeyRound,
   Lock,
   LogOut,
   MapPin,
@@ -258,6 +259,15 @@ export default function AdminDashboardPage() {
   const [staffDeletePassword, setStaffDeletePassword] = useState("");
   const [staffDeleteLoading, setStaffDeleteLoading] = useState(false);
   const [staffDeleteError, setStaffDeleteError] = useState("");
+
+  const [staffResetUser, setStaffResetUser] = useState<StaffUser | null>(null);
+  const [staffResetForm, setStaffResetForm] = useState({
+    newPassword: "",
+    password: "",
+  });
+  const [staffResetLoading, setStaffResetLoading] = useState(false);
+  const [staffResetError, setStaffResetError] = useState("");
+  const [staffResetMessage, setStaffResetMessage] = useState("");
 
   const [form, setForm] = useState({
     firstName: "",
@@ -699,6 +709,66 @@ export default function AdminDashboardPage() {
       setStaffDeleteError("Unable to connect to the server.");
     } finally {
       setStaffDeleteLoading(false);
+    }
+  };
+
+  const openStaffReset = (user: StaffUser) => {
+    setStaffResetUser(user);
+    setStaffResetForm({ newPassword: "", password: "" });
+    setStaffResetError("");
+    setStaffResetMessage("");
+  };
+
+  const closeStaffReset = () => {
+    if (staffResetLoading) return;
+
+    setStaffResetUser(null);
+    setStaffResetForm({ newPassword: "", password: "" });
+    setStaffResetError("");
+    setStaffResetMessage("");
+  };
+
+  const submitStaffReset = async () => {
+    if (!staffResetUser) return;
+
+    if (staffResetForm.newPassword.trim().length < 8) {
+      setStaffResetError("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (!staffResetForm.password.trim()) {
+      setStaffResetError("Admin password is required.");
+      return;
+    }
+
+    try {
+      setStaffResetLoading(true);
+      setStaffResetError("");
+      setStaffResetMessage("");
+
+      const res = await fetch(`/api/staff/${staffResetUser.id}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: staffResetForm.password,
+          newPassword: staffResetForm.newPassword,
+        }),
+      });
+
+      const json = await readJsonSafe(res);
+
+      if (!res.ok) {
+        setStaffResetError(json.error || "Failed to reset password.");
+        return;
+      }
+
+      setStaffResetMessage("Password reset successfully.");
+      setStaffResetForm({ newPassword: "", password: "" });
+    } catch (err) {
+      console.error(err);
+      setStaffResetError("Unable to connect to the server.");
+    } finally {
+      setStaffResetLoading(false);
     }
   };
 
@@ -1392,6 +1462,12 @@ export default function AdminDashboardPage() {
                               onClick={() => openStaffEdit(user)}
                             />
                             <IconActionButton
+                              label="Reset Password"
+                              dense
+                              icon={<KeyRound className="h-3.5 w-3.5" />}
+                              onClick={() => openStaffReset(user)}
+                            />
+                            <IconActionButton
                               label="Delete"
                               dense
                               icon={<Trash2 className="h-3.5 w-3.5" />}
@@ -1443,6 +1519,7 @@ export default function AdminDashboardPage() {
                                 <div className="flex items-center justify-center gap-2">
                                   <IconActionButton label="View Details" icon={<Eye className="h-4 w-4" />} onClick={() => openStaffView(user)} />
                                   <IconActionButton label="Edit Staff User" icon={<Edit className="h-4 w-4" />} variant="warning" onClick={() => openStaffEdit(user)} />
+                                  <IconActionButton label="Reset Password" icon={<KeyRound className="h-4 w-4" />} onClick={() => openStaffReset(user)} />
                                   <IconActionButton label="Delete Staff User" icon={<Trash2 className="h-4 w-4" />} variant="danger" onClick={() => openStaffDelete(user)} />
                                 </div>
                               </td>
@@ -1534,6 +1611,19 @@ export default function AdminDashboardPage() {
           onPasswordChange={setStaffDeletePassword}
           onCancel={closeStaffDelete}
           onConfirm={confirmStaffDelete}
+        />
+      )}
+
+      {staffResetUser && (
+        <StaffResetPasswordModal
+          userLabel={staffResetUser.fullName || staffResetUser.username}
+          form={staffResetForm}
+          loading={staffResetLoading}
+          error={staffResetError}
+          message={staffResetMessage}
+          onChange={(next) => setStaffResetForm((p) => ({ ...p, ...next }))}
+          onCancel={closeStaffReset}
+          onSubmit={submitStaffReset}
         />
       )}
 
@@ -1891,6 +1981,96 @@ function StaffEditModal({
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StaffResetPasswordModal({
+  userLabel,
+  form,
+  loading,
+  error,
+  message,
+  onChange,
+  onCancel,
+  onSubmit,
+}: {
+  userLabel: string;
+  form: { newPassword: string; password: string };
+  loading: boolean;
+  error: string;
+  message: string;
+  onChange: (next: Partial<{ newPassword: string; password: string }>) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.30)]">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+            <KeyRound className="h-6 w-6" />
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Reset Password</h2>
+            <p className="text-sm text-slate-500">
+              Set a new password for{" "}
+              <span className="font-semibold text-slate-700">{userLabel}</span>.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Input
+            label="New Password"
+            type="password"
+            value={form.newPassword}
+            onChange={(v) => onChange({ newPassword: v })}
+          />
+
+          <Input
+            label="Admin Password"
+            type="password"
+            value={form.password}
+            onChange={(v) => onChange({ password: v })}
+          />
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {message}
+          </div>
+        )}
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            {message ? "Close" : "Cancel"}
+          </button>
+
+          {!message && (
+            <button
+              type="button"
+              onClick={onSubmit}
+              disabled={loading}
+              className="rounded-2xl bg-[#0EA5E9] px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60"
+            >
+              {loading ? "Resetting..." : "Reset Password"}
+            </button>
+          )}
         </div>
       </div>
     </div>
