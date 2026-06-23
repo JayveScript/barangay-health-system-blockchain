@@ -427,9 +427,9 @@ function Input({
             className="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-sky-50 hover:text-[#0EA5E9]"
           >
             {show ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
               <Eye className="h-5 w-5" />
+            ) : (
+              <EyeOff className="h-5 w-5" />
             )}
           </button>
         )}
