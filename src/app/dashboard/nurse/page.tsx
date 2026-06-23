@@ -3,14 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
+import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import {
   Activity,
-  ClipboardList,
   HeartPulse,
   LogOut,
   MapPin,
   Menu,
   Scale,
+  Send,
   ShieldCheck,
   Stethoscope,
   UserRound,
@@ -38,7 +39,7 @@ import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr" | "bmi" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -152,6 +153,15 @@ export default function NurseDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "referrals"}
+              icon={<Send className="h-5 w-5" />}
+              label="Referred Resident"
+              onClick={() => {
+                setActiveTab("referrals");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -206,6 +216,12 @@ export default function NurseDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+              <SidebarButton
+                active={activeTab === "referrals"}
+                icon={<Send className="h-5 w-5" />}
+                label="Referred Resident"
+                onClick={() => setActiveTab("referrals")}
               />
               <SidebarButton
                 active={activeTab === "scan-qr"}
@@ -287,6 +303,8 @@ export default function NurseDashboardPage() {
 
             {activeTab === "overview" && <OverviewTab />}
 
+            {activeTab === "referrals" && <ReferralsTab />}
+
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-sky-200 bg-white p-5">
                 <QrScannerTab />
@@ -308,6 +326,7 @@ export default function NurseDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
           { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
