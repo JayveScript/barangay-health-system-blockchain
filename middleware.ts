@@ -6,7 +6,7 @@
  * │ Route                       │ Rule                                     │
  * ├─────────────────────────────┼──────────────────────────────────────────┤
  * │ /scan, /resident/[id]       │ Must be logged in + have allowed role    │
- * │ /dashboard/** (all roles)   │ Must be logged in                        │
+ * │ /dashboard/<role>/**        │ Must be logged in + role matches section │
  * │ /login, /register           │ Redirect to dashboard if already logged  │
  * └─────────────────────────────┴──────────────────────────────────────────┘
  *
@@ -37,6 +37,25 @@ function isResidentScanRoute(pathname: string) {
 
 function isSecureScanRoute(pathname: string) {
   return pathname === "/scan" || pathname.startsWith("/scan/");
+}
+
+// Which roles may access each /dashboard/<section>. Sections not listed here
+// (e.g. "resident") are open to any authenticated user — residents use their
+// own dashboard while staff/admin open /dashboard/resident/<id> detail views.
+const SECTION_ROLES: Record<string, string[]> = {
+  admin: ["SUPER_ADMIN", "BARANGAY_ADMIN"],
+  doctor: ["DOCTOR"],
+  nurse: ["NURSE"],
+  bhw: ["BHW"],
+  midwife: ["MIDWIFE"],
+  staff: ["STAFF"],
+};
+
+// The home dashboard path for a given role.
+function dashboardForRole(role: string): string {
+  const r = role.toUpperCase();
+  if (r === "SUPER_ADMIN" || r === "BARANGAY_ADMIN") return "/dashboard/admin";
+  return `/dashboard/${r.toLowerCase()}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,7 +111,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ------------------------------------------------------------------
-  // 2. Dashboard routes — must be logged in (any role)
+  // 2. Dashboard routes — must be logged in AND have the matching role
   // ------------------------------------------------------------------
   if (isProtectedDashboard(pathname)) {
     if (!token) {
@@ -107,6 +126,23 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.redirect(loginUrl);
       response.cookies.delete("auth_token");
       return response;
+    }
+
+    // Enforce role → dashboard-section access. SUPER_ADMIN may view any
+    // section; everyone else is confined to the section(s) for their role.
+    const role = payload.role.toUpperCase();
+    const section = pathname.split("/")[2]; // /dashboard/<section>/...
+    const allowedRoles = section ? SECTION_ROLES[section] : undefined;
+
+    if (
+      role !== "SUPER_ADMIN" &&
+      allowedRoles &&
+      !allowedRoles.includes(role)
+    ) {
+      // Wrong dashboard for this role → send them to their own.
+      return NextResponse.redirect(
+        new URL(dashboardForRole(role), request.url)
+      );
     }
 
     return NextResponse.next();

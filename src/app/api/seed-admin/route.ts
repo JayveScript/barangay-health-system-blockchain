@@ -56,7 +56,20 @@ export async function GET(req: Request) {
       );
     }
 
-    const passwordHash = await hash("admin12345", 10);
+    // Initial admin password must be supplied via env — never hardcode a
+    // known default that could be used to take over the system.
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+    if (!seedPassword || seedPassword.length < 8) {
+      return NextResponse.json(
+        {
+          error:
+            "SEED_ADMIN_PASSWORD env var must be set (min 8 characters) before seeding the admin.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const passwordHash = await hash(seedPassword, 10);
 
     const admin = await db.user.create({
       data: {
