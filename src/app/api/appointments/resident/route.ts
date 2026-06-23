@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveAuthedUser } from "@/lib/api-auth";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth";
@@ -36,25 +37,7 @@ function createSlots(startTime: string, endTime: string, slotMinutes: number) {
 }
 
 async function getApiUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) return null;
-
-  try {
-    const payload = verifyAuthToken(token);
-
-    return await db.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-      include: {
-        resident: true,
-      },
-    });
-  } catch {
-    return null;
-  }
+  return resolveAuthedUser({ resident: true });
 }
 
 export async function GET() {

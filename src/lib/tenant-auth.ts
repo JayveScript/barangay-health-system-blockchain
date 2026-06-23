@@ -1,6 +1,4 @@
-import { cookies } from "next/headers";
-import { db } from "@/lib/db";
-import { verifyAuthToken } from "@/lib/auth";
+import { resolveAuthedUser } from "@/lib/api-auth";
 export {
   BARANGAY_ADMIN_USERNAME_REGEX,
   BARANGAY_ADMIN_USERNAME_SUFFIX,
@@ -8,24 +6,7 @@ export {
 } from "@/lib/username-validation";
 
 export async function getCurrentApiUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) return null;
-
-  try {
-    const payload = verifyAuthToken(token);
-
-    return await db.user.findUnique({
-      where: { id: payload.userId },
-      include: {
-        barangay: true,
-        resident: true,
-      },
-    });
-  } catch {
-    return null;
-  }
+  return resolveAuthedUser({ barangay: true, resident: true });
 }
 
 export function isBarangayAdmin(user: { role?: unknown } | null | undefined) {

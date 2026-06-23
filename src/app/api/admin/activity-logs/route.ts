@@ -82,7 +82,7 @@ export async function GET() {
         }),
         db.qrScanAuditLog.findMany({
           where: {
-            action: "ACCESS_GRANTED",
+            action: { in: ["ACCESS_GRANTED", "ACCESS_DENIED"] },
             ...(isSuper ? {} : { scannedBy: { barangayId } }),
           },
           include: { scannedBy: { select: { fullName: true, role: true } } },
@@ -163,11 +163,17 @@ export async function GET() {
     }
 
     for (const s of scans) {
+      const denied = s.action === "ACCESS_DENIED";
+      const target = residentName(scanResidentMap.get(s.residentId));
       items.push({
         id: `qr-scan-${s.id}`,
         type: "qr-scan",
-        action: "Scanned a resident QR ID",
-        detail: `Viewed ${residentName(scanResidentMap.get(s.residentId))}'s digital health ID`,
+        action: denied
+          ? "Denied QR access attempt"
+          : "Scanned a resident QR ID",
+        detail: denied
+          ? `Attempted to view ${target}'s digital health ID — access denied${s.failureReason ? ` (${s.failureReason})` : ""}`
+          : `Viewed ${target}'s digital health ID`,
         actorName: s.scannedBy?.fullName || "Staff",
         actorRole: String(s.scannedBy?.role || s.role || "STAFF"),
         createdAt: s.createdAt.toISOString(),

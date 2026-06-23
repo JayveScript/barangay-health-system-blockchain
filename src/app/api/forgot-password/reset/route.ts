@@ -46,7 +46,8 @@ export async function POST(req: Request) {
 
     await prisma.user.update({
       where: { email },
-      data: { password: hashedPassword },
+      // Bump tokenVersion to revoke any existing sessions for this account.
+      data: { password: hashedPassword, tokenVersion: { increment: 1 } },
     });
 
     await prisma.passwordResetToken.deleteMany({ where: { email } });

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/auth";
+import { resolveAuthedUser } from "@/lib/api-auth";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
@@ -23,22 +22,8 @@ function detectMimeType(buffer: Buffer): string | null {
 
 export async function POST(req: Request) {
   // ── Auth check ──────────────────────────────────────────────────────────
-  let token: string | undefined;
-  try {
-    const cookieStore = await cookies();
-    token = cookieStore.get("auth_token")?.value ?? cookieStore.get("token")?.value;
-  } catch (err) {
-    console.error("UPLOAD_ERROR cookies():", err);
-    return NextResponse.json({ error: "Server error reading session." }, { status: 500 });
-  }
-
-  if (!token) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
-  try {
-    verifyAuthToken(token);
-  } catch {
+  const authedUser = await resolveAuthedUser();
+  if (!authedUser) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

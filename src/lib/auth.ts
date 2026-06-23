@@ -3,8 +3,11 @@ import { env } from "@/lib/env";
 
 export type AuthTokenPayload = {
   userId: string;
-  username: string;
+  username?: string;
   role: string;
+  // Session version — must match the user's current tokenVersion, otherwise the
+  // session has been revoked (e.g. after a password reset).
+  tv?: number;
 };
 
 function getJwtSecret(): string {
@@ -23,7 +26,7 @@ function getJwtSecret(): string {
 
 export function signAuthToken(payload: AuthTokenPayload) {
   return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: "7d",
+    expiresIn: "1d",
   });
 }
 

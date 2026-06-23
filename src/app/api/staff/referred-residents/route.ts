@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { verifyAuthToken } from "@/lib/auth";
 import { REFERRAL_RECEIVING_BARANGAY_NAMES } from "@/lib/barangay-options";
 import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
@@ -34,25 +33,7 @@ function createSlots(startTime: string, endTime: string, slotMinutes: number) {
 }
 
 async function getApiUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) return null;
-
-  try {
-    const payload = verifyAuthToken(token);
-
-    return await db.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-      include: {
-        barangay: true,
-      },
-    });
-  } catch {
-    return null;
-  }
+  return resolveAuthedUser({ barangay: true });
 }
 
 function getTodayStart() {

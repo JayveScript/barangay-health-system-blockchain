@@ -133,9 +133,10 @@ export async function POST(req: Request) {
       {
         userId: user.id,
         role: user.role,
+        tv: user.tokenVersion,
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     const res = NextResponse.json({
@@ -144,20 +145,12 @@ export async function POST(req: Request) {
       userId: user.id,
     });
 
-    res.cookies.set("token", token, {
-      httpOnly: true,
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
     res.cookies.set("auth_token", token, {
       httpOnly: true,
       path: "/",
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24, // 1 day
     });
 
     return res;
