@@ -2,23 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { ProgressBar } from "@/components/dashboard/Charts";
+import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
 import {
   Activity,
-  BarChart3,
-  CalendarDays,
   ClipboardList,
   HeartPulse,
   LogOut,
   MapPin,
   Menu,
-  Pill,
   Scale,
   ShieldCheck,
   Stethoscope,
-  Syringe,
   UserRound,
-  Users,
   ScanLine,
   X,
 } from "lucide-react";
@@ -325,73 +320,7 @@ export default function NurseDashboardPage() {
 }
 
 function OverviewTab() {
-  return (
-    <div className="space-y-5 pb-4">
-      <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard
-          icon={<Users className="h-5 w-5" />}
-          label="Patients Assisted"
-          value="72"
-        />
-        <MetricCard
-          icon={<Syringe className="h-5 w-5" />}
-          label="Immunization Support"
-          value="19"
-        />
-        <MetricCard
-          icon={<Pill className="h-5 w-5" />}
-          label="Medicine Records"
-          value="43"
-        />
-        <MetricCard
-          icon={<CalendarDays className="h-5 w-5" />}
-          label="Follow-ups"
-          value="16"
-        />
-      </div>
-
-      <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel
-          icon={<BarChart3 className="h-5 w-5" />}
-          title="Nursing Activity"
-          subtitle="Monthly nursing support overview"
-        >
-          <div className="space-y-5">
-            <ProgressBar label="Patient Assistance" value={84} />
-            <ProgressBar label="Vital Signs Recording" value={78} />
-            <ProgressBar label="Medicine Distribution" value={63} />
-            <ProgressBar label="Follow-up Coordination" value={54} />
-          </div>
-        </Panel>
-
-        <Panel
-          icon={<Activity className="h-5 w-5" />}
-          title="Nurse Service Analytics"
-          subtitle="Current health center workload summary"
-        >
-          <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Pending Tasks" value="11" />
-            <MiniStat label="Completed Tasks" value="38" />
-            <MiniStat label="Priority Patients" value="6" />
-            <MiniStat label="Updated Records" value="52" />
-          </div>
-        </Panel>
-      </div>
-
-      <Panel
-        icon={<HeartPulse className="h-5 w-5" />}
-        title="Health Center Nursing Summary"
-        subtitle="Assigned barangay nursing service overview"
-      >
-        <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Vitals Recorded" value="64" />
-          <SummaryBox title="Medicine Logs" value="43" />
-          <SummaryBox title="Assisted Consults" value="29" />
-          <SummaryBox title="Reports Prepared" value="10" />
-        </div>
-      </Panel>
-    </div>
-  );
+  return <ResidentStatsOverview />;
 }
 
 function PersonalInfoTab({
@@ -441,77 +370,6 @@ function SidebarButton({
       {icon}
       {label}
     </button>
-  );
-}
-
-function MetricCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl sm:rounded-[24px] border border-sky-200 bg-white p-2 sm:p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between">
-      <div className="mb-2 sm:mb-4 flex h-6 w-6 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-2xl bg-sky-50 text-sky-600">
-        {icon}
-      </div>
-      <div>
-        <p className="text-[8px] sm:text-sm font-semibold text-slate-500 leading-tight line-clamp-2">{label}</p>
-        <p className="mt-0.5 sm:mt-1 text-base sm:text-3xl font-extrabold text-slate-900 line-clamp-1">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function Panel({
-  icon,
-  title,
-  subtitle,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-slate-900">{title}</h3>
-          <p className="text-sm text-slate-500">{subtitle}</p>
-        </div>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-sky-200 bg-[#EFF6FF] p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-extrabold text-sky-600">{value}</p>
-    </div>
-  );
-}
-
-function SummaryBox({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-white to-[#EFF6FF] p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
-      <p className="mt-2 text-2xl font-extrabold text-slate-900">{value}</p>
-    </div>
   );
 }
 
