@@ -76,7 +76,8 @@ export async function POST(
 
     await prisma.user.update({
       where: { id },
-      data: { password: passwordHash },
+      // Bump tokenVersion to revoke the user's existing sessions immediately.
+      data: { password: passwordHash, tokenVersion: { increment: 1 } },
     });
 
     return NextResponse.json({

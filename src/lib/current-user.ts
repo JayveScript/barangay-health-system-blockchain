@@ -1,34 +1,14 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { verifyAuthToken } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { resolveAuthedUser } from "@/lib/api-auth";
 
 export async function getCurrentResidentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) {
-    redirect("/login");
-  }
-
-  let payload: { userId: string };
-
-  try {
-    payload = verifyAuthToken(token);
-  } catch {
-    redirect("/login");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: payload.userId },
-    include: {
-      barangay: true,
-      resident: {
-        include: {
-          medicalHistory: true,
-          familyHistory: true,
-          personalSocialHistory: true,
-        },
+  const user = await resolveAuthedUser({
+    barangay: true,
+    resident: {
+      include: {
+        medicalHistory: true,
+        familyHistory: true,
+        personalSocialHistory: true,
       },
     },
   });
@@ -38,6 +18,4 @@ export async function getCurrentResidentUser() {
   }
 
   return user;
-
-  
 }

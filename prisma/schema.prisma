@@ -64,6 +64,10 @@ model User {
   role        Role    @default(RESIDENT)
   isVerified  Boolean @default(false)
 
+  // Bumped to invalidate all existing sessions for this user (e.g. on a
+  // password reset). The value is embedded in the JWT and must match.
+  tokenVersion Int @default(0)
+
   barangayId String
   barangay   Barangay @relation(fields: [barangayId], references: [id])
 
