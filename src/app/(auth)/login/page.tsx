@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Download,
+  Eye,
+  EyeOff,
   HeartPulse,
   Lock,
   ShieldCheck,
@@ -398,6 +400,10 @@ function Input({
   icon: React.ReactNode;
   type?: string;
 }) {
+  const isPassword = type === "password";
+  const [show, setShow] = useState(false);
+  const inputType = isPassword ? (show ? "text" : "password") : type;
+
   return (
     <div>
       <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[#0EA5E9]">
@@ -406,12 +412,27 @@ function Input({
       <div className="flex min-h-[54px] items-center rounded-2xl border border-sky-300 bg-white px-4 shadow-sm transition duration-300 focus-within:border-[#0EA5E9] focus-within:shadow-md focus-within:shadow-sky-100">
         <span className="mr-3 text-slate-400">{icon}</span>
         <input
-          type={type}
+          type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className="w-full bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow((prev) => !prev)}
+            aria-label={show ? "Hide password" : "Show password"}
+            title={show ? "Hide password" : "Show password"}
+            className="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-sky-50 hover:text-[#0EA5E9]"
+          >
+            {show ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
