@@ -2,57 +2,38 @@
 
 /* ── Fluid tokens ──────────────────────────────── */
 :root {
-  --app-pad-x: clamp(1rem, 2.2vw, 2.5rem);
-  --app-pad-y: clamp(1rem, 1.6vh, 1.75rem);
+  --app-pad-x: clamp(1rem, 2vw, 2.5rem);
+  --app-pad-y: clamp(1rem, 1.5vw, 1.5rem);
   --sidebar-width: clamp(14rem, 16vw, 18rem);
-  --drawer-width: min(18rem, 86vw);
-  --content-max: min(100%, 80rem);
+  --drawer-width: min(18rem, 85vw);
+  --content-max: min(100%, 90rem);
   --login-max: min(100%, 75rem);
   --page-radius: clamp(1.25rem, 2vw, 2rem);
   --card-shadow: 0 1.5rem 3.75rem rgba(15, 23, 42, 0.1);
   --glow-spread: clamp(0.75rem, 1.2vw, 1.5rem);
 }
 
-/* Standard laptops (~1280–1535px) */
 @media (min-width: 1280px) {
   :root {
-    --content-max: min(100%, 90rem);
-    --login-max: min(94vw, 86rem);
-    --sidebar-width: clamp(15rem, 15vw, 18rem);
+    --content-max: min(100%, 96rem);
   }
 }
 
-/* Large desktops (~1536–1919px) */
 @media (min-width: 1536px) {
   :root {
-    --content-max: min(96vw, 105rem);
-    --login-max: min(92vw, 96rem);
-    --sidebar-width: clamp(16rem, 14vw, 19rem);
-    --app-pad-x: clamp(1.5rem, 2.5vw, 3rem);
+    --content-max: min(100%, 110rem);
   }
 }
 
-/* Full HD / wide desktop (~1920–2559px) */
 @media (min-width: 1920px) {
   :root {
-    --content-max: min(92vw, 118rem);
-    --login-max: min(88vw, 108rem);
-    --sidebar-width: clamp(16.5rem, 13vw, 20rem);
-    --app-pad-x: clamp(1.75rem, 3vw, 3.5rem);
-    --card-shadow: 0 2rem 5rem rgba(15, 23, 42, 0.12);
+    --content-max: min(100%, 120rem);
   }
 }
 
-/* Ultrawide / 4K (≥2560px) */
 @media (min-width: 2560px) {
   :root {
-    --content-max: min(86vw, 140rem);
-    --login-max: min(78vw, 120rem);
-    --sidebar-width: clamp(17rem, 12vw, 22rem);
-    --app-pad-x: clamp(2rem, 4vw, 5rem);
-    --app-pad-y: clamp(1.25rem, 2vh, 2.25rem);
-    --card-shadow: 0 2.5rem 6rem rgba(15, 23, 42, 0.14);
-    --glow-spread: clamp(1rem, 1.5vw, 2.25rem);
+    --content-max: min(92vw, 140rem);
   }
 }
 
