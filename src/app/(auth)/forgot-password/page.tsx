@@ -106,8 +106,8 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#EFF6FF] px-4 py-8">
-      <div className="w-full max-w-xl rounded-[32px] border border-[#DCEAF7] bg-white p-8 shadow-2xl shadow-sky-900/10 sm:p-10">
+    <main className="auth-shell items-center justify-center">
+      <div className="w-full max-w-xl rounded-[2rem] border border-[#DCEAF7] bg-white p-8 shadow-2xl shadow-sky-900/10 sm:p-10">
         <Link
           href="/login"
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9]"

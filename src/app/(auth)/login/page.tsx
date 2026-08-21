@@ -106,7 +106,7 @@ function LoginForm() {
   };
 
   return (
-    <main className="min-h-[100dvh] bg-[#EFF6FF] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="auth-shell">
       <style>{`
         @keyframes cardGlow {
           0%, 100% {
@@ -186,10 +186,10 @@ function LoginForm() {
           animation: iconPulseRing2 2.8s ease-out 0.8s infinite;
         }
       `}</style>
-      <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+      <div className="auth-card mx-auto flex overflow-hidden rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
 
         {/* ── LEFT PANEL ── */}
-        <section className="relative hidden w-[60%] overflow-hidden lg:flex lg:flex-col lg:justify-between">
+        <section className="relative hidden min-w-0 flex-[1.5] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('/images/login-medical-bg.jpg')" }}
@@ -209,7 +209,7 @@ function LoginForm() {
                   <div className="logo-float relative flex-shrink-0">
                     <span className="logo-ring-1" />
                     <span className="logo-ring-2" />
-                    <div className="logo-glow relative flex h-[104px] w-[104px] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
+                    <div className="logo-glow relative flex h-[6.5rem] w-[6.5rem] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
                       <img
                         src="/images/davao-logo.png"
                         alt="Lungsod ng Dabaw — Official Seal"
@@ -254,7 +254,7 @@ function LoginForm() {
         </section>
 
         {/* ── RIGHT PANEL ── */}
-        <section className="flex w-full items-center justify-center bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:w-[40%] lg:px-10">
+        <section className="flex w-full min-w-0 items-center justify-center bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:flex-1 lg:px-10">
           <div className="w-full max-w-md">
 
             {/* Kalyo app icon + KALYO letters + meaning */}

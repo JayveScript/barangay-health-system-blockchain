@@ -784,7 +784,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#EFF6FF] p-4 pb-20 sm:p-6 lg:pb-6 lg:h-screen lg:overflow-hidden">
+    <main className="page-shell">
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
@@ -793,10 +793,10 @@ export default function AdminDashboardPage() {
         />
       )}
 
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 lg:flex-row">
+      <div className="page-shell-inner">
         {/* Mobile sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-[280px] transform rounded-r-[30px] border border-[#DCEAF7] bg-white/95 p-4 text-slate-800 shadow-2xl shadow-sky-900/10 transition-transform duration-300 lg:hidden ${
+          className={`fixed inset-y-0 left-0 z-50 w-[var(--drawer-width)] transform rounded-r-[1.875rem] border border-[#DCEAF7] bg-white/95 p-4 text-slate-800 shadow-2xl shadow-sky-900/10 transition-transform duration-300 lg:hidden ${
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -902,7 +902,7 @@ export default function AdminDashboardPage() {
         </aside>
 
         {/* Desktop sidebar */}
-        <aside className="hidden shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[240px] lg:p-5 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <aside className="hidden shrink-0 rounded-[1.875rem] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[var(--sidebar-width)] lg:p-5 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
           <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-4 lg:p-5">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
@@ -1240,7 +1240,7 @@ export default function AdminDashboardPage() {
 
           {/* Desktop full table */}
                     <div className="hidden overflow-x-auto md:block">
-  <table className="min-w-[800px] w-full table-fixed border-separate border-spacing-y-2">
+  <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
     <thead>
       <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
         <th className="w-[44%] px-3">Resident Name</th>
@@ -1503,7 +1503,7 @@ export default function AdminDashboardPage() {
 
                     {/* Desktop full table */}
                     <div className="hidden overflow-x-auto md:block">
-                      <table className="min-w-[700px] w-full table-fixed border-separate border-spacing-y-2">
+                      <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
                         <thead>
                           <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
                             <th className="w-[34%] px-3">Name</th>
@@ -2702,7 +2702,7 @@ function ResidentDigitalIdModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
-      <div className="flex w-full max-w-[840px] flex-col items-center rounded-[30px] bg-white p-4 shadow-[0_30px_80px_rgba(15,23,42,0.30)] sm:p-6">
+      <div className="flex w-full max-w-[min(100%,52.5rem)] flex-col items-center rounded-[1.875rem] bg-white p-4 shadow-[0_1.875rem_5rem_rgba(15,23,42,0.30)] sm:p-6">
         <div className="mb-6 w-full flex items-center justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -2721,7 +2721,7 @@ function ResidentDigitalIdModal({
 
         <div 
           ref={cardRef}
-          className="relative h-[215px] w-[340px] overflow-hidden rounded-[18px] border border-sky-200 bg-white font-sans shadow-[0_18px_45px_rgba(37,99,235,0.18)] sm:h-[316px] sm:w-[500px] sm:rounded-[24px] lg:aspect-[760/480] lg:h-auto lg:w-full lg:max-w-[760px] lg:rounded-[30px]"
+          className="relative aspect-[340/215] w-full max-w-[min(100%,47.5rem)] overflow-hidden rounded-[1.125rem] border border-sky-200 bg-white font-sans shadow-[0_1.125rem_2.8rem_rgba(37,99,235,0.18)] sm:rounded-[1.5rem] lg:rounded-[1.875rem]"
         >
           <div className="absolute inset-0 bg-[linear-gradient(135deg,#F8FBFF_0%,#FFFFFF_42%,#EEF6FF_100%)]" />
           <div className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,#0EA5E9_0%,#38BDF8_48%,#BAE6FD_100%)] sm:h-2 lg:h-2.5" />
@@ -2832,7 +2832,7 @@ function ResidentDigitalIdModal({
           </div>
         </div>
 
-        <div className="mt-6 w-[340px] sm:w-[500px] lg:w-full lg:max-w-[760px]">
+        <div className="mt-6 w-full max-w-[min(100%,47.5rem)]">
           <button
             onClick={handleDownload}
             disabled={downloading}
