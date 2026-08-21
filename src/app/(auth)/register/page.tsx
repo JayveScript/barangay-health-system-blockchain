@@ -407,7 +407,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="fixed inset-0 h-screen w-screen overflow-hidden bg-[#EFF6FF] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="auth-shell overflow-hidden">
       <style jsx global>{`
         html,
         body {
@@ -416,7 +416,7 @@ export default function RegisterPage() {
         }
       `}</style>
 
-      <div className="mx-auto flex h-full w-full max-w-7xl overflow-hidden rounded-[32px] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+      <div className="auth-card mx-auto flex h-full w-full overflow-hidden rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
        <div className="flex h-full w-full flex-col overflow-hidden rounded-[26px] border border-sky-200/80 bg-white shadow-2xl shadow-sky-900/10 backdrop-blur">
           <div className="shrink-0 border-b border-sky-200 bg-white/90 px-4 py-3 sm:px-6">
             <div className="flex items-center justify-between gap-4">

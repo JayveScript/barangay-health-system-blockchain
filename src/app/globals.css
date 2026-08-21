@@ -1,19 +1,147 @@
 @import "tailwindcss";
 
+/* ── Fluid tokens ──────────────────────────────── */
+:root {
+  --app-pad-x: clamp(1rem, 2.2vw, 2.5rem);
+  --app-pad-y: clamp(1rem, 1.6vh, 1.75rem);
+  --sidebar-width: clamp(14rem, 16vw, 18rem);
+  --drawer-width: min(18rem, 86vw);
+  --content-max: min(100%, 80rem);
+  --login-max: min(100%, 75rem);
+  --page-radius: clamp(1.25rem, 2vw, 2rem);
+  --card-shadow: 0 1.5rem 3.75rem rgba(15, 23, 42, 0.1);
+  --glow-spread: clamp(0.75rem, 1.2vw, 1.5rem);
+}
+
+/* Standard laptops (~1280–1535px) */
+@media (min-width: 1280px) {
+  :root {
+    --content-max: min(100%, 90rem);
+    --login-max: min(94vw, 86rem);
+    --sidebar-width: clamp(15rem, 15vw, 18rem);
+  }
+}
+
+/* Large desktops (~1536–1919px) */
+@media (min-width: 1536px) {
+  :root {
+    --content-max: min(96vw, 105rem);
+    --login-max: min(92vw, 96rem);
+    --sidebar-width: clamp(16rem, 14vw, 19rem);
+    --app-pad-x: clamp(1.5rem, 2.5vw, 3rem);
+  }
+}
+
+/* Full HD / wide desktop (~1920–2559px) */
+@media (min-width: 1920px) {
+  :root {
+    --content-max: min(92vw, 118rem);
+    --login-max: min(88vw, 108rem);
+    --sidebar-width: clamp(16.5rem, 13vw, 20rem);
+    --app-pad-x: clamp(1.75rem, 3vw, 3.5rem);
+    --card-shadow: 0 2rem 5rem rgba(15, 23, 42, 0.12);
+  }
+}
+
+/* Ultrawide / 4K (≥2560px) */
+@media (min-width: 2560px) {
+  :root {
+    --content-max: min(86vw, 140rem);
+    --login-max: min(78vw, 120rem);
+    --sidebar-width: clamp(17rem, 12vw, 22rem);
+    --app-pad-x: clamp(2rem, 4vw, 5rem);
+    --app-pad-y: clamp(1.25rem, 2vh, 2.25rem);
+    --card-shadow: 0 2.5rem 6rem rgba(15, 23, 42, 0.14);
+    --glow-spread: clamp(1rem, 1.5vw, 2.25rem);
+  }
+}
+
 /* ── Base ─────────────────────────────────────── */
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
   padding-bottom: env(safe-area-inset-bottom);
   -webkit-font-smoothing: antialiased;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* ── Shell helpers ────────────────────────────── */
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: #eff6ff;
+  padding: var(--app-pad-y) var(--app-pad-x);
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+.page-shell-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--content-max);
+  height: 100%;
+  margin-inline: auto;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  min-width: 0;
+}
+
+.auth-shell {
+  display: flex;
+  width: 100%;
+  min-height: 100dvh;
+  align-items: stretch;
+  justify-content: center;
+  background: #eff6ff;
+  padding: var(--app-pad-y) var(--app-pad-x);
+}
+
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: var(--login-max);
+  min-height: calc(100dvh - (var(--app-pad-y) * 2));
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: var(--page-radius);
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    height: 100dvh;
+    overflow: hidden;
+    padding-bottom: var(--app-pad-y);
+  }
+
+  .page-shell-inner {
+    flex-direction: row;
+  }
 }
 
 /* ── Inputs — prevent iOS auto-zoom (needs 16px) ─ */
 .input {
   @apply w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-sky-500;
-  font-size: 16px;
+  font-size: 1rem;
 }
-input, select, textarea { font-size: 16px !important; }
+input, select, textarea { font-size: 1rem !important; }
 
 /* ── Touch targets ────────────────────────────── */
 button, a, [role="button"] {
@@ -23,7 +151,7 @@ button, a, [role="button"] {
 
 /* ── Bottom-nav spacing ───────────────────────── */
 .mobile-bottom-pad {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
 }
 .bottom-nav-safe {
   padding-bottom: env(safe-area-inset-bottom);
@@ -33,15 +161,44 @@ button, a, [role="button"] {
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 /* ── Chart containment — never bleed past the card on mobile ─ */
 .chart-safe {
   max-width: 100%;
   overflow-x: hidden;
+  min-width: 0;
+}
+
+/* ── Visual effects scale with viewport ───────── */
+@media (min-width: 1920px) {
+  .logo-glow,
+  .app-glow,
+  .info-card-anim,
+  .info-card-anim-d1,
+  .info-card-anim-d2 {
+    filter: drop-shadow(0 0 var(--glow-spread) rgba(56, 189, 248, 0.18));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-float,
+  .logo-glow,
+  .app-float,
+  .app-glow,
+  .info-card-anim,
+  .info-card-anim-d1,
+  .info-card-anim-d2,
+  .logo-ring-1,
+  .logo-ring-2,
+  .app-ring-1,
+  .app-ring-2 {
+    animation: none !important;
+  }
 }
 
 /* ── Scrollbars ───────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 0.375rem; height: 0.375rem; }
 ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
