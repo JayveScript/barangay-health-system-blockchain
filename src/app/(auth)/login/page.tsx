@@ -108,7 +108,7 @@ function LoginForm() {
   };
 
   return (
-    <main className="auth-shell">
+    <main className="auth-shell auth-shell--login">
       <style>{`
         @keyframes cardGlow {
           0%, 100% {
@@ -199,19 +199,19 @@ function LoginForm() {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-blue-950/70 to-sky-900/65" />
           <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-transparent to-slate-950/30" />
 
-          <div className="relative z-10 flex h-full flex-col items-start justify-start p-8 text-white">
+          <div className="relative z-10 flex h-full min-h-0 flex-col items-start justify-center gap-[clamp(1.25rem,3vh,2.5rem)] p-[clamp(1.5rem,3vw,2.75rem)] text-white">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold shadow-lg shadow-slate-950/20 backdrop-blur-md">
                 <ShieldCheck className="h-4 w-4" />
                 Secure Health Center Access
               </div>
 
-              <div className="mt-5 w-full max-w-2xl">
-                <div className="flex items-center gap-6">
+              <div className="w-full max-w-2xl">
+                <div className="flex items-center gap-[clamp(1rem,2vw,1.75rem)]">
                   {/* Davao logo beside the title */}
                   <div className="logo-float relative flex-shrink-0">
                     <span className="logo-ring-1" />
                     <span className="logo-ring-2" />
-                    <div className="logo-glow relative flex h-[6.5rem] w-[6.5rem] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
+                    <div className="logo-glow relative flex h-[clamp(4.5rem,6.5vw,6.5rem)] w-[clamp(4.5rem,6.5vw,6.5rem)] items-center justify-center rounded-full bg-white p-1.5 ring-2 ring-sky-200/60">
                       <img
                         src="/images/davao-logo.png"
                         alt="Lungsod ng Dabaw — Official Seal"
@@ -220,18 +220,18 @@ function LoginForm() {
                     </div>
                   </div>
 
-                  <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
+                  <h1 className="text-[clamp(1.75rem,2.6vw,3rem)] font-extrabold leading-tight drop-shadow-lg">
                     Barangay Health Center Management System
                   </h1>
                 </div>
 
-                <p className="mt-4 max-w-xl text-lg leading-8 text-white/95 drop-shadow-md">
+                <p className="mt-4 max-w-xl text-[clamp(0.95rem,1.05vw,1.15rem)] leading-relaxed text-white/95 drop-shadow-md">
                   A secure and modern platform for managing patient records,
                   consultations, and daily barangay health center operations.
                 </p>
               </div>
 
-            <div className="mt-10 w-full grid gap-5 xl:grid-cols-3">
+            <div className="w-full grid gap-[clamp(0.75rem,1.5vw,1.25rem)] xl:grid-cols-3">
               <InfoCard
                 icon={<HeartPulse className="h-5 w-5" />}
                 title="Patient Records"
@@ -256,7 +256,7 @@ function LoginForm() {
         </section>
 
         {/* ── RIGHT PANEL ── */}
-        <section className="flex w-full min-w-0 items-center justify-center bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:flex-1 lg:px-10">
+        <section className="flex w-full min-w-0 min-h-0 items-center justify-center overflow-y-auto bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:flex-1 lg:px-10">
           <div className="w-full max-w-md">
 
             {/* Kalyo app icon + KALYO letters + meaning */}
@@ -452,12 +452,12 @@ function InfoCard({
   animClass: string;
 }) {
   return (
-    <div className={`${animClass} group rounded-[24px] border border-white/20 bg-white/15 p-6 shadow-lg shadow-slate-950/20 backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-sky-200/70 hover:bg-white/20`}>
-      <div className="mb-3 flex h-13 w-13 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
+    <div className={`${animClass} group rounded-[20px] border border-white/20 bg-white/15 p-[clamp(1rem,1.4vw,1.4rem)] shadow-lg shadow-slate-950/20 backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-sky-200/70 hover:bg-white/20`}>
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white transition duration-300 group-hover:bg-[#0EA5E9] group-hover:shadow-lg group-hover:shadow-sky-500/30">
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-white drop-shadow-sm">{title}</h3>
-      <p className="mt-2 text-base leading-6 text-white/90 drop-shadow-sm">
+      <h3 className="text-[clamp(1rem,1.1vw,1.25rem)] font-bold text-white drop-shadow-sm">{title}</h3>
+      <p className="mt-2 text-[clamp(0.85rem,0.9vw,1rem)] leading-6 text-white/90 drop-shadow-sm">
         {text}
       </p>
     </div>

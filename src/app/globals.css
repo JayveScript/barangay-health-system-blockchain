@@ -105,6 +105,21 @@ svg {
   border-radius: var(--page-radius);
 }
 
+/* ── Login: fixed, no-scroll, viewport-locked ── */
+.auth-shell--login {
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  align-items: center;
+}
+
+.auth-shell--login .auth-card {
+  height: calc(100dvh - (var(--app-pad-y) * 2));
+  min-height: 0;
+  max-height: calc(100dvh - (var(--app-pad-y) * 2));
+}
+
 @media (min-width: 1024px) {
   .page-shell {
     height: 100dvh;
