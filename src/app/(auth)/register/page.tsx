@@ -23,6 +23,8 @@ import {
 import {
   DEFAULT_BARANGAY_CITY,
   REGISTRATION_BARANGAY_OPTIONS,
+  EDUCATIONAL_ATTAINMENT_OPTIONS,
+  RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
 
 type FormState = {
@@ -252,9 +254,6 @@ export default function RegisterPage() {
       if (!form.birthDate) nextErrors.birthDate = "Birth date is required.";
       if (!form.age.trim()) nextErrors.age = "Age is required.";
       if (!form.sex) nextErrors.sex = "Please select sex.";
-      if (!form.houseStreet.trim()) {
-        nextErrors.houseStreet = "House / street is required.";
-      }
       if (!form.barangayName.trim()) {
         nextErrors.barangayName = "Please select barangay.";
       }
@@ -407,17 +406,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="auth-shell overflow-hidden">
-      <style jsx global>{`
-        html,
-        body {
-          height: 100%;
-          overflow: hidden;
-        }
-      `}</style>
-
-      <div className="auth-card mx-auto flex h-full w-full overflow-hidden rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
-       <div className="flex h-full w-full flex-col overflow-hidden rounded-[26px] border border-sky-200/80 bg-white shadow-2xl shadow-sky-900/10 backdrop-blur">
+    <main className="auth-shell">
+      <div className="auth-card mx-auto flex w-full rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
+       <div className="flex w-full flex-col rounded-[26px] border border-sky-200/80 bg-white shadow-2xl shadow-sky-900/10 backdrop-blur">
           <div className="shrink-0 border-b border-sky-200 bg-white/90 px-4 py-3 sm:px-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
@@ -522,7 +513,7 @@ export default function RegisterPage() {
 
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6"
+            className="px-4 py-4 sm:px-6"
           >
             <div className="transition-all duration-300">
               {step === 1 && (
@@ -617,7 +608,6 @@ export default function RegisterPage() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <InputField
                         label="House No. / Street / Purok"
-                        required
                         placeholder="Example: Purok 3, Zone 2"
                         icon={<MapPin className="h-4 w-4" />}
                         value={form.houseStreet}
@@ -679,19 +669,7 @@ export default function RegisterPage() {
                         label="Educational Attainment"
                         value={form.educationalAttainment}
                         onChange={(v) => updateField("educationalAttainment", v)}
-                        options={[
-                          "No Formal Education",
-                          "Elementary Level",
-                          "Elementary Graduate",
-                          "High School Level",
-                          "High School Graduate",
-                          "Senior High School Level",
-                          "Senior High School Graduate",
-                          "Vocational / Technical Course",
-                          "College Level",
-                          "College Graduate",
-                          "Post Graduate (Master's / Doctorate)",
-                        ]}
+                        options={[...EDUCATIONAL_ATTAINMENT_OPTIONS]}
                       />
                       <SelectWithOther
                         label="Occupation"
@@ -731,22 +709,7 @@ export default function RegisterPage() {
                         label="Relationship"
                         value={form.relationship}
                         onChange={(v) => updateField("relationship", v)}
-                        options={[
-                          "Father",
-                          "Mother",
-                          "Husband",
-                          "Wife",
-                          "Son",
-                          "Daughter",
-                          "Brother",
-                          "Sister",
-                          "Grandfather",
-                          "Grandmother",
-                          "Uncle",
-                          "Aunt",
-                          "Guardian",
-                          "Friend",
-                        ]}
+                        options={[...RELATIONSHIP_OPTIONS]}
                       />
                     </div>
 

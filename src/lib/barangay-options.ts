@@ -9,6 +9,29 @@ export const REGISTRATION_BARANGAY_OPTIONS = [
   { label: "APALILI, BRGY. COLOSAS", value: "Apalili, Brgy. Colosas" },
 ] as const;
 
+export const EDUCATIONAL_ATTAINMENT_OPTIONS = [
+  "Home",
+  "Day Care",
+  "Kindergarten",
+  "Elementary Level",
+  "Elementary Graduate",
+  "JHS/SHS Level",
+  "JHS/SHS Graduate",
+  "College Level",
+  "College Graduate",
+] as const;
+
+export const RELATIONSHIP_OPTIONS = [
+  "Parent",
+  "Grandparent",
+  "Sibling",
+  "Spouse",
+  "Common-Law",
+  "Relative",
+  "Neighbor",
+  "Others",
+] as const;
+
 export const REFERRAL_RECEIVING_BARANGAY_NAMES: string[] =
   REGISTRATION_BARANGAY_OPTIONS.map((barangay) => barangay.value);
 
