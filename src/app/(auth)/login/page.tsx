@@ -72,6 +72,8 @@ function LoginForm() {
 
       switch (data.role) {
         case "SUPER_ADMIN":
+          window.location.href = "/dashboard/superadmin";
+          break;
         case "BARANGAY_ADMIN":
           window.location.href = "/dashboard/admin";
           break;
