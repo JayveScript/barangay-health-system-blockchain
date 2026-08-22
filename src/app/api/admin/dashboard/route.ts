@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import {
+  canManageBarangay,
+  getCurrentApiUser,
+  resolveScopeBarangayId,
+} from "@/lib/tenant-auth";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const user = await getCurrentApiUser();
 
-    const barangayId = user?.barangayId;
-
-    if (!canManageBarangay(user) || !barangayId) {
+    if (!canManageBarangay(user) || !user?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const requestedBarangayId = new URL(req.url).searchParams.get("barangayId");
+    const barangayId = resolveScopeBarangayId(user, requestedBarangayId);
 
     const residents = await db.resident.findMany({
       where: {
@@ -59,6 +64,12 @@ export async function GET() {
     resident.user?.isVerified
 ).length;
 
+    // The barangay actually being viewed (own, or the one a super-admin picked).
+    const barangay =
+      barangayId === user.barangayId
+        ? user.barangay
+        : await db.barangay.findUnique({ where: { id: barangayId } });
+
     return NextResponse.json({
       stats: {
         totalResidents,
@@ -67,7 +78,7 @@ export async function GET() {
       },
       residents,
       staffUsers,
-      barangay: user.barangay,
+      barangay,
     });
   } catch (error) {
     console.error("ADMIN_DASHBOARD_ERROR", error);

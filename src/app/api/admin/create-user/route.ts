@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
-import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import {
+  canManageBarangay,
+  getCurrentApiUser,
+  resolveScopeBarangayId,
+} from "@/lib/tenant-auth";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   isValidBarangayAdminUsername,
@@ -15,13 +19,16 @@ type StaffRole = (typeof allowedRoles)[number];
 export async function POST(req: Request) {
   try {
     const admin = await getCurrentApiUser();
-    const barangayId = admin?.barangayId;
 
-    if (!canManageBarangay(admin) || !barangayId) {
+    if (!canManageBarangay(admin) || !admin?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
+
+    // Super-admin may create the user under any barangay (via the switcher);
+    // a barangay-admin is locked to their own.
+    const barangayId = resolveScopeBarangayId(admin, body.barangayId);
 
     const fullName = String(body.fullName || "").trim();
     const email = String(body.email || "").trim().toLowerCase() || null;
