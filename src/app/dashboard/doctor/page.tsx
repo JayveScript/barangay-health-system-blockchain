@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
@@ -758,7 +759,7 @@ function AppointmentsTab() {
         subtitle="Accept or reject resident appointment requests."
       >
         {loading ? (
-          <p className="text-sm text-slate-500">Loading appointments...</p>
+          <InlineLoader label="Loading appointments..." />
         ) : items.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-[#EFF6FF] p-8 text-center">
             <p className="text-lg font-extrabold text-slate-900">
@@ -1038,11 +1039,7 @@ function OverviewTab() {
 
   if (loading) {
     return (
-      <div className="rounded-[24px] border border-sky-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold text-slate-500">
-          Loading overview data...
-        </p>
-      </div>
+      <InlineLoader label="Loading overview data..." />
     );
   }
 
@@ -1209,9 +1206,7 @@ function DoctorAnnouncementsTab() {
         )}
 
         {loading ? (
-          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-            Loading announcements...
-          </div>
+          <InlineLoader label="Loading announcements..." />
         ) : announcements.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">

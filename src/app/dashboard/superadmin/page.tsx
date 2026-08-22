@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   normalizeBarangayHcmsUsername,
@@ -269,7 +270,7 @@ function OverviewTab() {
   }, []);
 
   if (loading) {
-    return <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-10 text-center text-sm font-semibold text-sky-600">Loading system overview...</div>;
+    return <InlineLoader label="Loading system overview..." />;
   }
   if (error) {
     return <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>;
@@ -867,7 +868,7 @@ function BarangayFilter({
 }
 
 function LoadingRow({ text }: { text: string }) {
-  return <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-8 text-center text-sm font-semibold text-sky-600">{text}</div>;
+  return <InlineLoader label={text} />;
 }
 
 function EmptyRow({ text }: { text: string }) {

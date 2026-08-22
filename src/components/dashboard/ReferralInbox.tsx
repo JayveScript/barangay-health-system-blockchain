@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import {
   ArrowLeft,
   IdCard,
@@ -179,9 +180,7 @@ export function ReferralInbox({
       )}
 
       {loading ? (
-        <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-          Loading referrals...
-        </div>
+        <InlineLoader label="Loading referrals..." />
       ) : referrals.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-sky-200 bg-sky-50 p-10 text-center">
           <Inbox className="mx-auto mb-3 h-10 w-10 text-sky-300" />

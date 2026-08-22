@@ -16,6 +16,7 @@ import {
   Activity,
 } from "lucide-react";
 import { DonutChart, BarList } from "./Charts";
+import { InlineLoader } from "./InlineLoader";
 
 // Matches the sex slices in /api/residents/stats.
 const SEX_COLORS = ["#075985", "#7DD3FC", "#94A3B8"];
@@ -85,11 +86,7 @@ export function ResidentStatsOverview() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="rounded-[24px] border border-sky-200 bg-white p-10 text-center text-sm font-semibold text-slate-500">
-        Loading resident statistics...
-      </div>
-    );
+    return <InlineLoader label="Loading resident statistics..." />;
   }
 
   if (error) {

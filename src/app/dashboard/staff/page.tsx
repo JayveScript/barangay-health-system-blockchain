@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { createPortal } from "react-dom";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ProgressBar } from "@/components/dashboard/Charts";
@@ -1009,9 +1010,7 @@ function ReferralList({
 }) {
   if (loading) {
     return (
-      <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-        Loading referrals...
-      </div>
+      <InlineLoader label="Loading referrals..." />
     );
   }
 
@@ -2109,9 +2108,7 @@ function StaffAnnouncementsTab() {
         )}
 
         {loading ? (
-          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-            Loading announcements...
-          </div>
+          <InlineLoader label="Loading announcements..." />
         ) : announcements.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
@@ -2360,9 +2357,7 @@ function StaffLogbookTab() {
 
         {/* Logbook Table */}
         {loading ? (
-          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-            Loading logbook entries...
-          </div>
+          <InlineLoader label="Loading logbook entries..." />
         ) : filtered.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">

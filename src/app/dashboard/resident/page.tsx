@@ -3,6 +3,7 @@
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useSecureQrUrl } from "@/hooks/useSecureQrUrl";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { createPortal } from "react-dom";
 import * as htmlToImage from "html-to-image";
 import {
@@ -210,9 +211,7 @@ function ResidentAnnouncementsTab() {
       )}
 
       {loading ? (
-        <div className="rounded-[26px] border border-sky-200 bg-white p-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
-          Loading announcements...
-        </div>
+        <InlineLoader label="Loading announcements..." />
       ) : announcements.length === 0 ? (
         <div className="rounded-[30px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-12 text-center shadow-sm">
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
@@ -442,9 +441,7 @@ function ResidentNotificationsTab() {
       )}
 
       {loading ? (
-        <div className="rounded-[26px] border border-sky-200 bg-white p-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
-          Loading notifications...
-        </div>
+        <InlineLoader label="Loading notifications..." />
       ) : filteredNotifications.length === 0 ? (
         <div className="rounded-[30px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-12 text-center shadow-sm">
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
@@ -1334,9 +1331,7 @@ function ResidentAppointmentsTab() {
       )}
 
       {loading ? (
-        <div className="rounded-[30px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
-          Loading available doctors...
-        </div>
+        <InlineLoader label="Loading available doctors..." />
       ) : availableDoctors.length === 0 ? (
         <div className="rounded-[30px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-12 text-center shadow-sm">
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
@@ -1920,9 +1915,7 @@ function ResidentMedicalHistoryTab({
               </div>
 
               {loading ? (
-                <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-5 text-sm font-semibold text-sky-600">
-                  Loading appointment timeline...
-                </div>
+                <InlineLoader label="Loading appointment timeline..." />
               ) : sortedAppointments.length === 0 ? (
                 <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm font-semibold text-slate-500">
                   No appointments recorded yet.
@@ -1990,9 +1983,7 @@ function ResidentMedicalHistoryTab({
           </div>
 
           {bmiLoading ? (
-            <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-5 text-sm font-semibold text-sky-600">
-              Loading BMI records...
-            </div>
+            <InlineLoader label="Loading BMI records..." />
           ) : bmiRecords.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm font-semibold text-slate-500">
               No BMI records recorded yet.

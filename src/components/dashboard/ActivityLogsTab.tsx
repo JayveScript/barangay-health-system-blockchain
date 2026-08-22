@@ -12,6 +12,7 @@ import {
   Send,
   Stethoscope,
 } from "lucide-react";
+import { InlineLoader } from "./InlineLoader";
 
 type ActivityItem = {
   id: string;
@@ -203,9 +204,7 @@ export function ActivityLogsTab({ barangayId }: { barangayId?: string }) {
       )}
 
       {loading ? (
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-10 text-center text-sm font-semibold text-sky-600">
-          Loading activity logs...
-        </div>
+        <InlineLoader label="Loading activity logs..." />
       ) : filtered.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-sky-200 bg-sky-50 px-4 py-12 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-sky-600 ring-1 ring-sky-200">
