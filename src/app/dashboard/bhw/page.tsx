@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { PortalLoader } from "@/components/PortalLoader";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ProgressBar } from "@/components/dashboard/Charts";
 import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
@@ -93,13 +95,7 @@ export default function BHWDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <main className="h-screen overflow-hidden bg-[#EFF6FF] p-6">
-        <div className="mx-auto max-w-7xl rounded-[30px] border border-[#DCEAF7] bg-white p-8 shadow-2xl shadow-sky-900/10">
-          <p className="text-sm text-slate-500">Loading BHW dashboard...</p>
-        </div>
-      </main>
-    );
+    return <PortalLoader label="Loading BHW dashboard..." />;
   }
 
   if (!user) return null;
@@ -455,9 +451,7 @@ function BHWAnnouncementsTab() {
         )}
 
         {loading ? (
-          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-            Loading announcements...
-          </div>
+          <InlineLoader label="Loading announcements..." />
         ) : announcements.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
@@ -708,9 +702,7 @@ function LogbookTab() {
 
         {/* Logbook Table */}
         {loading ? (
-          <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-            Loading logbook entries...
-          </div>
+          <InlineLoader label="Loading logbook entries..." />
         ) : filtered.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">

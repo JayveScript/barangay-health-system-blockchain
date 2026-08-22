@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { PortalLoader } from "@/components/PortalLoader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
@@ -85,13 +86,7 @@ export default function NurseDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <main className="h-screen overflow-hidden bg-[#EFF6FF] p-6">
-        <div className="mx-auto max-w-7xl rounded-[30px] border border-[#DCEAF7] bg-white p-8 shadow-2xl shadow-sky-900/10">
-          <p className="text-sm text-slate-500">Loading Nurse dashboard...</p>
-        </div>
-      </main>
-    );
+    return <PortalLoader label="Loading Nurse dashboard..." />;
   }
 
   if (!user) return null;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import {
   CalendarCheck,
   CalendarDays,
@@ -718,7 +719,7 @@ function DiagnosisHistory({
       </div>
 
       {loading ? (
-        <div className="py-8 text-center text-sm font-semibold text-slate-500">Loading records...</div>
+        <InlineLoader label="Loading records..." />
       ) : diagnoses.length === 0 ? (
         <div className="rounded-[20px] border border-dashed border-sky-200 bg-sky-50/50 py-10 text-center">
           <Stethoscope className="mx-auto mb-3 h-10 w-10 text-sky-300" />

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import * as htmlToImage from "html-to-image";
 import {
   Activity,
@@ -2559,9 +2560,7 @@ function ResidentDetailsModal({
           {activeTab === "medical" && (
             <div className="space-y-6">
               {medLoading && (
-                <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-4 text-sm font-semibold text-sky-600">
-                  Loading medical history…
-                </div>
+                <InlineLoader label="Loading medical history…" />
               )}
               {medError && (
                 <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
@@ -3574,9 +3573,7 @@ const [form, setForm] = useState({
         </div>
 
         {loading ? (
-          <div className="rounded-2xl bg-slate-50 p-8 text-center text-sm font-semibold text-slate-500">
-            Loading announcements...
-          </div>
+          <InlineLoader label="Loading announcements..." />
         ) : announcements.length === 0 ? (
           <div className="rounded-[26px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">

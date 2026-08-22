@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { PortalLoader } from "@/components/PortalLoader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {
   Activity,
@@ -81,13 +82,7 @@ export default function MidwifeDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <main className="h-screen overflow-hidden bg-[#EFF6FF] p-6">
-        <div className="mx-auto max-w-7xl rounded-[28px] border border-[#E5E7EB] bg-white p-8 shadow-sm">
-          <p className="text-sm text-slate-500">Loading Midwife dashboard...</p>
-        </div>
-      </main>
-    );
+    return <PortalLoader label="Loading Midwife dashboard..." />;
   }
 
   if (!user) return null;

@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { PasswordGate } from "@/components/dashboard/ReferralInbox";
+import { InlineLoader } from "@/components/dashboard/InlineLoader";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type ReferralAvailabilitySummary = {
@@ -629,11 +630,7 @@ function ReferralList({
   busyId?: string | null;
 }) {
   if (loading) {
-    return (
-      <div className="rounded-[24px] border border-sky-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
-        Loading referrals...
-      </div>
-    );
+    return <InlineLoader label="Loading referrals..." />;
   }
 
   if (referrals.length === 0) {
