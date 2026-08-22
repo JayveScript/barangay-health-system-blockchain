@@ -56,6 +56,10 @@ type StaffUser = {
   createdAt: string;
 };
 
+import {
+  EDUCATIONAL_ATTAINMENT_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+} from "@/lib/barangay-options";
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
@@ -1574,7 +1578,7 @@ function StaffRegistrationModal({
 
   const validateStep = () => {
     if (step !== 1) return true;
-    if (!form.lastName || !form.firstName || !form.birthDate || !form.sex || !form.civilStatus || !form.houseStreet) {
+    if (!form.lastName || !form.firstName || !form.birthDate || !form.sex || !form.civilStatus) {
       setError("Please complete required fields in Step 1.");
       return false;
     }
@@ -1716,13 +1720,37 @@ function StaffRegistrationModal({
                   <option value="COHABITANT">Co-habitant</option>
                 </select>
               </div>
-              <ModalInput label="House / Street *" value={form.houseStreet} onChange={(v) => updateField("houseStreet", v)} />
+              <ModalInput label="House / Street" value={form.houseStreet} onChange={(v) => updateField("houseStreet", v)} />
               <ModalInput label="Contact Number" value={form.contactNumber} onChange={(v) => updateField("contactNumber", v)} />
               <ModalInput label="Religion" value={form.religion} onChange={(v) => updateField("religion", v)} />
-              <ModalInput label="Educational Attainment" value={form.educationalAttainment} onChange={(v) => updateField("educationalAttainment", v)} />
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Educational Attainment</label>
+                <select
+                  value={form.educationalAttainment}
+                  onChange={(e) => updateField("educationalAttainment", e.target.value)}
+                  className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none"
+                >
+                  <option value="">Select</option>
+                  {EDUCATIONAL_ATTAINMENT_OPTIONS.map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
               <ModalInput label="Occupation" value={form.occupation} onChange={(v) => updateField("occupation", v)} />
               <ModalInput label="Accompanying Person" value={form.accompanyingPerson} onChange={(v) => updateField("accompanyingPerson", v)} />
-              <ModalInput label="Relationship" value={form.relationship} onChange={(v) => updateField("relationship", v)} />
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Relationship</label>
+                <select
+                  value={form.relationship}
+                  onChange={(e) => updateField("relationship", e.target.value)}
+                  className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none"
+                >
+                  <option value="">Select</option>
+                  {RELATIONSHIP_OPTIONS.map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
 
