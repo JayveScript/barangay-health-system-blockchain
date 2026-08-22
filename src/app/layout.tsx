@@ -3,7 +3,10 @@ import type { Metadata, Viewport } from "next";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
-  title: "Barangay Health Center Management System",
+  title: {
+    default: "KALYO",
+    template: "%s · KALYO",
+  },
   description: "A secure platform for managing patient records, consultations, and barangay health center operations.",
   appleWebApp: {
     capable: true,
