@@ -43,6 +43,7 @@ function isSecureScanRoute(pathname: string) {
 // (e.g. "resident") are open to any authenticated user — residents use their
 // own dashboard while staff/admin open /dashboard/resident/<id> detail views.
 const SECTION_ROLES: Record<string, string[]> = {
+  superadmin: ["SUPER_ADMIN"],
   admin: ["SUPER_ADMIN", "BARANGAY_ADMIN"],
   doctor: ["DOCTOR"],
   nurse: ["NURSE"],
@@ -54,7 +55,8 @@ const SECTION_ROLES: Record<string, string[]> = {
 // The home dashboard path for a given role.
 function dashboardForRole(role: string): string {
   const r = role.toUpperCase();
-  if (r === "SUPER_ADMIN" || r === "BARANGAY_ADMIN") return "/dashboard/admin";
+  if (r === "SUPER_ADMIN") return "/dashboard/superadmin";
+  if (r === "BARANGAY_ADMIN") return "/dashboard/admin";
   return `/dashboard/${r.toLowerCase()}`;
 }
 
@@ -154,13 +156,10 @@ export async function middleware(request: NextRequest) {
   if (isAuthPage(pathname) && token) {
     const payload = await verifyAuthTokenEdge(token);
     if (payload) {
-      // Send each role to its own dashboard
-      let rolePath = payload.role.toLowerCase();
-      if (rolePath === "barangay_admin" || rolePath === "super_admin") {
-        rolePath = "admin";
-      }
-      const destination = `/dashboard/${rolePath}`;
-      return NextResponse.redirect(new URL(destination, request.url));
+      // Send each role to its own dashboard.
+      return NextResponse.redirect(
+        new URL(dashboardForRole(payload.role), request.url)
+      );
     }
   }
 
