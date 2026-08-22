@@ -1,8 +1,12 @@
 export const DEFAULT_BARANGAY_CITY = "Davao City";
 
 export const REGISTRATION_BARANGAY_OPTIONS = [
-  { label: "BARANGAY 19-B", value: "Barangay 19-B" },
-  { label: "BARANGAY 20", value: "Barangay 20" },
+  { label: "PANAGA, BRGY. COLOSAS", value: "Panaga, Brgy. Colosas" },
+  { label: "COLOSAS PROPER, BRGY. COLOSAS", value: "Colosas Proper, Brgy. Colosas" },
+  { label: "SURAYAN, BRGY. COLOSAS", value: "Surayan, Brgy. Colosas" },
+  { label: "MONTEFLOR, BRGY. COLOSAS", value: "Monteflor, Brgy. Colosas" },
+  { label: "GALACIA, BRGY. COLOSAS", value: "Galacia, Brgy. Colosas" },
+  { label: "APALILI, BRGY. COLOSAS", value: "Apalili, Brgy. Colosas" },
 ] as const;
 
 export const REFERRAL_RECEIVING_BARANGAY_NAMES: string[] =
