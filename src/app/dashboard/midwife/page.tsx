@@ -330,7 +330,7 @@ function OverviewTab() {
       <Panel
         icon={<HeartPulse className="h-5 w-5" />}
         title="Maternal Health Summary"
-        subtitle="Barangay 19-B midwife monitoring overview"
+        subtitle="Barangay midwife monitoring overview"
       >
         <div className="grid items-start gap-4 md:grid-cols-4">
           <SummaryBox title="Pregnant Residents" value="7" />
@@ -375,7 +375,7 @@ function PersonalInfoTab({
           <InfoBox label="Phone Number" value={user.phoneNumber || "Not set"} />
           <InfoBox
             label="Barangay"
-            value={user.barangay?.name || "Barangay 19-B"}
+            value={user.barangay?.name || "Assigned Barangay"}
           />
           <InfoBox
             label="Verification Status"

@@ -2750,7 +2750,7 @@ function ResidentDigitalIdModal({
               />
               <div className="flex-1 px-2 text-center sm:px-4">
                 <p className="text-[7px] font-black leading-tight text-slate-800 sm:text-[10px] lg:text-[13px]">REPUBLIC OF THE PHILIPPINES</p>
-                <p className="text-[7px] font-black leading-tight text-slate-800 sm:text-[10px] lg:text-[13px]">BARANGAY 19-B HEALTH OFFICE</p>
+                <p className="text-[7px] font-black leading-tight text-slate-800 sm:text-[10px] lg:text-[13px]">{(resident.barangayName || "Barangay").toUpperCase()} HEALTH OFFICE</p>
                 <h2 className="mt-1 text-[11px] font-black uppercase tracking-wide text-[#075985] sm:text-[17px] lg:text-[25px]">BARANGAY HEALTH DIGITAL ID</h2>
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 shadow-sm ring-1 ring-sky-200 sm:h-14 sm:w-14 sm:rounded-2xl lg:h-[74px] lg:w-[74px] lg:rounded-[22px]">

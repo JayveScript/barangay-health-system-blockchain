@@ -3,7 +3,7 @@ import { resolveAuthedUser } from "@/lib/api-auth";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 
-const STATIC_BARANGAY = "Barangay 19-B";
+const STATIC_BARANGAY = "Colosas Proper, Brgy. Colosas";
 const STATIC_CITY = "Davao City";
 
 type Body = {

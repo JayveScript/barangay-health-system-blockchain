@@ -502,7 +502,7 @@ export async function POST(req: Request) {
 
     if (!isAllowedReferralReceivingBarangay(targetBarangay.name)) {
       return NextResponse.json(
-        { error: "Please select Barangay 19-B or Barangay 20 for referral." },
+        { error: "Please select a valid receiving barangay for referral." },
         { status: 400 }
       );
     }
