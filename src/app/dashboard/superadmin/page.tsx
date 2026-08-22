@@ -328,6 +328,7 @@ function ResidentsTab() {
   const [rows, setRows] = useState<SuperResident[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [barangay, setBarangay] = useState("ALL");
 
   useEffect(() => {
     (async () => {
@@ -341,22 +342,33 @@ function ResidentsTab() {
     })();
   }, []);
 
+  const barangayOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.barangayName).filter(Boolean))].sort(),
+    [rows]
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      `${r.firstName} ${r.lastName} ${r.barangayName}`.toLowerCase().includes(q)
-    );
-  }, [rows, search]);
+    return rows.filter((r) => {
+      if (barangay !== "ALL" && r.barangayName !== barangay) return false;
+      if (!q) return true;
+      return `${r.firstName} ${r.lastName} ${r.barangayName}`
+        .toLowerCase()
+        .includes(q);
+    });
+  }, [rows, search, barangay]);
 
   return (
     <TableCard
       title="Registered Residents"
-      subtitle="Every resident across all barangays."
+      subtitle="Filter residents by a specific sitio, or view all barangays."
       icon={<Users className="h-5 w-5" />}
       search={search}
       onSearch={setSearch}
       count={filtered.length}
+      filterControl={
+        <BarangayFilter value={barangay} onChange={setBarangay} options={barangayOptions} />
+      }
     >
       {loading ? (
         <LoadingRow text="Loading residents..." />
@@ -405,6 +417,7 @@ function StaffTab() {
   const [rows, setRows] = useState<SuperStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [barangay, setBarangay] = useState("ALL");
 
   useEffect(() => {
     (async () => {
@@ -418,22 +431,38 @@ function StaffTab() {
     })();
   }, []);
 
+  const barangayOptions = useMemo(
+    () =>
+      [
+        ...new Set(
+          rows.map((s) => s.barangay?.name).filter((n): n is string => !!n)
+        ),
+      ].sort(),
+    [rows]
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((s) =>
-      `${s.fullName ?? ""} ${s.username} ${s.role} ${s.barangay?.name ?? ""}`.toLowerCase().includes(q)
-    );
-  }, [rows, search]);
+    return rows.filter((s) => {
+      if (barangay !== "ALL" && s.barangay?.name !== barangay) return false;
+      if (!q) return true;
+      return `${s.fullName ?? ""} ${s.username} ${s.role} ${s.barangay?.name ?? ""}`
+        .toLowerCase()
+        .includes(q);
+    });
+  }, [rows, search, barangay]);
 
   return (
     <TableCard
       title="Health Center Staff"
-      subtitle="Every staff, doctor, nurse, BHW, and midwife across all barangays."
+      subtitle="Filter staff by a specific sitio, or view all barangays."
       icon={<Stethoscope className="h-5 w-5" />}
       search={search}
       onSearch={setSearch}
       count={filtered.length}
+      filterControl={
+        <BarangayFilter value={barangay} onChange={setBarangay} options={barangayOptions} />
+      }
     >
       {loading ? (
         <LoadingRow text="Loading staff..." />
@@ -768,6 +797,7 @@ function TableCard({
   search,
   onSearch,
   count,
+  filterControl,
   children,
 }: {
   title: string;
@@ -776,6 +806,7 @@ function TableCard({
   search: string;
   onSearch: (v: string) => void;
   count: number;
+  filterControl?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -788,18 +819,49 @@ function TableCard({
             <p className="text-sm text-slate-500">{subtitle}</p>
           </div>
         </div>
-        <div className="relative w-full lg:max-w-xs">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search..."
-            className="min-h-[46px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-11 pr-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-          />
+        <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+          {filterControl}
+          <div className="relative w-full sm:w-56">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => onSearch(e.target.value)}
+              placeholder="Search..."
+              className="min-h-[46px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-11 pr-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+            />
+          </div>
         </div>
       </div>
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{count} record(s)</p>
       <div className="overflow-x-auto">{children}</div>
+    </div>
+  );
+}
+
+function BarangayFilter({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="relative w-full sm:w-56">
+      <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-600" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-h-[46px] w-full cursor-pointer rounded-2xl border border-sky-200 bg-sky-50 pl-11 pr-4 text-sm font-bold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+      >
+        <option value="ALL">All Barangays</option>
+        {options.map((b) => (
+          <option key={b} value={b}>
+            {b}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
