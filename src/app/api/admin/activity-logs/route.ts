@@ -33,7 +33,7 @@ function residentName(r?: { firstName?: string | null; lastName?: string | null 
   return `${r.firstName ?? ""} ${r.lastName ?? ""}`.replace(/\s+/g, " ").trim() || "a resident";
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const admin = await getCurrentApiUser();
 
@@ -42,8 +42,13 @@ export async function GET() {
     }
 
     const isSuper = String(admin.role) === "SUPER_ADMIN";
-    const barangayId = admin.barangayId;
-    const scope = isSuper ? {} : { barangayId };
+    const requestedBarangayId = new URL(req.url).searchParams.get("barangayId");
+    // Super-admin: a specific barangay if chosen, otherwise all barangays.
+    // Barangay-admin: always their own.
+    const barangayId =
+      isSuper && requestedBarangayId ? requestedBarangayId : admin.barangayId;
+    const allBarangays = isSuper && !requestedBarangayId;
+    const scope = allBarangays ? {} : { barangayId };
 
     const [diagnoses, bmiRecords, availabilities, referrals, scans] =
       await Promise.all([
@@ -72,7 +77,7 @@ export async function GET() {
           take: 40,
         }),
         db.residentReferral.findMany({
-          where: isSuper ? {} : { sourceBarangayId: barangayId },
+          where: allBarangays ? {} : { sourceBarangayId: barangayId },
           include: {
             referredByStaff: { select: { fullName: true, role: true } },
             targetBarangay: { select: { name: true } },
@@ -83,7 +88,7 @@ export async function GET() {
         db.qrScanAuditLog.findMany({
           where: {
             action: { in: ["ACCESS_GRANTED", "ACCESS_DENIED"] },
-            ...(isSuper ? {} : { scannedBy: { barangayId } }),
+            ...(allBarangays ? {} : { scannedBy: { barangayId } }),
           },
           include: { scannedBy: { select: { fullName: true, role: true } } },
           orderBy: { createdAt: "desc" },

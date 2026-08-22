@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import { canManageBarangay, getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 async function verifyAdminPassword(userId: string, password: string) {
@@ -75,7 +75,7 @@ export async function PATCH(
     const resident = await prisma.resident.findFirst({
       where: {
         id,
-        barangayId,
+        ...(isSuperAdmin(currentUser) ? {} : { barangayId }),
       },
       select: {
         id: true,
@@ -213,7 +213,7 @@ export async function DELETE(
     const resident = await prisma.resident.findFirst({
       where: {
         id,
-        barangayId,
+        ...(isSuperAdmin(currentUser) ? {} : { barangayId }),
       },
       select: {
         id: true,

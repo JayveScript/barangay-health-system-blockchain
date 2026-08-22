@@ -150,6 +150,7 @@ type AdminCurrentUser = {
   isVerified: boolean;
   createdAt: string;
   barangay?: {
+    id: string;
     name: string;
   } | null;
 };
@@ -283,6 +284,12 @@ export default function AdminDashboardPage() {
   });
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Barangay switcher (super-admin can view/manage any sitio).
+  const [barangays, setBarangays] = useState<{ id: string; name: string }[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [selectedBarangayId, setSelectedBarangayId] = useState<string>("");
+
   const currentBarangayName =
     data?.barangay?.name ||
     adminUser?.barangay?.name ||
@@ -291,7 +298,31 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchDashboard();
     fetchAdminUser();
+    (async () => {
+      try {
+        const res = await fetch("/api/barangays");
+        if (!res.ok) return;
+        const json = await res.json();
+        setBarangays(json.barangays || []);
+        setIsSuperAdmin(Boolean(json.isSuperAdmin));
+      } catch {
+        /* silent */
+      }
+    })();
   }, []);
+
+  // Default the switcher to the admin's own barangay once it's known.
+  useEffect(() => {
+    if (adminUser?.barangay?.id && !selectedBarangayId) {
+      setSelectedBarangayId(adminUser.barangay.id);
+    }
+  }, [adminUser?.barangay?.id, selectedBarangayId]);
+
+  // Re-load the dashboard whenever the super-admin switches barangay.
+  useEffect(() => {
+    if (selectedBarangayId) fetchDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBarangayId]);
 
   const adminInitials = useMemo(() => {
     if (!adminUser?.fullName) return "AD";
@@ -307,7 +338,10 @@ export default function AdminDashboardPage() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/dashboard");
+      const query = selectedBarangayId
+        ? `?barangayId=${encodeURIComponent(selectedBarangayId)}`
+        : "";
+      const res = await fetch(`/api/admin/dashboard${query}`);
       const json = await res.json();
 
       if (!res.ok || !json?.stats) {
@@ -451,6 +485,7 @@ export default function AdminDashboardPage() {
           username: normalizeBarangayHcmsUsername(form.username),
           password: form.password,
           role: form.role,
+          barangayId: selectedBarangayId,
         }),
       });
 
@@ -1004,10 +1039,28 @@ export default function AdminDashboardPage() {
                         Verified Admin
                       </span>
 
-                      <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {currentBarangayName}
-                      </span>
+                      {isSuperAdmin && barangays.length > 0 ? (
+                        <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-50 pl-2.5 pr-1 py-0.5 text-xs font-bold text-sky-700">
+                          <MapPin className="h-3.5 w-3.5" />
+                          <select
+                            value={selectedBarangayId}
+                            onChange={(e) => setSelectedBarangayId(e.target.value)}
+                            title="Switch barangay"
+                            className="max-w-[220px] cursor-pointer rounded-full bg-transparent px-1 py-1 text-xs font-bold text-sky-700 outline-none"
+                          >
+                            {barangays.map((b) => (
+                              <option key={b.id} value={b.id}>
+                                {b.name}
+                              </option>
+                            ))}
+                          </select>
+                        </span>
+                      ) : (
+                        <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {currentBarangayName}
+                        </span>
+                      )}
                     </div>
 
                     <p className="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
@@ -1148,7 +1201,9 @@ export default function AdminDashboardPage() {
                   </div>
                 )}
 
-                {tab === "activity-logs" && <ActivityLogsTab />}
+                {tab === "activity-logs" && (
+                  <ActivityLogsTab barangayId={selectedBarangayId} />
+                )}
 
                 {tab === "residents" && (
                   <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
@@ -1553,7 +1608,7 @@ export default function AdminDashboardPage() {
                   </div>
                 )}
 
-{tab === "announcements" && <AdminAnnouncementsTab />}
+{tab === "announcements" && <AdminAnnouncementsTab barangayId={selectedBarangayId} />}
 
 
               </>
@@ -3193,7 +3248,7 @@ type Announcement = {
   createdAt: string;
 };
 
-function AdminAnnouncementsTab() {
+function AdminAnnouncementsTab({ barangayId }: { barangayId?: string }) {
   const today = new Date().toISOString().split("T")[0];
 
   const [selectedDate, setSelectedDate] = useState(today);
@@ -3217,7 +3272,8 @@ const [form, setForm] = useState({
       setLoading(true);
       setError("");
 
-      const res = await fetch(`/api/admin/announcements?date=${selectedDate}`);
+      const bq = barangayId ? `&barangayId=${encodeURIComponent(barangayId)}` : "";
+      const res = await fetch(`/api/admin/announcements?date=${selectedDate}${bq}`);
       const json = await res.json();
 
       if (!res.ok) {
@@ -3236,7 +3292,8 @@ const [form, setForm] = useState({
 
   useEffect(() => {
     fetchAnnouncements();
-  }, [selectedDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, barangayId]);
 
   const handleImageUpload = (file: File | null) => {
   if (!file) return;
@@ -3289,7 +3346,8 @@ const [form, setForm] = useState({
       },
       body: JSON.stringify({
         ...form,
-        imageUrl: finalImageUrl, 
+        imageUrl: finalImageUrl,
+        barangayId,
       }),
     });
 

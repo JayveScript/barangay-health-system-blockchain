@@ -1,19 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { canManageBarangay, getCurrentApiUser } from "@/lib/tenant-auth";
+import {
+  canManageBarangay,
+  getCurrentApiUser,
+  resolveScopeBarangayId,
+} from "@/lib/tenant-auth";
 import { sendAnnouncementEmail } from "@/lib/mail";
 
 export async function GET(req: Request) {
   try {
     const user = await getCurrentApiUser();
-    const barangayId = user?.barangayId;
 
-    if (!user || !barangayId) {
+    if (!user || !user.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const date = searchParams.get("date");
+    const barangayId = resolveScopeBarangayId(
+      user,
+      searchParams.get("barangayId")
+    );
 
     const selectedDate = date ? new Date(date) : new Date();
 
@@ -49,13 +56,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();
-    const barangayId = user?.barangayId;
 
-    if (!canManageBarangay(user) || !barangayId) {
+    if (!canManageBarangay(user) || !user?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
+    const barangayId = resolveScopeBarangayId(user, body.barangayId);
 
     if (!body.title || !body.content || !body.publishDate) {
       return NextResponse.json(

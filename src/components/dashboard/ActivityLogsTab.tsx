@@ -75,7 +75,7 @@ function relativeTime(iso: string) {
   });
 }
 
-export function ActivityLogsTab() {
+export function ActivityLogsTab({ barangayId }: { barangayId?: string }) {
   const [logs, setLogs] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,7 +86,10 @@ export function ActivityLogsTab() {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch("/api/admin/activity-logs");
+      const query = barangayId
+        ? `?barangayId=${encodeURIComponent(barangayId)}`
+        : "";
+      const res = await fetch(`/api/admin/activity-logs${query}`);
       const json = await res.json();
       if (!res.ok) {
         setError(json.error || "Failed to load activity logs.");
@@ -102,7 +105,8 @@ export function ActivityLogsTab() {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [barangayId]);
 
   const roleCounts = useMemo(() => {
     const map: Record<string, number> = {};
