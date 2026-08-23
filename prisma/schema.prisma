@@ -101,6 +101,7 @@ model Resident {
   middleName            String?
   age                   Int
   sex                   Sex
+  isPregnant            Boolean?
   birthDate             DateTime
   religion              String?
   houseStreet           String?
@@ -240,6 +241,7 @@ model PendingRegistration {
   middleName            String?
   age                   Int
   sex                   Sex
+  isPregnant            Boolean?
   birthDate             DateTime
   religion              String?
   completeAddress       String

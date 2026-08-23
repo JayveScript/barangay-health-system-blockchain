@@ -127,6 +127,7 @@ export default async function PublicResidentPage({ params }: PageProps) {
       lastName: true,
       age: true,
       sex: true,
+      isPregnant: true,
       birthDate: true,
       religion: true,
       houseStreet: true,
@@ -405,6 +406,18 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   <QrInfoRow label="Full Name" value={fullName} />
                   <QrInfoRow label="Age" value={resident.age} />
                   <QrInfoRow label="Sex" value={resident.sex} />
+                  {resident.sex === "FEMALE" && (
+                    <QrInfoRow
+                      label="Pregnant"
+                      value={
+                        resident.isPregnant === null || resident.isPregnant === undefined
+                          ? "Not specified"
+                          : resident.isPregnant
+                          ? "Yes"
+                          : "No"
+                      }
+                    />
+                  )}
                   <QrInfoRow label="Birth Date" value={birthDate} />
                   <QrInfoRow label="Civil Status" value={resident.civilStatus} />
                   <QrInfoRow label="Religion" value={resident.religion} />

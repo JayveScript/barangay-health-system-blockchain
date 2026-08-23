@@ -21,6 +21,7 @@ export async function POST(req: Request) {
       middleName,
       age,
       sex,
+      isPregnant,
       birthDate,
       religion,
       completeAddress,
@@ -167,6 +168,7 @@ export async function POST(req: Request) {
       middleName: middleName || null,
       age: parsedAge,
       sex,
+      isPregnant: sex === "FEMALE" ? Boolean(isPregnant) : null,
       birthDate: parsedBirthDate,
       religion: religion || null,
 

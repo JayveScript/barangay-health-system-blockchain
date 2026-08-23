@@ -39,6 +39,7 @@ type ResidentData = {
   middleName?: string | null;
   age: number;
   sex: string;
+  isPregnant?: boolean | null;
   birthDate: string;
   religion?: string | null;
   completeAddress: string;

@@ -127,6 +127,7 @@ export async function POST(req: Request) {
           middleName: pending.middleName,
           age: pending.age,
           sex: pending.sex,
+          isPregnant: pending.isPregnant,
           birthDate: pending.birthDate,
           religion: pending.religion,
           completeAddress: pending.completeAddress,
