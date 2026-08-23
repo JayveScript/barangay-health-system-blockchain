@@ -10,6 +10,7 @@ import {
   HeartPulse,
   LogOut,
   MapPin,
+  Megaphone,
   Menu,
   Scale,
   Send,
@@ -38,9 +39,10 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -148,6 +150,15 @@ export default function NurseDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "announcements"}
+              icon={<Megaphone className="h-5 w-5" />}
+              label="Announcements"
+              onClick={() => {
+                setActiveTab("announcements");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "referrals"}
               icon={<Send className="h-5 w-5" />}
               label="Referred Resident"
@@ -211,6 +222,12 @@ export default function NurseDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+              <SidebarButton
+                active={activeTab === "announcements"}
+                icon={<Megaphone className="h-5 w-5" />}
+                label="Announcements"
+                onClick={() => setActiveTab("announcements")}
               />
               <SidebarButton
                 active={activeTab === "referrals"}
@@ -298,6 +315,10 @@ export default function NurseDashboardPage() {
 
             {activeTab === "overview" && <OverviewTab />}
 
+            {activeTab === "announcements" && (
+              <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
+            )}
+
             {activeTab === "referrals" && <ReferralsTab />}
 
             {activeTab === "scan-qr" && (
@@ -320,7 +341,7 @@ export default function NurseDashboardPage() {
       <MobileBottomNav
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
-          { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },

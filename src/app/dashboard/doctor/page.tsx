@@ -151,6 +151,7 @@ type DoctorAvailability = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -455,7 +456,9 @@ export default function DoctorDashboardPage() {
 
             {activeTab === "diagnose" && <DiagnoseTab />}
 
-            {activeTab === "announcements" && <DoctorAnnouncementsTab />}
+            {activeTab === "announcements" && (
+              <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
+            )}
 
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-sky-200 bg-white p-5">
@@ -1125,145 +1128,6 @@ function OverviewTab() {
     </div>
   );
 }
-type Announcement = {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string | null;
-  publishDate: string;
-  createdAt: string;
-};
-
-function DoctorAnnouncementsTab() {
-  const today = new Date().toISOString().split("T")[0];
-
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const fetchAnnouncements = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const res = await fetch(`/api/admin/announcements?date=${selectedDate}`);
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error || "Failed to load announcements.");
-        return;
-      }
-
-      setAnnouncements(Array.isArray(json) ? json : []);
-    } catch (err) {
-      console.error(err);
-      setError("Unable to connect to the server.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAnnouncements();
-  }, [selectedDate]);
-
-  return (
-    <div className="space-y-5 pb-4">
-      <Panel
-        icon={<Megaphone className="h-5 w-5" />}
-        title="Health Center Announcements"
-        subtitle="View today, past, and upcoming announcements from the admin."
-      >
-        <div className="mb-5 flex flex-col gap-4 rounded-[24px] border border-sky-200 bg-[#EFF6FF] p-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">
-              Announcements for {formatLongDate(selectedDate)}
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Use the calendar to view announcements for another date.
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-sky-200">
-            <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
-              Calendar Date
-            </label>
-
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="min-h-[46px] rounded-xl border border-sky-200 bg-white px-4 text-sm font-bold text-slate-900 outline-none focus:border-sky-500"
-            />
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <InlineLoader label="Loading announcements..." />
-        ) : announcements.length === 0 ? (
-          <div className="rounded-[24px] border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-10 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
-              <Megaphone className="h-9 w-9" />
-            </div>
-
-            <h3 className="text-2xl font-black text-slate-900">
-              No announcement
-            </h3>
-
-            <p className="mt-2 text-sm text-slate-500">
-              There is no announcement for this selected date.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
-            {announcements.map((item) => (
-              <div
-                key={item.id}
-                className="overflow-hidden rounded-[26px] border border-sky-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                {item.imageUrl ? (
-                  <div className="bg-slate-100">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="max-h-[360px] w-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-44 items-center justify-center bg-gradient-to-br from-sky-50 to-white text-sky-600">
-                    <Megaphone className="h-14 w-14" />
-                  </div>
-                )}
-
-                <div className="p-5">
-                  <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-600">
-                    {formatLongDate(item.publishDate)}
-                  </span>
-
-                  <h3 className="mt-3 text-2xl font-black text-slate-900">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
-                    {item.content}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Panel>
-    </div>
-  );
-}
-
 function PersonalInfoTab({
   user,
   initials,
