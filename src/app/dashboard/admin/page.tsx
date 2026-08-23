@@ -1437,7 +1437,7 @@ export default function AdminDashboardPage() {
                             label="Role"
                             value={form.role}
                             onChange={(v) => setForm((p) => ({ ...p, role: v }))}
-                            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
+                            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"]}
                           />
 
                           <ReadonlyBadgeInput
@@ -2024,7 +2024,7 @@ function StaffEditModal({
             label="Role"
             value={form.role}
             onChange={(v) => onChange({ role: v })}
-            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
+            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"]}
           />
 
           <Input

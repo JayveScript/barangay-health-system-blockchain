@@ -92,6 +92,15 @@ function LoginForm() {
         case "MIDWIFE":
           window.location.href = "/dashboard/midwife";
           break;
+        case "PHARMACIST":
+          window.location.href = "/dashboard/pharmacist";
+          break;
+        case "MEDTECH":
+          window.location.href = "/dashboard/medtech";
+          break;
+        case "NUTRITIONIST":
+          window.location.href = "/dashboard/nutritionist";
+          break;
         default:
           setServerError("Unknown account role.");
           break;

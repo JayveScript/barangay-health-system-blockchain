@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
-const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE"];
+const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"];
 
 // GET /api/superadmin/staff — all clinical/support staff across every barangay.
 export async function GET() {
