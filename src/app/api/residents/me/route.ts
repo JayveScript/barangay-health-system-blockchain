@@ -14,6 +14,7 @@ export async function GET() {
     middleName: user.resident.middleName,
     age: user.resident.age,
     sex: user.resident.sex,
+    isPregnant: user.resident.isPregnant,
     birthDate: user.resident.birthDate,
     religion: user.resident.religion,
 

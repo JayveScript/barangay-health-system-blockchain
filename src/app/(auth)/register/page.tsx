@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
+  Baby,
   BookOpen,
   Building2,
   CalendarDays,
@@ -33,6 +34,7 @@ type FormState = {
   middleName: string;
   age: string;
   sex: "MALE" | "FEMALE" | "";
+  isPregnant: boolean | null;
   birthDate: string;
   religion: string;
 
@@ -119,6 +121,7 @@ const initialForm: FormState = {
   middleName: "",
   age: "",
   sex: "",
+  isPregnant: null,
   birthDate: "",
   religion: "",
 
@@ -191,6 +194,24 @@ export default function RegisterPage() {
   const [serverMessage, setServerMessage] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPregnancyModal, setShowPregnancyModal] = useState(false);
+
+  const handleSexChange = (value: FormState["sex"]) => {
+    setForm((prev) => ({
+      ...prev,
+      sex: value,
+      // Pregnancy only applies to female residents.
+      isPregnant: value === "FEMALE" ? prev.isPregnant : null,
+    }));
+    if (value === "FEMALE") {
+      setShowPregnancyModal(true);
+    }
+  };
+
+  const setPregnancy = (pregnant: boolean) => {
+    setForm((prev) => ({ ...prev, isPregnant: pregnant }));
+    setShowPregnancyModal(false);
+  };
 
   const progress = useMemo(() => (step / 5) * 100, [step]);
 
@@ -595,13 +616,31 @@ export default function RegisterPage() {
                       label="Sex"
                       required
                       value={form.sex}
-                      onChange={(v) => updateField("sex", v as FormState["sex"])}
+                      onChange={(v) => handleSexChange(v as FormState["sex"])}
                       error={errors.sex}
                       options={[
                         { label: "Male", value: "MALE" },
                         { label: "Female", value: "FEMALE" },
                       ]}
                     />
+
+                    {form.sex === "FEMALE" && form.isPregnant !== null && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPregnancyModal(true)}
+                        className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-bold transition ${
+                          form.isPregnant
+                            ? "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100"
+                            : "border-sky-200 bg-sky-50 text-sky-600 hover:bg-sky-100"
+                        }`}
+                      >
+                        <Baby className="h-4 w-4" />
+                        Pregnant: {form.isPregnant ? "Yes" : "No"}
+                        <span className="text-xs font-semibold opacity-70">
+                          (tap to change)
+                        </span>
+                      </button>
+                    )}
                   </FormSection>
 
                   <FormSection title="Address Information">
@@ -975,6 +1014,42 @@ export default function RegisterPage() {
           </form>
         </div>
       </div>
+
+      {/* Pregnancy prompt — shown when Female is selected */}
+      {showPregnancyModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-2xl">
+            <div className="flex flex-col items-center bg-gradient-to-br from-pink-400 to-rose-500 px-6 pb-7 pt-9 text-center text-white">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
+                <Baby className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-black">Pregnancy Status</h3>
+              <p className="mt-1 text-sm text-white/90">
+                Is the resident currently pregnant?
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 p-5">
+              <button
+                type="button"
+                onClick={() => setPregnancy(false)}
+                className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-bold text-sky-700 transition hover:bg-sky-100"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => setPregnancy(true)}
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 px-4 text-sm font-bold text-white shadow-lg shadow-pink-500/25 transition hover:from-pink-600 hover:to-rose-600"
+              >
+                <Baby className="h-4 w-4" />
+                Yes, Pregnant
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Registration Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">

@@ -20,6 +20,7 @@ type ResidentRegistrationForm = {
   middleName: string;
   age: string;
   sex: "MALE" | "FEMALE" | "";
+  isPregnant: boolean | null;
   birthDate: string;
   religion: string;
   houseStreet: string;
@@ -89,6 +90,7 @@ const initialForm: ResidentRegistrationForm = {
   middleName: "",
   age: "",
   sex: "",
+  isPregnant: null,
   birthDate: "",
   religion: "",
   houseStreet: "",
@@ -347,7 +349,14 @@ function RegistrationModal({
                 <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Sex *</label>
                 <select
                   value={form.sex}
-                  onChange={(e) => updateField("sex", e.target.value as ResidentRegistrationForm["sex"])}
+                  onChange={(e) => {
+                    const value = e.target.value as ResidentRegistrationForm["sex"];
+                    setForm((prev) => ({
+                      ...prev,
+                      sex: value,
+                      isPregnant: value === "FEMALE" ? prev.isPregnant : null,
+                    }));
+                  }}
                   className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none"
                 >
                   <option value="">Select</option>
@@ -355,6 +364,25 @@ function RegistrationModal({
                   <option value="FEMALE">Female</option>
                 </select>
               </div>
+              {form.sex === "FEMALE" && (
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Pregnant?</label>
+                  <select
+                    value={form.isPregnant === null ? "" : form.isPregnant ? "yes" : "no"}
+                    onChange={(e) =>
+                      updateField(
+                        "isPregnant",
+                        e.target.value === "" ? null : e.target.value === "yes"
+                      )
+                    }
+                    className="min-h-[48px] w-full rounded-2xl border border-pink-200 bg-pink-50/40 px-4 text-sm font-semibold text-slate-900 outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="yes">Yes, Pregnant</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Civil Status *</label>
                 <select

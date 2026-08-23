@@ -12,6 +12,7 @@ type Body = {
   middleName?: string;
   age: number | string;
   sex: "MALE" | "FEMALE";
+  isPregnant?: boolean | null;
   birthDate: string;
   religion?: string;
   houseStreet?: string;
@@ -130,6 +131,7 @@ export async function POST(req: Request) {
           middleName: normalize(body.middleName),
           age,
           sex: body.sex,
+          isPregnant: body.sex === "FEMALE" ? Boolean(body.isPregnant) : null,
           birthDate,
           religion: normalize(body.religion),
           houseStreet: normalize(body.houseStreet),
