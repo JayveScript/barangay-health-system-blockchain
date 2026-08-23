@@ -50,7 +50,7 @@ const TYPE_STYLES: Record<
   },
 };
 
-const ROLE_FILTERS = ["ALL", "DOCTOR", "NURSE", "BHW", "MIDWIFE"];
+const ROLE_FILTERS = ["ALL", "DOCTOR", "NURSE", "BHW", "MIDWIFE", "MEDTECH", "NUTRITIONIST"];
 
 function humanizeRole(role: string) {
   return role

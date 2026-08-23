@@ -13,6 +13,9 @@ enum Role {
   NURSE
   BHW
   MIDWIFE
+  PHARMACIST
+  MEDTECH
+  NUTRITIONIST
   // STAFF role retired — folded into BHW. Value kept to match the existing
   // Postgres enum (0 rows use it); the app no longer assigns or accepts it.
   STAFF
