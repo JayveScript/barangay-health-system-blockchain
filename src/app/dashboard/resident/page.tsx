@@ -25,6 +25,7 @@ X,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
+import { ResidentComplaints } from "@/components/ResidentComplaints";
 import {
   buildConditionHistory,
   formatUpdateDate,
@@ -551,7 +552,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "notifications" | "announcements" | "digital"
+  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "announcements" | "digital"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -622,6 +623,7 @@ export default function ResidentDashboard() {
     { id: "medical-history",label: "Medical",      icon: <Stethoscope className="h-5 w-5" /> },
     { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
     { id: "notifications",  label: "Alerts",       icon: <Bell className="h-5 w-5" /> },
+    { id: "complaints",     label: "Complaints",   icon: <MessageSquareText className="h-5 w-5" /> },
     { id: "announcements",  label: "News",         icon: <Megaphone className="h-5 w-5" /> },
     { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
   ];
@@ -732,6 +734,22 @@ export default function ResidentDashboard() {
               <button
                 type="button"
                 onClick={() => {
+                  setSidebarTab("complaints");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "complaints"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <MessageSquareText className="h-5 w-5 shrink-0" />
+                Complaints
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
                   setSidebarTab("announcements");
                   setMobileSidebarOpen(false);
                 }}
@@ -830,6 +848,19 @@ export default function ResidentDashboard() {
                 >
                   <Bell className="h-5 w-5 shrink-0" />
                   Notifications
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("complaints")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "complaints"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <MessageSquareText className="h-5 w-5 shrink-0" />
+                  Complaints
                 </button>
 
                 <button
@@ -1080,6 +1111,18 @@ export default function ResidentDashboard() {
       icon={<Bell className="h-5 w-5" />}
     >
       <ResidentNotificationsTab />
+    </Section>
+  </div>
+)}
+
+            {sidebarTab === "complaints" && (
+  <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
+    <Section
+      title="Patient Complaints"
+      subtitle="Complaints recorded during your health center visits — showing the health worker who logged each one and when."
+      icon={<MessageSquareText className="h-5 w-5" />}
+    >
+      <ResidentComplaints />
     </Section>
   </div>
 )}

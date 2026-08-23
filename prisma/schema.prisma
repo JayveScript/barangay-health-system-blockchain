@@ -86,6 +86,7 @@ model User {
   qrOtpSessions   QrOtpSession[]   @relation("QrOtpSessions")
   bmiRecordsRecorded BMIRecord[]   @relation("BMIRecordedBy")
   diagnosesRecorded  Diagnosis[]   @relation("DiagnosesRecorded")
+  complaintsRecorded Complaint[]   @relation("ComplaintsRecorded")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,6 +134,7 @@ model Resident {
   referrals    ResidentReferral[]
   bmiRecords   BMIRecord[]
   diagnoses    Diagnosis[]
+  complaints   Complaint[]
 
   isArchived Boolean   @default(false)
   archivedAt DateTime?
@@ -384,6 +386,20 @@ model Diagnosis {
 
   @@index([barangayId])
   @@index([residentId, barangayId])
+}
+
+model Complaint {
+  id          String   @id @default(cuid())
+  residentId  String
+  createdById String
+  text        String
+
+  createdAt DateTime @default(now())
+
+  resident  Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  createdBy User     @relation("ComplaintsRecorded", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([residentId])
 }
 
 model Announcement {

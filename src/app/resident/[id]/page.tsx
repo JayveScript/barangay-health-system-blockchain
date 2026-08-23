@@ -16,6 +16,7 @@ import {
   HeartPulse,
 } from "lucide-react";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
+import { ResidentComplaints } from "@/components/ResidentComplaints";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -290,14 +291,16 @@ export default async function PublicResidentPage({ params }: PageProps) {
         #tab-identifying:checked ~ .tab-panels .panel-identifying,
         #tab-medical:checked ~ .tab-panels .panel-medical,
         #tab-family:checked ~ .tab-panels .panel-family,
-        #tab-social:checked ~ .tab-panels .panel-social {
+        #tab-social:checked ~ .tab-panels .panel-social,
+        #tab-complaints:checked ~ .tab-panels .panel-complaints {
           display: block;
         }
 
         #tab-identifying:checked ~ .tab-nav label[for="tab-identifying"],
         #tab-medical:checked ~ .tab-nav label[for="tab-medical"],
         #tab-family:checked ~ .tab-nav label[for="tab-family"],
-        #tab-social:checked ~ .tab-nav label[for="tab-social"] {
+        #tab-social:checked ~ .tab-nav label[for="tab-social"],
+        #tab-complaints:checked ~ .tab-nav label[for="tab-complaints"] {
           background: #2563eb;
           color: white;
           box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
@@ -354,6 +357,12 @@ export default async function PublicResidentPage({ params }: PageProps) {
             name="resident-tab"
             id="tab-social"
           />
+          <input
+            className="tab-input"
+            type="radio"
+            name="resident-tab"
+            id="tab-complaints"
+          />
 
           <div className="tab-nav flex gap-2 overflow-x-auto border-b border-blue-100 bg-white p-3">
             <label
@@ -379,6 +388,12 @@ export default async function PublicResidentPage({ params }: PageProps) {
               className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
             >
               Personal / Social History
+            </label>
+            <label
+              htmlFor="tab-complaints"
+              className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
+            >
+              Complaints
             </label>
           </div>
 
@@ -569,6 +584,15 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   No personal / social history recorded.
                 </p>
               )}
+            </section>
+
+            <section className="tab-panel panel-complaints">
+              <SectionTitle title="Patient Complaints" />
+              <p className="mb-4 -mt-2 text-sm font-medium text-slate-500">
+                Record the patient&apos;s complaint below. It is saved to their
+                record with your name and the date.
+              </p>
+              <ResidentComplaints residentId={id} />
             </section>
           </div>
         </div>
