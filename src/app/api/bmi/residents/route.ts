@@ -9,7 +9,7 @@ async function getApiUser() {
 export async function GET() {
   try {
     const user = await getApiUser();
-    if (!user || !["BHW", "STAFF", "NURSE"].includes(String(user.role))) {
+    if (!user || !["BHW", "NURSE"].includes(String(user.role))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

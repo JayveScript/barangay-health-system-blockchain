@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
 // Clinical / support roles that may view their barangay's resident statistics.
-const ALLOWED_ROLES = ["STAFF", "BHW", "NURSE", "MIDWIFE", "DOCTOR"];
+const ALLOWED_ROLES = ["BHW", "NURSE", "MIDWIFE", "DOCTOR"];
 
 /**
  * GET /api/residents/stats

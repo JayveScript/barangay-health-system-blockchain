@@ -315,7 +315,7 @@ export async function GET() {
   try {
     const user = await getApiUser();
 
-    if (!user || !["STAFF", "NURSE"].includes(String(user.role))) {
+    if (!user || !["BHW", "NURSE"].includes(String(user.role))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -452,7 +452,7 @@ export async function POST(req: Request) {
   try {
     const user = await getApiUser();
 
-    if (!user || !["STAFF", "NURSE"].includes(String(user.role))) {
+    if (!user || !["BHW", "NURSE"].includes(String(user.role))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

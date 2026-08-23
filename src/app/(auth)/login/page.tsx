@@ -89,9 +89,6 @@ function LoginForm() {
         case "BHW":
           window.location.href = "/dashboard/bhw";
           break;
-        case "STAFF":
-          window.location.href = "/dashboard/staff";
-          break;
         case "MIDWIFE":
           window.location.href = "/dashboard/midwife";
           break;

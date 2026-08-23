@@ -49,7 +49,6 @@ const SECTION_ROLES: Record<string, string[]> = {
   nurse: ["NURSE"],
   bhw: ["BHW"],
   midwife: ["MIDWIFE"],
-  staff: ["STAFF"],
 };
 
 // The home dashboard path for a given role.

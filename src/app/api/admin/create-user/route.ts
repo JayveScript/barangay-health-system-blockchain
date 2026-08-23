@@ -12,7 +12,7 @@ import {
   normalizeBarangayHcmsUsername,
 } from "@/lib/username-validation";
 
-const allowedRoles = ["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"] as const;
+const allowedRoles = ["DOCTOR", "BHW", "NURSE", "MIDWIFE"] as const;
 
 type StaffRole = (typeof allowedRoles)[number];
 

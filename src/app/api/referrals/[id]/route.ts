@@ -4,7 +4,7 @@ import { getCurrentApiUser } from "@/lib/tenant-auth";
 import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 // Roles (of the receiving / target barangay) allowed to accept or reject.
-const ALLOWED_ROLES = ["STAFF", "DOCTOR", "NURSE"];
+const ALLOWED_ROLES = ["BHW", "DOCTOR", "NURSE"];
 
 /**
  * PATCH /api/referrals/[id]
