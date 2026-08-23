@@ -103,6 +103,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (String(password).length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters." },
+        { status: 400 }
+      );
+    }
+
     if (!normalizedEmail) {
       return NextResponse.json(
         { error: "Email is required for Gmail verification." },
