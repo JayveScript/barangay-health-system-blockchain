@@ -24,7 +24,6 @@ export const SCANNER_ALLOWED_ROLES = new Set([
   "MIDWIFE",
   "DOCTOR",
   "BHW",
-  "STAFF",
 ]);
 
 // ---------------------------------------------------------------------------

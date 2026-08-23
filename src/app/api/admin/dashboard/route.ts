@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       where: {
         barangayId,
         role: {
-          in: ["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"],
+          in: ["DOCTOR", "BHW", "NURSE", "MIDWIFE"],
         },
       },
       select: {

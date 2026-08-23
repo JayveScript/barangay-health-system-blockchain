@@ -120,7 +120,7 @@ export async function GET(req: Request) {
             ? `Recorded ${labels.join(", ")} for ${residentName(d.resident)}`
             : `Recorded a diagnosis for ${residentName(d.resident)}`,
         actorName: d.diagnosedBy?.fullName || "Health Worker",
-        actorRole: String(d.diagnosedBy?.role || "STAFF"),
+        actorRole: String(d.diagnosedBy?.role || "BHW"),
         createdAt: d.createdAt.toISOString(),
       });
     }
@@ -132,7 +132,7 @@ export async function GET(req: Request) {
         action: "Recorded BMI & vitals",
         detail: `BMI ${b.bmi.toFixed(1)} (${b.bmiCategory}) for ${residentName(b.resident)}`,
         actorName: b.recordedBy?.fullName || "Health Worker",
-        actorRole: String(b.recordedBy?.role || "STAFF"),
+        actorRole: String(b.recordedBy?.role || "BHW"),
         createdAt: b.createdAt.toISOString(),
       });
     }
@@ -162,7 +162,7 @@ export async function GET(req: Request) {
         action: "Sent a resident referral",
         detail: `Referred ${data.fullName || "a resident"} to ${r.targetBarangay?.name || "another barangay"} (${r.status})`,
         actorName: r.referredByStaff?.fullName || "Staff",
-        actorRole: String(r.referredByStaff?.role || "STAFF"),
+        actorRole: String(r.referredByStaff?.role || "BHW"),
         createdAt: r.createdAt.toISOString(),
       });
     }
@@ -180,7 +180,7 @@ export async function GET(req: Request) {
           ? `Attempted to view ${target}'s digital health ID — access denied${s.failureReason ? ` (${s.failureReason})` : ""}`
           : `Viewed ${target}'s digital health ID`,
         actorName: s.scannedBy?.fullName || "Staff",
-        actorRole: String(s.scannedBy?.role || s.role || "STAFF"),
+        actorRole: String(s.scannedBy?.role || s.role || "BHW"),
         createdAt: s.createdAt.toISOString(),
       });
     }

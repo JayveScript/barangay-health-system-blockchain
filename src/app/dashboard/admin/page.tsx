@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
   const [staffEditForm, setStaffEditForm] = useState({
     fullName: "",
     username: "",
-    role: "STAFF",
+    role: "BHW",
     password: "",
   });
   const [staffEditLoading, setStaffEditLoading] = useState(false);
@@ -281,7 +281,7 @@ export default function AdminDashboardPage() {
     phoneNumber: "",
     username: "",
     password: "",
-    role: "STAFF",
+    role: "BHW",
   });
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -507,7 +507,7 @@ export default function AdminDashboardPage() {
         phoneNumber: "",
         username: "",
         password: "",
-        role: "STAFF",
+        role: "BHW",
       });
 
       fetchDashboard();
@@ -1437,7 +1437,7 @@ export default function AdminDashboardPage() {
                             label="Role"
                             value={form.role}
                             onChange={(v) => setForm((p) => ({ ...p, role: v }))}
-                            options={["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
+                            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
                           />
 
                           <ReadonlyBadgeInput
@@ -2024,7 +2024,7 @@ function StaffEditModal({
             label="Role"
             value={form.role}
             onChange={(v) => onChange({ role: v })}
-            options={["STAFF", "DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
+            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE"]}
           />
 
           <Input

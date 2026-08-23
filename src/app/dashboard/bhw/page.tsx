@@ -22,8 +22,10 @@ import {
   RefreshCw,
   Scale,
   Search,
+  Send,
   ShieldCheck,
   Trash2,
+  UserPlus,
   UserRound,
   Users,
   ScanLine,
@@ -47,11 +49,20 @@ type BHWUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
+import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
+import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
 
 export default function BHWDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "scan-qr" | "logbook" | "bmi">(
-    "overview"
-  );
+  const [activeTab, setActiveTab] = useState<
+    | "overview"
+    | "personal"
+    | "announcements"
+    | "registration"
+    | "referrals"
+    | "scan-qr"
+    | "logbook"
+    | "bmi"
+  >("overview");
   const [user, setUser] = useState<BHWUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -166,6 +177,24 @@ export default function BHWDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "registration"}
+              icon={<UserPlus className="h-5 w-5" />}
+              label="Register Resident"
+              onClick={() => {
+                setActiveTab("registration");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
+              active={activeTab === "referrals"}
+              icon={<Send className="h-5 w-5" />}
+              label="Referrals"
+              onClick={() => {
+                setActiveTab("referrals");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -226,6 +255,18 @@ export default function BHWDashboardPage() {
                 icon={<Megaphone className="h-5 w-5" />}
                 label="Announcements"
                 onClick={() => setActiveTab("announcements")}
+              />
+              <SidebarButton
+                active={activeTab === "registration"}
+                icon={<UserPlus className="h-5 w-5" />}
+                label="Register Resident"
+                onClick={() => setActiveTab("registration")}
+              />
+              <SidebarButton
+                active={activeTab === "referrals"}
+                icon={<Send className="h-5 w-5" />}
+                label="Referrals"
+                onClick={() => setActiveTab("referrals")}
               />
               <SidebarButton
                 active={activeTab === "scan-qr"}
@@ -319,6 +360,12 @@ export default function BHWDashboardPage() {
 
             {activeTab === "announcements" && <BHWAnnouncementsTab />}
 
+            {activeTab === "registration" && (
+              <ResidentRegistrationTab barangayName={currentBarangayName} />
+            )}
+
+            {activeTab === "referrals" && <ReferralsTab />}
+
             {activeTab === "logbook" && <LogbookTab />}
 
             {activeTab === "bmi" && <BMITab />}
@@ -329,8 +376,8 @@ export default function BHWDashboardPage() {
       <MobileBottomNav
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
-          { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
-          { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
+          { id: "registration", label: "Register", icon: <UserPlus className="h-5 w-5" /> },
+          { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "logbook", label: "Logbook", icon: <BookOpen className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },

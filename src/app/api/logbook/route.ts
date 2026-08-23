@@ -9,7 +9,7 @@ async function getApiUser() {
 export async function GET(req: Request) {
   try {
     const user = await getApiUser();
-    if (!user || !["BHW", "STAFF"].includes(String(user.role))) {
+    if (!user || String(user.role) !== "BHW") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const user = await getApiUser();
-    if (!user || !["BHW", "STAFF"].includes(String(user.role))) {
+    if (!user || String(user.role) !== "BHW") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

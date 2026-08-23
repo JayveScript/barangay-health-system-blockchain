@@ -5,7 +5,6 @@ const ROLE_LABELS: Record<string, string> = {
   NURSE: "Nurse",
   BHW: "BHW",
   MIDWIFE: "Midwife",
-  STAFF: "Staff",
   RESIDENT: "Resident",
 };
 
