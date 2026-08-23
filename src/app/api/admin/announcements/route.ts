@@ -57,7 +57,13 @@ export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();
 
-    if (!canManageBarangay(user) || !user?.barangayId) {
+    // Barangay admins/super-admins plus clinical staff (doctors & nurses)
+    // may post and manage announcements for their barangay.
+    const role = String(user?.role || "");
+    const canPostAnnouncement =
+      canManageBarangay(user) || role === "DOCTOR" || role === "NURSE";
+
+    if (!canPostAnnouncement || !user?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
