@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Stethoscope,
   UserRound,
+  Users,
   ScanLine,
   X,
 } from "lucide-react";
@@ -42,9 +43,10 @@ import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
+import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -152,6 +154,15 @@ export default function NurseDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "residents"}
+              icon={<Users className="h-5 w-5" />}
+              label="Registered Residents"
+              onClick={() => {
+                setActiveTab("residents");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "announcements"}
               icon={<Megaphone className="h-5 w-5" />}
               label="Announcements"
@@ -233,6 +244,12 @@ export default function NurseDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+              <SidebarButton
+                active={activeTab === "residents"}
+                icon={<Users className="h-5 w-5" />}
+                label="Registered Residents"
+                onClick={() => setActiveTab("residents")}
               />
               <SidebarButton
                 active={activeTab === "announcements"}
@@ -351,6 +368,8 @@ export default function NurseDashboardPage() {
             {activeTab === "bmi" && <BMITab />}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+
+            {activeTab === "residents" && <RegisteredResidentsTab />}
 
             {activeTab === "maternal" && <MaternalRecordsTab />}
           </div>

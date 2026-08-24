@@ -53,11 +53,13 @@ import { BMITab } from "@/components/dashboard/BMITab";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
+import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function BHWDashboardPage() {
   const [activeTab, setActiveTab] = useState<
     | "overview"
     | "personal"
+    | "residents"
     | "announcements"
     | "registration"
     | "referrals"
@@ -171,6 +173,15 @@ export default function BHWDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "residents"}
+              icon={<Users className="h-5 w-5" />}
+              label="Registered Residents"
+              onClick={() => {
+                setActiveTab("residents");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "announcements"}
               icon={<Megaphone className="h-5 w-5" />}
               label="Announcements"
@@ -261,6 +272,12 @@ export default function BHWDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+              <SidebarButton
+                active={activeTab === "residents"}
+                icon={<Users className="h-5 w-5" />}
+                label="Registered Residents"
+                onClick={() => setActiveTab("residents")}
               />
               <SidebarButton
                 active={activeTab === "announcements"}
@@ -383,6 +400,8 @@ export default function BHWDashboardPage() {
             )}
 
             {activeTab === "referrals" && <ReferralsTab />}
+
+            {activeTab === "residents" && <RegisteredResidentsTab />}
 
             {activeTab === "maternal" && <MaternalRecordsTab />}
 
