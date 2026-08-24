@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { sendOtpEmail } from "@/lib/mail";
 import {
   DEFAULT_BARANGAY_CITY,
-  getRegistrationBarangay,
+  getHealthCenterForSitio,
 } from "@/lib/barangay-options";
 
 function generateOtp() {
@@ -80,9 +80,9 @@ export async function POST(req: Request) {
     const normalizedEmail = String(email || "").trim().toLowerCase();
     const normalizedUsername = String(username || "").trim();
     const normalizedPhone = String(contactNumber || "").trim();
-    const selectedBarangay = getRegistrationBarangay(
-      String(barangayName || "")
-    );
+    // The resident picks their sitio; it maps to one of the two health centers.
+    const selectedSitio = String(barangayName || "").trim();
+    const healthCenterName = getHealthCenterForSitio(selectedSitio);
 
     const parsedAge = Number(age);
     const parsedBirthDate = new Date(birthDate);
@@ -147,20 +147,21 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!selectedBarangay) {
+    if (!healthCenterName) {
       return NextResponse.json(
-        { error: "Please select a valid barangay." },
+        { error: "Please select a valid sitio." },
         { status: 400 }
       );
     }
 
+    // Route the resident to their health center (tenant) based on their sitio.
     const barangay =
       (await db.barangay.findFirst({
-        where: { name: selectedBarangay.value },
+        where: { name: healthCenterName },
       })) ||
       (await db.barangay.create({
         data: {
-          name: selectedBarangay.value,
+          name: healthCenterName,
           municipality: DEFAULT_BARANGAY_CITY,
         },
       }));
@@ -180,7 +181,7 @@ export async function POST(req: Request) {
       religion: religion || null,
 
       completeAddress,
-      barangayName: selectedBarangay.value,
+      barangayName: selectedSitio,
       city: DEFAULT_BARANGAY_CITY,
 
       civilStatus,
