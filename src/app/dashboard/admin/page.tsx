@@ -171,7 +171,7 @@ type DashboardData = {
   staffUsers: StaffUser[];
 };
 
-type SecureAction = "view" | "edit" | "digital-id" | "archive" | "delete" | null;
+type SecureAction = "view" | "edit" | "digital-id" | "archive" | "restore" | "delete" | null;
 
 const sexDistributionColors = ["#075985", "#7DD3FC", "#94A3B8"];
 const FALLBACK_BARANGAY_LABEL = "Assigned Barangay";
@@ -210,6 +210,7 @@ export default function AdminDashboardPage() {
   | "overview"
   | "personal"
   | "residents"
+  | "archive"
   | "create-user"
   | "staff-users"
   | "activity-logs"
@@ -374,8 +375,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const activeResidents = useMemo(
+    () => (data?.residents ?? []).filter((r) => !r.isArchived),
+    [data]
+  );
+  const archivedResidents = useMemo(
+    () => (data?.residents ?? []).filter((r) => r.isArchived),
+    [data]
+  );
+
   const sexData = useMemo(() => {
-  const residents = data?.residents ?? [];
+  const residents = activeResidents;
 
   const male = residents.filter(
     (r) => String(r.sex || "").toUpperCase() === "MALE"
@@ -425,13 +435,13 @@ export default function AdminDashboardPage() {
   }, [data]);
 
   const recentResidents = useMemo(() => {
-    return [...(data?.residents ?? [])].slice(0, 10);
+    return [...activeResidents].slice(0, 10);
   }, [data]);
 
   const filteredResidents = useMemo(() => {
   const query = residentSearch.toLowerCase().trim();
 
-  return (data?.residents ?? []).filter((resident) => {
+  return activeResidents.filter((resident) => {
     // Sitio filter (separates residents by sitio within the health center).
     if (
       sitioFilter !== "all" &&
@@ -631,7 +641,7 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      if (secureAction === "archive") {
+      if (secureAction === "archive" || secureAction === "restore") {
         const res = await fetch(`/api/residents/${secureResident.id}/archive`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -639,7 +649,10 @@ export default function AdminDashboardPage() {
         });
         const json = await readJsonSafe(res);
         if (!res.ok) {
-          setSecureError(json.error || "Failed to archive resident.");
+          setSecureError(
+            json.error ||
+              `Failed to ${secureAction === "restore" ? "restore" : "archive"} resident.`
+          );
           return;
         }
         closeSecureModal();
@@ -910,6 +923,16 @@ export default function AdminDashboardPage() {
             />
 
             <SidebarButton
+              active={tab === "archive"}
+              icon={<Archive className="h-5 w-5 shrink-0" />}
+              label="Archived Residents"
+              onClick={() => {
+                setTab("archive");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={tab === "create-user"}
               icon={<UserPlus className="h-5 w-5 shrink-0" />}
               label="Create User"
@@ -995,6 +1018,13 @@ export default function AdminDashboardPage() {
                 icon={<Users className="h-5 w-5 shrink-0" />}
                 label="Registered Residents"
                 onClick={() => setTab("residents")}
+              />
+
+              <SidebarButton
+                active={tab === "archive"}
+                icon={<Archive className="h-5 w-5 shrink-0" />}
+                label="Archived Residents"
+                onClick={() => setTab("archive")}
               />
 
               <SidebarButton
@@ -1380,6 +1410,64 @@ export default function AdminDashboardPage() {
     </tbody>
   </table>
 </div>
+                  </div>
+                )}
+
+                {tab === "archive" && (
+                  <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+                        <Archive className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                          Archived Residents
+                        </h2>
+                        <p className="text-sm text-slate-500">
+                          Archived residents are hidden from Registered Residents. Restore to move one back.
+                        </p>
+                      </div>
+                    </div>
+
+                    {archivedResidents.length === 0 ? (
+                      <div className="rounded-2xl bg-slate-50 px-4 py-10 text-center text-sm font-semibold text-slate-500">
+                        No archived residents.
+                      </div>
+                    ) : (
+                      <div className="max-h-[460px] space-y-2 overflow-y-auto pr-1">
+                        {archivedResidents.map((resident) => (
+                          <div
+                            key={resident.id}
+                            className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-bold text-slate-900">
+                                {formatShortName(resident)}
+                              </p>
+                              <p className="truncate text-xs font-semibold text-slate-500">
+                                {resident.barangayName} • {resident.age} yrs
+                                {resident.archivedAt
+                                  ? ` • Archived ${new Date(resident.archivedAt).toLocaleDateString()}`
+                                  : ""}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1.5">
+                              <IconActionButton
+                                label="View"
+                                icon={<Eye className="h-4 w-4" />}
+                                onClick={() => openSecureModal(resident, "view")}
+                              />
+                              <IconActionButton
+                                label="Restore"
+                                icon={<Archive className="h-4 w-4" />}
+                                variant="primary"
+                                onClick={() => openSecureModal(resident, "restore")}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1876,6 +1964,14 @@ function PasswordConfirmModal({
       iconColor: "text-red-600",
       btnClass: "bg-red-600 hover:bg-red-700",
       btnLabel: "Archive",
+    },
+    restore: {
+      title: "Restore Resident",
+      desc: `Enter your admin password to restore ${subjectLabel} back to registered residents.`,
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      btnClass: "bg-emerald-600 hover:bg-emerald-700",
+      btnLabel: "Restore",
     },
     delete: {
       title: "Delete",
