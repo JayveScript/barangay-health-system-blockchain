@@ -276,7 +276,7 @@ export default function RegisterPage() {
       if (!form.age.trim()) nextErrors.age = "Age is required.";
       if (!form.sex) nextErrors.sex = "Please select sex.";
       if (!form.barangayName.trim()) {
-        nextErrors.barangayName = "Please select barangay.";
+        nextErrors.barangayName = "Please select sitio.";
       }
       if (!form.civilStatus) {
         nextErrors.civilStatus = "Please select civil status.";
@@ -655,7 +655,7 @@ export default function RegisterPage() {
                         status={getFieldStatus("houseStreet")}
                       />
                       <SelectField
-                        label="Barangay"
+                        label="Sitio"
                         required
                         value={form.barangayName}
                         onChange={(v) => updateField("barangayName", v)}
@@ -671,7 +671,7 @@ export default function RegisterPage() {
                       />
                     </div>
 
-                    <HelperText text="Your complete address is automatically combined from the street, barangay, and city." />
+                    <HelperText text="Your complete address is automatically combined from the street, sitio, and city. Your sitio determines your assigned health center." />
                   </FormSection>
 
                   <FormSection title="Contact Details">

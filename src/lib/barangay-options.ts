@@ -1,13 +1,38 @@
 export const DEFAULT_BARANGAY_CITY = "Davao City";
 
-export const REGISTRATION_BARANGAY_OPTIONS = [
-  { label: "PANAGA, BRGY. COLOSAS", value: "Panaga, Brgy. Colosas" },
-  { label: "COLOSAS PROPER, BRGY. COLOSAS", value: "Colosas Proper, Brgy. Colosas" },
-  { label: "SURAYAN, BRGY. COLOSAS", value: "Surayan, Brgy. Colosas" },
-  { label: "MONTEFLOR, BRGY. COLOSAS", value: "Monteflor, Brgy. Colosas" },
-  { label: "GALACIA, BRGY. COLOSAS", value: "Galacia, Brgy. Colosas" },
-  { label: "APALILI, BRGY. COLOSAS", value: "Apalili, Brgy. Colosas" },
+// Two health centers (tenants). Each covers one or more sitios. A resident's
+// sitio (their address) determines which health center owns their records.
+export const HEALTH_CENTERS = [
+  {
+    name: "PANAGA HEALTH CENTER",
+    sitios: ["Panaga", "Galacia", "Monteflor", "Surayan", "Apalili"],
+  },
+  {
+    name: "COLOSAS PROPER",
+    sitios: ["Colosas Proper"],
+  },
 ] as const;
+
+export const HEALTH_CENTER_NAMES: string[] = HEALTH_CENTERS.map((h) => h.name);
+
+// Sitio choices shown in registration (the resident's actual sitio/address).
+export const REGISTRATION_SITIO_OPTIONS = HEALTH_CENTERS.flatMap((hc) =>
+  hc.sitios.map((sitio) => ({ label: sitio, value: sitio }))
+);
+
+// Kept as an alias for existing imports (registration dropdown).
+export const REGISTRATION_BARANGAY_OPTIONS = REGISTRATION_SITIO_OPTIONS;
+
+// Which health center a sitio belongs to. Returns the health-center name or null.
+export function getHealthCenterForSitio(sitio: string): string | null {
+  const normalized = sitio.trim().toLowerCase();
+  for (const hc of HEALTH_CENTERS) {
+    if (hc.sitios.some((s) => s.toLowerCase() === normalized)) {
+      return hc.name;
+    }
+  }
+  return null;
+}
 
 export const EDUCATIONAL_ATTAINMENT_OPTIONS = [
   "Home",
@@ -32,18 +57,9 @@ export const RELATIONSHIP_OPTIONS = [
   "Others",
 ] as const;
 
-export const REFERRAL_RECEIVING_BARANGAY_NAMES: string[] =
-  REGISTRATION_BARANGAY_OPTIONS.map((barangay) => barangay.value);
+// Health centers that may receive referrals (cross-center access is granted
+// only when a resident is referred to the other center).
+export const REFERRAL_RECEIVING_BARANGAY_NAMES: string[] = HEALTH_CENTER_NAMES;
 
-export type RegistrationBarangayName =
-  (typeof REGISTRATION_BARANGAY_OPTIONS)[number]["value"];
-
-export function getRegistrationBarangay(value: string) {
-  const normalized = value.trim().toLowerCase();
-
-  return REGISTRATION_BARANGAY_OPTIONS.find(
-    (barangay) =>
-      barangay.value.toLowerCase() === normalized ||
-      barangay.label.toLowerCase() === normalized
-  );
-}
+export type RegistrationSitioName =
+  (typeof REGISTRATION_SITIO_OPTIONS)[number]["value"];
