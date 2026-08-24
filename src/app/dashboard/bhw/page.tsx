@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/dashboard/Charts";
 import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverview";
 import {
   Activity,
+  Baby,
   BarChart3,
   CalendarDays,
   ClipboardList,
@@ -51,6 +52,7 @@ import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
+import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 
 export default function BHWDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -59,6 +61,7 @@ export default function BHWDashboardPage() {
     | "announcements"
     | "registration"
     | "referrals"
+    | "maternal"
     | "scan-qr"
     | "logbook"
     | "bmi"
@@ -195,6 +198,15 @@ export default function BHWDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "maternal"}
+              icon={<Baby className="h-5 w-5" />}
+              label="Maternal Records"
+              onClick={() => {
+                setActiveTab("maternal");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -267,6 +279,12 @@ export default function BHWDashboardPage() {
                 icon={<Send className="h-5 w-5" />}
                 label="Referrals"
                 onClick={() => setActiveTab("referrals")}
+              />
+              <SidebarButton
+                active={activeTab === "maternal"}
+                icon={<Baby className="h-5 w-5" />}
+                label="Maternal Records"
+                onClick={() => setActiveTab("maternal")}
               />
               <SidebarButton
                 active={activeTab === "scan-qr"}
@@ -366,6 +384,8 @@ export default function BHWDashboardPage() {
 
             {activeTab === "referrals" && <ReferralsTab />}
 
+            {activeTab === "maternal" && <MaternalRecordsTab />}
+
             {activeTab === "logbook" && <LogbookTab />}
 
             {activeTab === "bmi" && <BMITab />}
@@ -377,9 +397,9 @@ export default function BHWDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "registration", label: "Register", icon: <UserPlus className="h-5 w-5" /> },
+          { id: "maternal", label: "Maternal", icon: <Baby className="h-5 w-5" /> },
           { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
-          { id: "logbook", label: "Logbook", icon: <BookOpen className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
         ]}
         active={activeTab}

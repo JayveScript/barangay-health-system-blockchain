@@ -87,6 +87,7 @@ model User {
   bmiRecordsRecorded BMIRecord[]   @relation("BMIRecordedBy")
   diagnosesRecorded  Diagnosis[]   @relation("DiagnosesRecorded")
   complaintsRecorded Complaint[]   @relation("ComplaintsRecorded")
+  maternalRecordsRecorded MaternalRecord[] @relation("MaternalRecordsRecorded")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,6 +137,7 @@ model Resident {
   bmiRecords   BMIRecord[]
   diagnoses    Diagnosis[]
   complaints   Complaint[]
+  maternalRecord MaternalRecord?
 
   isArchived Boolean   @default(false)
   archivedAt DateTime?
@@ -388,6 +390,19 @@ model Diagnosis {
 
   @@index([barangayId])
   @@index([residentId, barangayId])
+}
+
+model MaternalRecord {
+  id          String   @id @default(cuid())
+  residentId  String   @unique
+  createdById String
+  data        Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resident  Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  createdBy User     @relation("MaternalRecordsRecorded", fields: [createdById], references: [id], onDelete: Cascade)
 }
 
 model Complaint {

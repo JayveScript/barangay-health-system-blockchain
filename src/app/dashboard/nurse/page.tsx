@@ -7,6 +7,7 @@ import { ResidentStatsOverview } from "@/components/dashboard/ResidentStatsOverv
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import {
   Activity,
+  Baby,
   HeartPulse,
   LogOut,
   MapPin,
@@ -40,9 +41,10 @@ import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
+import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -194,6 +196,15 @@ export default function NurseDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "maternal"}
+              icon={<Baby className="h-5 w-5" />}
+              label="Maternal Records"
+              onClick={() => {
+                setActiveTab("maternal");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -252,6 +263,12 @@ export default function NurseDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5" />}
                 label="Diagnose Patient"
                 onClick={() => setActiveTab("diagnose")}
+              />
+              <SidebarButton
+                active={activeTab === "maternal"}
+                icon={<Baby className="h-5 w-5" />}
+                label="Maternal Records"
+                onClick={() => setActiveTab("maternal")}
               />
             </div>
           </div>
@@ -334,6 +351,8 @@ export default function NurseDashboardPage() {
             {activeTab === "bmi" && <BMITab />}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+
+            {activeTab === "maternal" && <MaternalRecordsTab />}
           </div>
         </section>
       </div>
@@ -344,6 +363,7 @@ export default function NurseDashboardPage() {
           { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
           { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
+          { id: "maternal", label: "Maternal", icon: <Baby className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
           { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
         ]}
