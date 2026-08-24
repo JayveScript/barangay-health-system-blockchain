@@ -45,7 +45,14 @@ export async function PATCH(
     const currentUserId = currentUser?.id;
     const barangayId = currentUser?.barangayId;
 
-    if (!canManageBarangay(currentUser) || !currentUserId || !barangayId) {
+    // Admins/super-admins plus clinical staff (BHW/Nurse/Midwife) may edit
+    // residents in their own barangay. Each confirms their own password.
+    const role = String(currentUser?.role || "");
+    const canEditResident =
+      canManageBarangay(currentUser) ||
+      ["BHW", "NURSE", "MIDWIFE"].includes(role);
+
+    if (!canEditResident || !currentUserId || !barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

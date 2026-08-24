@@ -35,9 +35,10 @@ type MidwifeUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
+import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function MidwifeDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "maternal" | "scan-qr">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr">(
     "overview"
   );
   const [user, setUser] = useState<MidwifeUser | null>(null);
@@ -143,6 +144,15 @@ export default function MidwifeDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "residents"}
+              icon={<Users className="h-5 w-5" />}
+              label="Registered Residents"
+              onClick={() => {
+                setActiveTab("residents");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "maternal"}
               icon={<Baby className="h-5 w-5" />}
               label="Maternal Records"
@@ -188,6 +198,12 @@ export default function MidwifeDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+              <SidebarButton
+                active={activeTab === "residents"}
+                icon={<Users className="h-5 w-5" />}
+                label="Registered Residents"
+                onClick={() => setActiveTab("residents")}
               />
               <SidebarButton
                 active={activeTab === "maternal"}
@@ -258,6 +274,8 @@ export default function MidwifeDashboardPage() {
 
             {activeTab === "overview" && <OverviewTab />}
 
+            {activeTab === "residents" && <RegisteredResidentsTab />}
+
             {activeTab === "maternal" && <MaternalRecordsTab />}
 
             {activeTab === "scan-qr" && (
@@ -277,6 +295,7 @@ export default function MidwifeDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
           { id: "maternal", label: "Maternal", icon: <Baby className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
         ]}
