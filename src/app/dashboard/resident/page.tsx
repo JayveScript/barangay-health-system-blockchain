@@ -783,9 +783,9 @@ export default function ResidentDashboard() {
           </aside>
 
           {/* Desktop sidebar */}
-          <aside className="hidden rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block">
-            <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
-              <div className="flex items-center gap-3">
+          <aside className="hidden rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:flex lg:h-full lg:flex-col">
+            <div className="flex min-h-0 flex-1 flex-col rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
+              <div className="flex shrink-0 items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                   <ShieldIcon className="h-6 w-6 text-white" />
                 </div>
@@ -798,7 +798,7 @@ export default function ResidentDashboard() {
                 </div>
               </div>
 
-              <div className="mt-8 space-y-3">
+              <div className="mt-8 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
                 <button
                   type="button"
                   onClick={() => setSidebarTab("personal")}

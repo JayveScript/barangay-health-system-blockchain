@@ -237,9 +237,9 @@ export default function BHWDashboardPage() {
         </aside>
 
         {/* Desktop sidebar */}
-        <aside className="hidden h-full w-[240px] shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
-            <div className="mb-6 flex items-center gap-3">
+        <aside className="hidden h-full w-[240px] shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:flex lg:flex-col">
+          <div className="flex min-h-0 flex-1 flex-col rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
+            <div className="mb-6 flex shrink-0 items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                 <HeartPulse className="h-6 w-6" />
               </div>
@@ -249,7 +249,7 @@ export default function BHWDashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
               <SidebarButton
                 active={activeTab === "overview"}
                 icon={<Activity className="h-5 w-5" />}

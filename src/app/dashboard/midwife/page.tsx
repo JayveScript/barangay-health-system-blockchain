@@ -164,9 +164,9 @@ export default function MidwifeDashboardPage() {
         </aside>
 
         {/* Desktop sidebar */}
-        <aside className="hidden h-full w-[240px] shrink-0 rounded-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-5 text-white shadow-xl lg:block">
-          <div className="rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur">
-            <div className="mb-6 flex items-center gap-3">
+        <aside className="hidden h-full w-[240px] shrink-0 rounded-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-5 text-white shadow-xl lg:flex lg:flex-col">
+          <div className="flex min-h-0 flex-1 flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur">
+            <div className="mb-6 flex shrink-0 items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                 <HeartPulse className="h-6 w-6" />
               </div>
@@ -176,7 +176,7 @@ export default function MidwifeDashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
               <SidebarButton
                 active={activeTab === "overview"}
                 icon={<Activity className="h-5 w-5" />}
