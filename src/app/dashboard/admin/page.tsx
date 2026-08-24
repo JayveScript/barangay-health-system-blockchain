@@ -59,6 +59,7 @@ import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { PortalLoader } from "@/components/PortalLoader";
+import { HEALTH_CENTERS } from "@/lib/barangay-options";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
 
 type ResidentRecord = {
@@ -246,6 +247,7 @@ export default function AdminDashboardPage() {
   const [secureLoading, setSecureLoading] = useState(false);
   const [secureError, setSecureError] = useState("");
   const [residentSearch, setResidentSearch] = useState("");
+  const [sitioFilter, setSitioFilter] = useState("all");
   const [staffSearch, setStaffSearch] = useState("");
 
   const [staffViewUser, setStaffViewUser] = useState<StaffUser | null>(null);
@@ -429,9 +431,17 @@ export default function AdminDashboardPage() {
   const filteredResidents = useMemo(() => {
   const query = residentSearch.toLowerCase().trim();
 
-  if (!query) return data?.residents ?? [];
-
   return (data?.residents ?? []).filter((resident) => {
+    // Sitio filter (separates residents by sitio within the health center).
+    if (
+      sitioFilter !== "all" &&
+      (resident.barangayName ?? "").toLowerCase() !== sitioFilter.toLowerCase()
+    ) {
+      return false;
+    }
+
+    if (!query) return true;
+
     const fullName = `${resident.firstName} ${resident.middleName ?? ""} ${resident.lastName}`.toLowerCase();
 
     return (
@@ -441,7 +451,21 @@ export default function AdminDashboardPage() {
       resident.contactNumber?.toLowerCase().includes(query)
     );
   });
-}, [data, residentSearch]);
+}, [data, residentSearch, sitioFilter]);
+
+  // Sitios belonging to this admin's health center, for the sitio filter.
+  const centerSitios = useMemo(() => {
+    const center = HEALTH_CENTERS.find((hc) => hc.name === currentBarangayName);
+    if (center) return [...center.sitios];
+    // Fallback: distinct sitios present in the resident list.
+    return Array.from(
+      new Set(
+        (data?.residents ?? [])
+          .map((r) => (r.barangayName ?? "").trim())
+          .filter(Boolean)
+      )
+    );
+  }, [currentBarangayName, data]);
 
   const filteredStaffUsers = useMemo(() => {
     const query = staffSearch.toLowerCase().trim();
@@ -1226,17 +1250,36 @@ export default function AdminDashboardPage() {
     </div>
   </div>
 
-  {/* RIGHT SIDE SEARCH */}
-  <div className="relative w-full lg:max-w-sm">
-    <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+  {/* RIGHT SIDE — sitio filter + search */}
+  <div className="flex w-full flex-col gap-3 sm:flex-row lg:max-w-xl lg:justify-end">
+    {centerSitios.length > 1 && (
+      <div className="relative w-full sm:max-w-[220px]">
+        <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+        <select
+          value={sitioFilter}
+          onChange={(e) => setSitioFilter(e.target.value)}
+          className="min-h-[52px] w-full appearance-none rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-8 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
+        >
+          <option value="all">All Sitios</option>
+          {centerSitios.map((sitio) => (
+            <option key={sitio} value={sitio}>
+              {sitio}
+            </option>
+          ))}
+        </select>
+      </div>
+    )}
 
-    <input
-      type="text"
-      value={residentSearch}
-      onChange={(e) => setResidentSearch(e.target.value)}
-      placeholder="Search name, contact, age..."
-      className="min-h-[52px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
-    />
+    <div className="relative w-full sm:max-w-sm">
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+      <input
+        type="text"
+        value={residentSearch}
+        onChange={(e) => setResidentSearch(e.target.value)}
+        placeholder="Search name, contact, age..."
+        className="min-h-[52px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
+      />
+    </div>
   </div>
 </div>
                     {/* Mobile compact list - Name + Actions on one line */}
