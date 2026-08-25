@@ -287,7 +287,7 @@ export default function DoctorDashboardPage() {
 
             <SidebarButton
               active={activeTab === "announcements"}
-              icon={<Megaphone className="h-5 w-5" />}
+              icon={<Megaphone className="h-6 w-6" />}
               label="Announcements"
               onClick={() => {
                 setActiveTab("announcements");
@@ -371,7 +371,7 @@ export default function DoctorDashboardPage() {
 
               <SidebarButton
   active={activeTab === "announcements"}
-  icon={<Megaphone className="h-5 w-5" />}
+  icon={<Megaphone className="h-6 w-6" />}
   label="Announcements"
   onClick={() => setActiveTab("announcements")}
 />
@@ -494,7 +494,7 @@ export default function DoctorDashboardPage() {
           { id: "appointments", label: "Schedule", icon: <CalendarCheck className="h-5 w-5" /> },
           { id: "referrals", label: "Referrals", icon: <Inbox className="h-5 w-5" /> },
           { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },
-          { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
+          { id: "announcements", label: "News", icon: <Megaphone className="h-6 w-6" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
         ]}

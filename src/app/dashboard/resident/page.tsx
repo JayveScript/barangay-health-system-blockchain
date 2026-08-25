@@ -625,7 +625,7 @@ export default function ResidentDashboard() {
     { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
     { id: "notifications",  label: "Alerts",       icon: <Bell className="h-5 w-5" /> },
     { id: "complaints",     label: "Complaints",   icon: <MessageSquareText className="h-5 w-5" /> },
-    { id: "announcements",  label: "News",         icon: <Megaphone className="h-5 w-5" /> },
+    { id: "announcements",  label: "News",         icon: <Megaphone className="h-6 w-6" /> },
     { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
   ];
 
@@ -758,7 +758,7 @@ export default function ResidentDashboard() {
                     : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
                 }`}
               >
-                <Megaphone className="h-5 w-5 shrink-0" />
+                <Megaphone className="h-6 w-6 shrink-0" />
                 Announcements
               </button>
 
@@ -870,7 +870,7 @@ export default function ResidentDashboard() {
       : "text-slate-600 hover:bg-white hover:text-sky-600"
   }`}
 >
-  <Megaphone className="h-5 w-5 shrink-0" />
+  <Megaphone className="h-6 w-6 shrink-0" />
   Announcements
 </button>
 

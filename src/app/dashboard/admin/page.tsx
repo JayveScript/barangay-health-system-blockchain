@@ -842,7 +842,7 @@ export default function AdminDashboardPage() {
     { id: "residents",     label: "Residents",  icon: <Users className="h-5 w-5" /> },
     { id: "create-user",   label: "Add User",   icon: <UserPlus className="h-5 w-5" /> },
     { id: "activity-logs", label: "Activity",   icon: <ClipboardList className="h-5 w-5" /> },
-    { id: "announcements", label: "News",       icon: <Megaphone className="h-5 w-5" /> },
+    { id: "announcements", label: "News",       icon: <Megaphone className="h-6 w-6" /> },
     { id: "scan-qr",       label: "Scan QR",    icon: <ScanLine className="h-5 w-5" /> },
   ];
 
@@ -952,7 +952,7 @@ export default function AdminDashboardPage() {
 
             <SidebarButton
               active={tab === "announcements"}
-              icon={<Megaphone className="h-5 w-5 shrink-0" />}
+              icon={<Megaphone className="h-6 w-6 shrink-0" />}
               label="Announcements"
               onClick={() => {
                 setTab("announcements");
@@ -1037,7 +1037,7 @@ export default function AdminDashboardPage() {
 
               <SidebarButton
   active={tab === "announcements"}
-  icon={<Megaphone className="h-5 w-5 shrink-0" />}
+  icon={<Megaphone className="h-6 w-6 shrink-0" />}
   label="Announcements"
   onClick={() => setTab("announcements")}
 />

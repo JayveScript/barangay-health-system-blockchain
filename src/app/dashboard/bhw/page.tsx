@@ -181,7 +181,7 @@ export default function BHWDashboardPage() {
             />
             <SidebarButton
               active={activeTab === "announcements"}
-              icon={<Megaphone className="h-5 w-5" />}
+              icon={<Megaphone className="h-6 w-6" />}
               label="Announcements"
               onClick={() => {
                 setActiveTab("announcements");
@@ -278,7 +278,7 @@ export default function BHWDashboardPage() {
               />
               <SidebarButton
                 active={activeTab === "announcements"}
-                icon={<Megaphone className="h-5 w-5" />}
+                icon={<Megaphone className="h-6 w-6" />}
                 label="Announcements"
                 onClick={() => setActiveTab("announcements")}
               />
@@ -498,7 +498,7 @@ function BHWAnnouncementsTab() {
   return (
     <div className="space-y-5 pb-4">
       <Panel
-        icon={<Megaphone className="h-5 w-5" />}
+        icon={<Megaphone className="h-6 w-6" />}
         title="Health Center Announcements"
         subtitle="View today's, past, and upcoming announcements from the admin."
       >
