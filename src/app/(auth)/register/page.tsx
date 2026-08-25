@@ -114,6 +114,7 @@ const stepLabels = [
 
 const STATIC_BARANGAY = REGISTRATION_BARANGAY_OPTIONS[0].value;
 const STATIC_CITY = DEFAULT_BARANGAY_CITY;
+const USERNAME_SUFFIX = "@barangay.hcms";
 
 const initialForm: FormState = {
   lastName: "",
@@ -259,6 +260,14 @@ export default function RegisterPage() {
     setServerError("");
   };
 
+  const buildFullUsername = (value: string) => {
+    const base = value.trim();
+    if (!base) return "";
+    return base.toLowerCase().endsWith(USERNAME_SUFFIX)
+      ? base
+      : `${base}${USERNAME_SUFFIX}`;
+  };
+
   const validateEmail = (value: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -339,6 +348,14 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
+      const completeAddress = [
+        form.houseStreet.trim(),
+        form.barangayName.trim(),
+        STATIC_CITY,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
       const res = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -347,10 +364,11 @@ export default function RegisterPage() {
         body: JSON.stringify({
           ...form,
           city: STATIC_CITY,
+          completeAddress,
           age: Number(form.age),
           birthDate: form.birthDate,
           email: form.email.trim().toLowerCase(),
-          username: form.username.trim(),
+          username: buildFullUsername(form.username),
           contactNumber: form.contactNumber.trim(),
           barangayName: form.barangayName,
         }),
@@ -359,6 +377,9 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.field === "email" || data.field === "username") {
+          setErrors((prev) => ({ ...prev, [data.field]: data.error }));
+        }
         setServerError(data.error || "Failed to submit registration.");
         return;
       }
@@ -877,9 +898,13 @@ export default function RegisterPage() {
           required
           placeholder="Choose a username"
           value={form.username}
-          onChange={(v) => updateField("username", v)}
+          onChange={(v) =>
+            updateField("username", v.replace(/[@\s]/g, ""))
+          }
           error={errors.username}
           status={getFieldStatus("username")}
+          suffix={USERNAME_SUFFIX}
+          helper="Your login username will end with @barangay.hcms. Include it when you log in."
         />
 
         <InputField
@@ -1156,6 +1181,7 @@ function InputField({
   helper,
   required = false,
   status = "default",
+  suffix,
 }: {
   label: string;
   value: string;
@@ -1167,6 +1193,7 @@ function InputField({
   helper?: string;
   required?: boolean;
   status?: "default" | "success" | "error";
+  suffix?: string;
 }) {
   const borderClass =
     status === "error"
@@ -1192,6 +1219,11 @@ function InputField({
           onChange={(e) => onChange(e.target.value)}
           className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
         />
+        {suffix && value && (
+          <span className="ml-1 whitespace-nowrap text-sm font-bold text-slate-400">
+            {suffix}
+          </span>
+        )}
         {status === "success" && !error && value && (
           <CheckCircle2 className="ml-2 h-4 w-4 text-emerald-500" />
         )}

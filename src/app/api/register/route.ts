@@ -83,6 +83,10 @@ export async function POST(req: Request) {
     const selectedSitio = String(barangayName || "").trim();
     const healthCenterName = getHealthCenterForSitio(selectedSitio);
 
+    const resolvedAddress =
+      String(completeAddress || "").trim() ||
+      [selectedSitio, DEFAULT_BARANGAY_CITY].filter(Boolean).join(", ");
+
     const parsedAge = Number(age);
     const parsedBirthDate = new Date(birthDate);
 
@@ -93,7 +97,7 @@ export async function POST(req: Request) {
       !password ||
       !sex ||
       !civilStatus ||
-      !completeAddress ||
+      !resolvedAddress ||
       !birthDate
     ) {
       return NextResponse.json(
@@ -130,18 +134,31 @@ export async function POST(req: Request) {
       );
     }
 
-    const existing = await db.user.findFirst({
-      where: {
-        OR: [
-          ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
-          { username: normalizedUsername },
-        ],
-      },
+    const existingEmail = normalizedEmail
+      ? await db.user.findFirst({ where: { email: normalizedEmail } })
+      : null;
+
+    if (existingEmail) {
+      return NextResponse.json(
+        {
+          error:
+            "This Gmail is already registered to another account. Please use a different Gmail or log in.",
+          field: "email",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingUsername = await db.user.findFirst({
+      where: { username: normalizedUsername },
     });
 
-    if (existing) {
+    if (existingUsername) {
       return NextResponse.json(
-        { error: "Email or username already exists." },
+        {
+          error: "This username is already taken. Please choose another.",
+          field: "username",
+        },
         { status: 400 }
       );
     }
@@ -178,7 +195,7 @@ export async function POST(req: Request) {
       birthDate: parsedBirthDate,
       religion: religion || null,
 
-      completeAddress,
+      completeAddress: resolvedAddress,
       barangayName: selectedSitio,
       city: DEFAULT_BARANGAY_CITY,
 
