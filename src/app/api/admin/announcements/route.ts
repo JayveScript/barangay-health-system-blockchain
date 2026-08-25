@@ -57,8 +57,6 @@ export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();
 
-    // Barangay admins/super-admins plus clinical staff (doctors & nurses)
-    // may post and manage announcements for their barangay.
     const role = String(user?.role || "");
     const canPostAnnouncement =
       canManageBarangay(user) || role === "DOCTOR" || role === "NURSE";
@@ -87,7 +85,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Send email notifications to all barangay residents with an email on file
     const barangay = await prisma.barangay.findUnique({
       where: { id: barangayId },
       select: { name: true },
@@ -119,7 +116,6 @@ export async function POST(req: Request) {
         )
       );
 
-    // Fire-and-forget — don't block the response
     Promise.all(emailPromises);
 
     return NextResponse.json(announcement);

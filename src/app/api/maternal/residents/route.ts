@@ -4,8 +4,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 const ALLOWED_ROLES = ["MIDWIFE", "NURSE", "BHW"];
 
-// Lists pregnant female residents (from registration) in the worker's
-// barangay — these are the residents eligible for a maternal record.
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

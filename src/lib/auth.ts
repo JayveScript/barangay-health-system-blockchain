@@ -5,8 +5,6 @@ export type AuthTokenPayload = {
   userId: string;
   username?: string;
   role: string;
-  // Session version — must match the user's current tokenVersion, otherwise the
-  // session has been revoked (e.g. after a password reset).
   tv?: number;
 };
 
@@ -16,7 +14,6 @@ function getJwtSecret(): string {
     return secret;
   }
 
-  // Allow `next build` to finish when env vars are not set yet (e.g. first Vercel deploy).
   if (process.env.npm_lifecycle_event === "build") {
     return "__build_placeholder__";
   }

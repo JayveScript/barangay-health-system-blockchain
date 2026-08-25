@@ -4,8 +4,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 const ALLOWED_ROLES = ["BHW", "NURSE", "MIDWIFE"];
 
-// Registered (non-archived) residents in the worker's barangay, with the
-// details needed to view/edit. Archive is intentionally NOT exposed here.
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

@@ -23,7 +23,6 @@ export async function sendAnnouncementEmail(
     day: "numeric",
   });
 
-  // Extract base64 data from data URL so Gmail can render it as a CID attachment
   const attachments: {
     filename: string;
     content: Buffer;

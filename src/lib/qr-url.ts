@@ -1,7 +1,3 @@
-/**
- * QR codes contain a direct URL so phone cameras / Safari open the link immediately.
- * Set NEXT_PUBLIC_APP_URL in Vercel after your first deploy so QRs always use your new domain.
- */
 
 export function getQrBaseUrl(clientOrigin?: string): string {
   const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");

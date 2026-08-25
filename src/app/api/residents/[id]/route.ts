@@ -45,8 +45,6 @@ export async function PATCH(
     const currentUserId = currentUser?.id;
     const barangayId = currentUser?.barangayId;
 
-    // Admins/super-admins plus clinical staff (BHW/Nurse/Midwife) may edit
-    // residents in their own barangay. Each confirms their own password.
     const role = String(currentUser?.role || "");
     const canEditResident =
       canManageBarangay(currentUser) ||
@@ -137,7 +135,6 @@ export async function PATCH(
       });
     }
 
-    // ── Blockchain: anchor updated profile hash (fire-and-forget) ────────────
     anchorRecord(
       id,
       {
@@ -163,7 +160,6 @@ export async function PATCH(
         { role: currentUser?.role ?? "unknown", event: "resident_profile_updated" }
       )
     ).catch(err => console.error("[blockchain] resident update anchor failed:", err));
-    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json({
       message: "Resident updated successfully.",

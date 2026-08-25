@@ -112,7 +112,6 @@ export default function SuperAdminDashboard() {
 
       <div className="mx-auto h-full max-w-7xl">
         <div className="grid h-full gap-6 lg:grid-cols-[248px_minmax(0,1fr)]">
-          {/* Mobile sidebar */}
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[280px] transform rounded-r-[30px] border border-[#DCEAF7] bg-white/95 p-4 shadow-2xl transition-transform duration-300 lg:hidden ${
               mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -130,13 +129,11 @@ export default function SuperAdminDashboard() {
             />
           </aside>
 
-          {/* Desktop sidebar */}
           <aside className="hidden rounded-[30px] border border-[#DCEAF7] bg-white p-5 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:overflow-y-auto">
             <SidebarInner tab={tab} navItems={navItems} onPick={setTab} />
           </aside>
 
           <section className="h-full overflow-y-auto rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 md:p-6">
-            {/* Hero header — distinct super-admin identity */}
             <div className="mb-6 overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0369A1] via-[#1D4ED8] to-[#4338CA] p-5 text-white shadow-lg sm:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
@@ -245,7 +242,6 @@ function SidebarInner({
   );
 }
 
-// ── Overview ────────────────────────────────────────────────────────────────
 function OverviewTab() {
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -324,7 +320,6 @@ function OverviewTab() {
   );
 }
 
-// ── Residents (all barangays) ────────────────────────────────────────────────
 function ResidentsTab() {
   const [rows, setRows] = useState<SuperResident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -413,7 +408,6 @@ function ResidentsTab() {
   );
 }
 
-// ── Staff (all barangays) ────────────────────────────────────────────────────
 function StaffTab() {
   const [rows, setRows] = useState<SuperStaff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -499,7 +493,6 @@ function StaffTab() {
   );
 }
 
-// ── Barangay Admins (create + reset) ─────────────────────────────────────────
 function AdminsTab() {
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -571,7 +564,6 @@ function AdminsTab() {
 
   return (
     <div className="space-y-5 pb-4">
-      {/* Create barangay + admin */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
@@ -615,7 +607,6 @@ function AdminsTab() {
         </form>
       </div>
 
-      {/* Existing admins */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-blue-700">
@@ -767,7 +758,6 @@ function ResetPasswordModal({
   );
 }
 
-// ── Small shared UI ──────────────────────────────────────────────────────────
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
     <div className="flex min-w-0 flex-col justify-between rounded-xl border border-sky-200 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-5">

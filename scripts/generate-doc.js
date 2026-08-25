@@ -6,14 +6,13 @@ const {
 } = require('docx');
 
 async function createDocument() {
-  const primaryColor = "0F172A"; // Slate 900
-  const secondaryColor = "0284C7"; // Sky 600
-  const tableHeaderBg = "1E293B"; // Slate 800
+  const primaryColor = "0F172A";
+  const secondaryColor = "0284C7";
+  const tableHeaderBg = "1E293B";
   const tableHeaderFg = "FFFFFF";
-  const zebraBg = "F8FAFC"; // Slate 50
-  const borderColor = "CBD5E1"; // Slate 300
+  const zebraBg = "F8FAFC";
+  const borderColor = "CBD5E1";
 
-  // Helper for cell padding & borders
   const cellMargins = { top: 120, bottom: 120, left: 150, right: 150 };
   const borderStyle = {
     top: { style: BorderStyle.SINGLE, size: 4, color: borderColor },
@@ -30,7 +29,6 @@ async function createDocument() {
         }
       },
       children: [
-        // Title & Header Block
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { after: 100 },
@@ -38,7 +36,7 @@ async function createDocument() {
             new TextRun({
               text: "Barangay Health System Blockchain (BHCMS)",
               bold: true,
-              size: 32, // 16pt
+              size: 32,
               color: primaryColor,
               font: "Arial"
             })
@@ -51,14 +49,13 @@ async function createDocument() {
             new TextRun({
               text: "ACCESSIBILITY TESTING & WAVE EVALUATION REPORT",
               bold: true,
-              size: 24, // 12pt
+              size: 24,
               color: secondaryColor,
               font: "Arial"
             })
           ]
         }),
 
-        // Metadata box
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
@@ -92,7 +89,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 300 } }),
 
-        // Section 1: Purpose and Scope
         new Paragraph({
           text: "1. Purpose and Scope of Testing",
           heading: HeadingLevel.HEADING_1,
@@ -135,7 +131,6 @@ async function createDocument() {
           ]
         }),
 
-        // Section 2: Screens and Flows Tested
         new Paragraph({
           text: "2. Screens and Flows Tested",
           heading: HeadingLevel.HEADING_1,
@@ -183,7 +178,6 @@ async function createDocument() {
           ]
         }),
 
-        // Section 3: Table 1 - WAVE Testing Record
         new Paragraph({
           text: "3. Accessibility Evaluation Testing Record (WAVE & Scanner)",
           heading: HeadingLevel.HEADING_1,
@@ -202,7 +196,6 @@ async function createDocument() {
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
-            // Header Row
             new TableRow({
               children: [
                 new TableCell({
@@ -232,7 +225,6 @@ async function createDocument() {
                 }),
               ]
             }),
-            // Data Rows
             new TableRow({
               children: [
                 new TableCell({ borders: borderStyle, margins: cellMargins, children: [new Paragraph({ children: [new TextRun({ text: "Login Page (/login) - Form Labels", bold: true, font: "Arial" })] })] }),
@@ -283,7 +275,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 200 } }),
 
-        // Section 4: Table 2 - Manual Accessibility Check
         new Paragraph({
           text: "4. Manual Accessibility Check",
           heading: HeadingLevel.HEADING_1,
@@ -336,7 +327,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 200 } }),
 
-        // Section 5: Before and After Evidence
         new Paragraph({
           text: "5. Before and After Evidence",
           heading: HeadingLevel.HEADING_1,
@@ -352,7 +342,6 @@ async function createDocument() {
           ]
         }),
 
-        // Issue 1
         new Paragraph({
           text: "Issue 1: Missing Form Input Labels & Low Text Contrast on Authentication Page (/login)",
           heading: HeadingLevel.HEADING_2,
@@ -380,7 +369,6 @@ async function createDocument() {
           ]
         }),
 
-        // Issue 1 Table Box
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
@@ -407,7 +395,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 200 } }),
 
-        // Issue 2
         new Paragraph({
           text: "Issue 2: Empty Icon Buttons & Low-Contrast Status Badges in Admin Dashboard (/dashboard/admin)",
           heading: HeadingLevel.HEADING_2,
@@ -435,7 +422,6 @@ async function createDocument() {
           ]
         }),
 
-        // Issue 2 Table Box
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
@@ -462,7 +448,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 200 } }),
 
-        // Section 6: Final Submission Checklist
         new Paragraph({
           text: "6. Final Submission Checklist",
           heading: HeadingLevel.HEADING_1,
@@ -485,7 +470,6 @@ async function createDocument() {
 
         new Paragraph({ spacing: { after: 200 } }),
 
-        // Section 7: Reflections
         new Paragraph({
           text: "7. Reflections",
           heading: HeadingLevel.HEADING_1,

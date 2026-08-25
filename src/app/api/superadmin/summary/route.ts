@@ -4,8 +4,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"];
 
-// GET /api/superadmin/summary
-// System-wide totals + a per-barangay breakdown (residents, staff, admin).
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

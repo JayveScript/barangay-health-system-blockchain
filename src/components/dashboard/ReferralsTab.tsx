@@ -23,7 +23,6 @@ import {
 import { PasswordGate } from "@/components/dashboard/ReferralInbox";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 
-// ── Types ────────────────────────────────────────────────────────────────────
 type ReferralAvailabilitySummary = {
   hasAvailableDoctor: boolean;
   availableSlots: number;
@@ -152,7 +151,6 @@ type StaffReferralsResponse = {
   sentReferrals: ResidentReferral[];
 };
 
-// ── Main tab ─────────────────────────────────────────────────────────────────
 export function ReferralsTab() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -490,7 +488,6 @@ export function ReferralsTab() {
   );
 }
 
-// ── Sub-components ───────────────────────────────────────────────────────────
 function Panel({
   icon,
   title,
@@ -942,7 +939,6 @@ function ReferralStatusBadge({ status }: { status: string }) {
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function getReferralResidentName(referral: ResidentReferral) {
   return (
     referral.identifyingData?.fullName ||

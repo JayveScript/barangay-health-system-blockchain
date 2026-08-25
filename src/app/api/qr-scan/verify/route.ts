@@ -120,7 +120,6 @@ export async function POST(req: Request) {
         failureReason: "Invalid password",
         meta,
       });
-      // Blockchain: log denial (fire-and-forget)
       logAuditEvent(
         AuditEventType.QR_SCAN_DENIED,
         user.id,
@@ -135,7 +134,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2FA removed — password verification is sufficient for QR access
 
     return grantAccess(user, payload.residentId, meta);
   } catch (error) {
@@ -192,7 +190,6 @@ async function grantAccess(
     meta,
   });
 
-  // ── Blockchain: immutable audit log for access grant (fire-and-forget) ───
   logAuditEvent(
     AuditEventType.QR_SCAN_GRANTED,
     user.id,

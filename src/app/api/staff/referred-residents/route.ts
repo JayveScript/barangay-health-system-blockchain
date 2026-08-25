@@ -578,7 +578,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // ── Blockchain: anchor referral hash + log audit event (fire-and-forget) ─
     anchorRecord(
       residentId,
       {
@@ -603,7 +602,6 @@ export async function POST(req: Request) {
         { role: user.role, targetBarangayId, referralId: referral.id }
       )
     ).catch(err => console.error("[blockchain] referral anchor failed:", err));
-    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(
       {

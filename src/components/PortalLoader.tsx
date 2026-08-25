@@ -4,20 +4,12 @@ import { HeartPulse } from "lucide-react";
 
 type PortalLoaderProps = {
   label?: string;
-  /** When set, shows an error state instead of the spinner. */
   error?: string;
-  /** Optional retry / back action shown under an error. */
   onRetry?: () => void;
   retryLabel?: string;
-  /** Render embedded inside an existing shell instead of full-screen. */
   inline?: boolean;
 };
 
-/**
- * Modern, branded loading screen shared across the resident, doctor, staff and
- * admin portals. Shows an animated medical pulse ring while loading, or a clean
- * error card with a retry action.
- */
 export function PortalLoader({
   label = "Loading...",
   error,
@@ -32,23 +24,17 @@ export function PortalLoader({
   return (
     <div className={wrapperClass}>
       <div className="relative flex w-full max-w-sm flex-col items-center">
-        {/* soft glow behind the card */}
         <div className="pointer-events-none absolute -top-8 h-44 w-44 rounded-full bg-sky-300/30 blur-3xl" />
 
         <div className="relative flex w-full flex-col items-center gap-7 rounded-[32px] border border-white/70 bg-white/80 px-10 py-12 shadow-2xl shadow-sky-900/10 backdrop-blur-xl">
-          {/* animated pulse ring + medical icon */}
           <div className="relative flex h-24 w-24 items-center justify-center">
-            {/* expanding halo */}
             {!error && (
               <span className="absolute inset-0 animate-ping rounded-full bg-sky-400/20 [animation-duration:1.8s]" />
             )}
-            {/* spinning gradient ring */}
             {!error && (
               <span className="absolute inset-0 animate-spin rounded-full border-4 border-transparent [animation-duration:1s] [border-right-color:#7DD3FC] [border-top-color:#0EA5E9]" />
             )}
-            {/* static track ring */}
             <span className="absolute inset-1.5 rounded-full border-2 border-sky-100" />
-            {/* center badge */}
             <span
               className={`flex h-16 w-16 items-center justify-center rounded-full text-white shadow-lg ${
                 error
@@ -87,7 +73,6 @@ export function PortalLoader({
             <div className="flex flex-col items-center gap-3.5 text-center">
               <p className="text-base font-bold text-slate-800">{label}</p>
 
-              {/* bouncing dots */}
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-sky-500 [animation-delay:-0.3s]" />
                 <span className="h-2 w-2 animate-bounce rounded-full bg-sky-400 [animation-delay:-0.15s]" />

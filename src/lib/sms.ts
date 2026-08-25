@@ -1,6 +1,5 @@
 export async function sendOtpSms(phoneNumber: string, otp: string) {
   if (!process.env.SEMAPHORE_API_KEY) {
-    // Never print the OTP in production logs. In dev, surface it for testing.
     if (process.env.NODE_ENV === "production") {
       console.error("SEMAPHORE_API_KEY missing — SMS OTP could not be sent.");
     } else {

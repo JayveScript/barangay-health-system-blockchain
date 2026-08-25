@@ -53,7 +53,6 @@ export default function InstallPage() {
         .btn-pulse{animation:btnPulse 2s ease-out infinite;}
       `}</style>
 
-      {/* Android hint overlay */}
       {showAndroidHint && active === "android" && (
         <div className="slide-up fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-slate-200 bg-white pb-10 pt-5 shadow-2xl">
           <button onClick={() => setShowAndroidHint(false)} className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 text-lg">×</button>
@@ -89,7 +88,6 @@ export default function InstallPage() {
         </div>
       )}
 
-      {/* iOS share hint overlay */}
       {showIOSHint && active === "ios" && (
         <div className="slide-up fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-slate-200 bg-white pb-10 pt-5 shadow-2xl">
           <button onClick={() => setShowIOSHint(false)} className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 text-lg">×</button>
@@ -114,7 +112,6 @@ export default function InstallPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Login
         </Link>
 
-        {/* App Icon */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="relative mb-6">
             <span className="rip1 absolute inset-0 rounded-[32px] bg-sky-400/30" />
@@ -140,7 +137,6 @@ export default function InstallPage() {
           </div>
         </div>
 
-        {/* Platform tabs */}
         <div className="mb-4 flex gap-2">
           {([
             { id: "desktop", emoji: "🖥️", label: "Desktop" },
@@ -158,7 +154,6 @@ export default function InstallPage() {
           ))}
         </div>
 
-        {/* ── DESKTOP ── */}
         {active === "desktop" && (
           <div className="fade-up rounded-3xl bg-white p-6 shadow-xl shadow-sky-900/10">
             {installed ? (
@@ -194,7 +189,6 @@ export default function InstallPage() {
           </div>
         )}
 
-        {/* ── ANDROID ── */}
         {active === "android" && (
           <div className="fade-up rounded-3xl bg-white p-6 shadow-xl shadow-sky-900/10">
             {installed ? (
@@ -263,7 +257,6 @@ export default function InstallPage() {
           </div>
         )}
 
-        {/* ── iOS ── */}
         {active === "ios" && (
           <div className="fade-up rounded-3xl bg-white p-6 shadow-xl shadow-sky-900/10">
             <div className="flex flex-col items-center gap-4 text-center">
@@ -275,11 +268,9 @@ export default function InstallPage() {
                 <p className="mt-1 text-sm text-slate-500">iPhone/iPad uses Safari — one step to install.</p>
               </div>
 
-              {/* Big visual share instruction */}
               <div className="w-full rounded-2xl bg-gradient-to-br from-sky-50 to-blue-100 border border-sky-200 p-5">
                 <p className="mb-4 text-sm font-semibold text-sky-800">In Safari, do this:</p>
                 <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
-                  {/* Share icon big */}
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-500 shadow-lg shadow-sky-500/40">
                     <svg viewBox="0 0 24 24" className="h-8 w-8 fill-white"><path d="M12 2l-3 5h2v7h2V7h2L12 2zm-7 9v10h14V11h-3v2h1v6H7v-6h1v-2H5z"/></svg>
                   </div>

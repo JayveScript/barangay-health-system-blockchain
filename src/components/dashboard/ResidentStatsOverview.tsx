@@ -18,7 +18,6 @@ import {
 import { DonutChart, BarList } from "./Charts";
 import { InlineLoader } from "./InlineLoader";
 
-// Matches the sex slices in /api/residents/stats.
 const SEX_COLORS = ["#075985", "#7DD3FC", "#94A3B8"];
 
 type StatsResponse = {
@@ -40,11 +39,6 @@ type OverviewResponse = {
   announcements: number;
 };
 
-/**
- * Live resident statistics overview for the staff / BHW dashboards.
- * Fetches the current user's barangay stats and renders real stat cards,
- * a sex-distribution donut, and an age-group bar chart.
- */
 export function ResidentStatsOverview() {
   const [data, setData] = useState<StatsResponse | null>(null);
   const [overview, setOverview] = useState<OverviewResponse | null>(null);
@@ -69,7 +63,6 @@ export function ResidentStatsOverview() {
         }
         if (!cancelled) setData(statsJson as StatsResponse);
 
-        // Activity overview is supplementary — don't fail the whole page if it errors.
         if (overviewRes.ok) {
           const overviewJson = await overviewRes.json();
           if (!cancelled) setOverview(overviewJson as OverviewResponse);

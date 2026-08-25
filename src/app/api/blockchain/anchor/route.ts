@@ -1,10 +1,3 @@
-/**
- * POST /api/blockchain/anchor
- * Anchor a health record hash on-chain.
- *
- * Body: { residentId: string, recordData: object, recordType: string }
- * Response: { txHash, recordHash }
- */
 
 import { NextRequest, NextResponse } from "next/server";
 import { anchorRecord, RecordType } from "@/lib/blockchain";
@@ -21,7 +14,6 @@ const VALID_RECORD_TYPES: RecordType[] = [
 
 export async function POST(req: NextRequest) {
   try {
-    // Only authenticated staff can anchor records
     const user = await getCurrentResidentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 });

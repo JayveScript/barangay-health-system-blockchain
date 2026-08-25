@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 
-// Returns the logged-in resident's complaints, showing which health worker
-// recorded each one and when.
 export async function GET() {
   try {
     const user = await resolveAuthedUser({ resident: true });

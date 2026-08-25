@@ -1,10 +1,3 @@
-/**
- * POST /api/blockchain/verify
- * Verify whether a resident's current health record matches what was anchored on-chain.
- *
- * Body: { residentId: string, recordData: object, recordType: string }
- * Response: { verified: boolean, onChainHash, currentHash, timestamp }
- */
 
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRecord, RecordType } from "@/lib/blockchain";
@@ -31,7 +24,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       ...result,
-      // Human-readable timestamp
       anchoredAt: result.timestamp ? new Date(result.timestamp * 1000).toISOString() : null,
     });
   } catch (err) {

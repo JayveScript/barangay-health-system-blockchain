@@ -2,14 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
-// Clinical / support roles that may view their barangay's resident statistics.
 const ALLOWED_ROLES = ["BHW", "NURSE", "MIDWIFE", "DOCTOR"];
 
-/**
- * GET /api/residents/stats
- * Aggregate resident statistics for the current user's barangay:
- * totals, sex distribution, and age groups — for dashboard charts.
- */
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

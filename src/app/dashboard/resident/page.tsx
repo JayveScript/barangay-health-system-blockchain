@@ -406,7 +406,6 @@ function ResidentNotificationsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Filter chips — single scrollable row */}
       <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {NOTIFICATION_FILTERS.map((tab) => {
           const count =
@@ -631,7 +630,6 @@ export default function ResidentDashboard() {
 
   return (
     <main className="h-[100dvh] overflow-hidden bg-[#EFF6FF] px-4 pb-[72px] py-4 md:px-8 md:py-6 lg:px-10 lg:pb-6">
-      {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
@@ -641,7 +639,6 @@ export default function ResidentDashboard() {
 
       <div className="mx-auto h-full max-w-7xl">
         <div className="grid h-full gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-          {/* Mobile sidebar */}
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[280px] transform rounded-r-[30px] border border-[#DCEAF7] bg-white/95 p-4 text-slate-800 shadow-2xl shadow-sky-900/10 transition-transform duration-300 lg:hidden ${
               mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -782,7 +779,6 @@ export default function ResidentDashboard() {
             </div>
           </aside>
 
-          {/* Desktop sidebar */}
           <aside className="hidden rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:flex lg:h-full lg:flex-col">
             <div className="flex min-h-0 flex-1 flex-col rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
               <div className="flex shrink-0 items-center gap-3">
@@ -896,7 +892,6 @@ export default function ResidentDashboard() {
           <section className="h-full overflow-y-auto [transform:translateZ(0)] [will-change:transform] [backface-visibility:hidden] rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 backdrop-blur md:p-6">
             <div className="mb-6 flex flex-col gap-4 overflow-hidden rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-5 shadow-lg shadow-sky-900/5 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                {/* Mobile hamburger menu button */}
                 <button
                   onClick={() => setMobileSidebarOpen(true)}
                   className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#0EA5E9] text-white shadow-md shadow-sky-500/25 hover:bg-sky-600"
@@ -1158,7 +1153,6 @@ export default function ResidentDashboard() {
         </div>
       </div>
 
-      {/* Mobile bottom navigation */}
       <MobileBottomNav
         items={residentBottomNavItems}
         active={sidebarTab}
@@ -1331,8 +1325,6 @@ function ResidentAppointmentsTab() {
   (appointment) => appointment.suggestion && appointment.suggestion.trim() !== ""
 );
 
-  // Only show today's and upcoming appointment requests — past-dated ones have
-  // already happened and shouldn't linger in the active requests list.
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
@@ -1534,7 +1526,6 @@ function ResidentAppointmentsTab() {
           </div>
         ) : (
           <>
-          {/* Mobile compact layout - only TIME & QUEUE, tap for details */}
           <div className="mt-5 space-y-2 md:hidden">
             <div className="grid grid-cols-3 px-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               <span>Time</span>
@@ -1564,7 +1555,6 @@ function ResidentAppointmentsTab() {
             ))}
           </div>
 
-          {/* Mobile detail modal */}
           {mobileDetailAppointment && (
             <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 md:hidden" onClick={() => setMobileDetailAppointment(null)}>
               <div
@@ -1617,7 +1607,6 @@ function ResidentAppointmentsTab() {
             </div>
           )}
 
-          {/* Desktop table layout - full columns */}
           <div className="mt-5 hidden overflow-x-auto rounded-2xl border border-slate-200 md:block">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -1774,7 +1763,6 @@ function ResidentMedicalHistoryTab({
         const json = await res.json();
         if (res.ok) setBmiRecords(Array.isArray(json) ? json : []);
       } catch {
-        /* silent */
       } finally {
         setBmiLoading(false);
       }
@@ -1791,7 +1779,6 @@ function ResidentMedicalHistoryTab({
           setConditionHistory(buildConditionHistory(json));
         }
       } catch {
-        /* silent */
       }
     };
     fetchDiagnoses();
@@ -1836,10 +1823,6 @@ function ResidentMedicalHistoryTab({
     (item) => item.value === true
   ).length;
 
-  // Latest record = the most recent dated activity across the appointment
-  // timeline AND diagnoses (medical-record status changes). A diagnosis made
-  // after the visit date — e.g. a condition set on Jun 8 — should win over an
-  // earlier appointment date.
   const latestRecordDate = useMemo(() => {
     const times = [
       ...appointments.map((a) => new Date(a.date).getTime()),
@@ -2014,7 +1997,6 @@ function ResidentMedicalHistoryTab({
           </div>
         </div>
 
-        {/* BMI History */}
         <div className="rounded-[28px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
@@ -2696,7 +2678,6 @@ function DigitalIdCard({
           </div>
 
           <div className="flex flex-1 gap-2 pt-2 sm:gap-4 sm:pt-4 lg:gap-8 lg:pt-6">
-            {/* Left column — QR + barcode */}
             <div className="flex w-[80px] shrink-0 flex-col items-center sm:w-[130px] lg:w-[200px]">
               <div className="w-full rounded-xl border border-sky-100 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3">
                 {qrImageUrl ? (
@@ -2708,22 +2689,18 @@ function DigitalIdCard({
                 )}
               </div>
               <p className="mt-1 text-center text-[6px] font-bold leading-tight text-slate-500 sm:mt-1.5 sm:text-[9px] lg:mt-2 lg:text-[12px]">Scan for Health Record</p>
-              {/* Barcode */}
               <div className="mt-1.5 w-full sm:mt-2 lg:mt-3">
                 <IdBarcode seed={resident.id ?? "B19B-HC"} />
                 <p className="mt-0.5 text-center text-[5px] font-bold text-slate-400 sm:text-[7px] lg:text-[9px]">B19B-HC</p>
               </div>
             </div>
 
-            {/* Right column */}
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2 lg:gap-3">
-              {/* Name */}
               <div className="rounded-lg border border-sky-100/70 bg-white/70 px-2 py-1 shadow-sm backdrop-blur-sm sm:rounded-xl sm:px-3 sm:py-1.5 lg:rounded-2xl lg:px-4 lg:py-2.5">
                 <p className="text-[5px] font-black uppercase text-sky-900 sm:text-[7px] lg:text-[10px]">Last Name, First Name, Middle Name</p>
                 <h3 className="text-[10px] font-black uppercase leading-tight text-slate-950 sm:text-[16px] lg:text-[24px]">{formatIdName(resident)}</h3>
               </div>
 
-              {/* Nationality | Sex | DOB */}
               <div className="grid grid-cols-3 gap-x-1 sm:gap-x-2 lg:gap-x-3">
                 <div className="flex flex-col">
                   <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Nationality</p>
@@ -2739,13 +2716,11 @@ function DigitalIdCard({
                 </div>
               </div>
 
-              {/* Address */}
               <div>
                 <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Address</p>
                 <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[11px] lg:text-[16px]">{resident.completeAddress}</p>
               </div>
 
-              {/* Civil Status | Religion */}
               <div className="grid grid-cols-2 gap-x-1 sm:gap-x-2 lg:gap-x-3">
                 <div className="flex flex-col">
                   <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Civil Status</p>
@@ -2757,7 +2732,6 @@ function DigitalIdCard({
                 </div>
               </div>
 
-              {/* Occupation */}
               <div className="flex flex-col">
                 <p className="text-[5px] font-black uppercase text-sky-600 sm:text-[7px] lg:text-[10px]">Occupation</p>
                 <p className="break-words text-[8px] font-black uppercase leading-tight text-slate-950 sm:text-[12px] lg:text-[17px]">{resident.occupation || "-"}</p>
@@ -2783,7 +2757,6 @@ function DigitalIdCard({
 function IdBarcode({ seed }: { seed: string }) {
   const bars: { x: number; w: number }[] = [];
   let x = 0;
-  // Start/end guard bars
   const push = (w: number, gap: number) => { bars.push({ x, w }); x += w + gap; };
   push(2, 1); push(1, 1); push(2, 1);
   for (let i = 0; i < seed.length; i++) {

@@ -20,7 +20,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify the reset token
     const token = await prisma.passwordResetToken.findFirst({
       where: { email },
       orderBy: { createdAt: "desc" },
@@ -48,12 +47,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Token is valid — update password and delete the token
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
       where: { email },
-      // Bump tokenVersion to revoke any existing sessions for this account.
       data: { password: hashedPassword, tokenVersion: { increment: 1 } },
     });
 

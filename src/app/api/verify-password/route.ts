@@ -2,13 +2,6 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
-/**
- * POST /api/verify-password
- * Body: { password: string }
- *
- * Re-authenticates the CURRENT logged-in user by checking their own password.
- * Used as a confirmation gate before revealing sensitive records (any role).
- */
 export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();

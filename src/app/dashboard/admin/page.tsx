@@ -176,7 +176,6 @@ type SecureAction = "view" | "edit" | "digital-id" | "archive" | "restore" | "de
 const sexDistributionColors = ["#075985", "#7DD3FC", "#94A3B8"];
 const FALLBACK_BARANGAY_LABEL = "Assigned Barangay";
 
-// Compact, consistent resident name: "LASTNAME JL." (last name + given initials).
 function formatShortName(r: {
   firstName?: string | null;
   middleName?: string | null;
@@ -187,7 +186,6 @@ function formatShortName(r: {
   return initials ? `${last} ${initials}.` : last;
 }
 
-// Formal desktop name: "LASTNAME, FIRSTNAME M." (last name first, middle as initial).
 function formatTableName(r: {
   firstName?: string | null;
   middleName?: string | null;
@@ -289,7 +287,6 @@ export default function AdminDashboardPage() {
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Barangay switcher (super-admin can view/manage any sitio).
   const [barangays, setBarangays] = useState<{ id: string; name: string }[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedBarangayId, setSelectedBarangayId] = useState<string>("");
@@ -310,22 +307,18 @@ export default function AdminDashboardPage() {
         setBarangays(json.barangays || []);
         setIsSuperAdmin(Boolean(json.isSuperAdmin));
       } catch {
-        /* silent */
       }
     })();
   }, []);
 
-  // Default the switcher to the admin's own barangay once it's known.
   useEffect(() => {
     if (adminUser?.barangay?.id && !selectedBarangayId) {
       setSelectedBarangayId(adminUser.barangay.id);
     }
   }, [adminUser?.barangay?.id, selectedBarangayId]);
 
-  // Re-load the dashboard whenever the super-admin switches barangay.
   useEffect(() => {
     if (selectedBarangayId) fetchDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBarangayId]);
 
   const adminInitials = useMemo(() => {
@@ -442,7 +435,6 @@ export default function AdminDashboardPage() {
   const query = residentSearch.toLowerCase().trim();
 
   return activeResidents.filter((resident) => {
-    // Sitio filter (separates residents by sitio within the health center).
     if (
       sitioFilter !== "all" &&
       (resident.barangayName ?? "").toLowerCase() !== sitioFilter.toLowerCase()
@@ -463,11 +455,9 @@ export default function AdminDashboardPage() {
   });
 }, [data, residentSearch, sitioFilter]);
 
-  // Sitios belonging to this admin's health center, for the sitio filter.
   const centerSitios = useMemo(() => {
     const center = HEALTH_CENTERS.find((hc) => hc.name === currentBarangayName);
     if (center) return [...center.sitios];
-    // Fallback: distinct sitios present in the resident list.
     return Array.from(
       new Set(
         (data?.residents ?? [])
@@ -595,7 +585,6 @@ export default function AdminDashboardPage() {
       setSecureLoading(true);
       setSecureError("");
 
-      // For "view" and "digital-id" we just verify password then open the modal
       if (secureAction === "view" || secureAction === "digital-id") {
         const verifyRes = await fetch("/api/admin/verify-password", {
           method: "POST",
@@ -858,7 +847,6 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="page-shell">
-      {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
@@ -867,7 +855,6 @@ export default function AdminDashboardPage() {
       )}
 
       <div className="page-shell-inner">
-        {/* Mobile sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 z-50 w-[var(--drawer-width)] transform rounded-r-[1.875rem] border border-[#DCEAF7] bg-white/95 p-4 text-slate-800 shadow-2xl shadow-sky-900/10 transition-transform duration-300 lg:hidden ${
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -984,7 +971,6 @@ export default function AdminDashboardPage() {
           </div>
         </aside>
 
-        {/* Desktop sidebar */}
         <aside className="hidden shrink-0 rounded-[1.875rem] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[var(--sidebar-width)] lg:p-5 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
           <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-4 lg:p-5">
             <div className="mb-6 flex items-center gap-3">
@@ -1071,7 +1057,6 @@ export default function AdminDashboardPage() {
             <div className="mb-5 rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 sm:p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                  {/* Mobile hamburger menu button */}
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#0EA5E9] text-white hover:bg-sky-600"
@@ -1263,7 +1248,6 @@ export default function AdminDashboardPage() {
                 {tab === "residents" && (
                   <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
                    <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-  {/* LEFT SIDE */}
   <div className="flex items-center gap-3">
     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
       <ClipboardList className="h-6 w-6" />
@@ -1280,7 +1264,6 @@ export default function AdminDashboardPage() {
     </div>
   </div>
 
-  {/* RIGHT SIDE — sitio filter + search */}
   <div className="flex w-full flex-col gap-3 sm:flex-row lg:max-w-xl lg:justify-end">
     {centerSitios.length > 1 && (
       <div className="relative w-full sm:max-w-[220px]">
@@ -1312,7 +1295,6 @@ export default function AdminDashboardPage() {
     </div>
   </div>
 </div>
-                    {/* Mobile compact list - Name + Actions on one line */}
           <div className="md:hidden">
             <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               Resident Name
@@ -1367,7 +1349,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Desktop full table */}
                     <div className="hidden overflow-x-auto md:block">
   <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
     <thead>
@@ -1491,7 +1472,6 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <form onSubmit={handleCreateUser} className="space-y-5">
-                        {/* Full name — first / middle / last */}
                         <div>
                           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
                             Full Name
@@ -1604,7 +1584,6 @@ export default function AdminDashboardPage() {
                 {tab === "staff-users" && (
                   <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
                     <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                      {/* LEFT SIDE */}
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
                           <Stethoscope className="h-6 w-6" />
@@ -1621,7 +1600,6 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
-                      {/* RIGHT SIDE SEARCH */}
                       <div className="relative w-full lg:max-w-sm">
                         <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
@@ -1635,7 +1613,6 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Mobile compact list - Name + Actions on one line */}
                     <div className="space-y-2 md:hidden">
                       <div className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                         Staff Name
@@ -1688,7 +1665,6 @@ export default function AdminDashboardPage() {
                       ))}
                     </div>
 
-                    {/* Desktop full table */}
                     <div className="hidden overflow-x-auto md:block">
                       <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
                         <thead>
@@ -1836,7 +1812,6 @@ export default function AdminDashboardPage() {
         />
       )}
 
-      {/* Mobile bottom navigation */}
       <MobileBottomNav
         items={adminBottomNavItems}
         active={tab}
@@ -2464,7 +2439,6 @@ function ResidentDetailsModal({
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
 
-  // Medical history tab — live data
   type AppointmentEntry = {
     id: string;
     date: string;
@@ -2624,7 +2598,6 @@ function ResidentDetailsModal({
             )}
           </div>
 
-          {/* One-line icon tab strip */}
           <div className="mt-4 flex items-stretch gap-1 rounded-2xl bg-sky-50 p-1">
             {[
               { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
@@ -2707,7 +2680,6 @@ function ResidentDetailsModal({
                 </div>
               )}
 
-              {/* Condition flags */}
               <InfoSection icon={<HeartPulse className="h-5 w-5" />} title="Recorded Conditions" alwaysShow>
                 <ConditionHistoryCard
                   medicalHistory={resident.medicalHistory ?? null}
@@ -2725,7 +2697,6 @@ function ResidentDetailsModal({
                 </div>
               </InfoSection>
 
-              {/* BMI Records */}
               <InfoSection icon={<Activity className="h-5 w-5" />} title={`BMI Records (${medBmi.length})`}>
                 {medBmi.length === 0 && !medLoading ? (
                   <p className="text-sm text-slate-400">No BMI records found.</p>
@@ -2748,7 +2719,6 @@ function ResidentDetailsModal({
                 )}
               </InfoSection>
 
-              {/* Appointment history */}
               <InfoSection icon={<ClipboardList className="h-5 w-5" />} title={`Appointment History (${medAppointments.length})`}>
                 {medAppointments.length === 0 && !medLoading ? (
                   <p className="text-sm text-slate-400">No appointments recorded yet.</p>
@@ -3430,7 +3400,6 @@ const [form, setForm] = useState({
 
   useEffect(() => {
     fetchAnnouncements();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, barangayId]);
 
   const handleImageUpload = (file: File | null) => {
@@ -3499,7 +3468,6 @@ const [form, setForm] = useState({
     
     setMessage("Announcement posted successfully.");
 
-    // Reset form
     setForm({
       title: "",
       content: "",
@@ -3507,7 +3475,7 @@ const [form, setForm] = useState({
       publishDate: today,
     });
 
-    setImageFile(null); // 🔥 IMPORTANT
+    setImageFile(null);
 
     setSelectedDate(form.publishDate);
     await fetchAnnouncements();

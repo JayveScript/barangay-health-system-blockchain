@@ -24,11 +24,6 @@ function formatLongDate(value: string) {
   });
 }
 
-/**
- * Shared announcements panel with posting + viewing.
- * Used by roles allowed to manage announcements (admin, doctor, nurse, ...).
- * Posts to /api/admin/announcements which scopes to the user's own barangay.
- */
 export function AnnouncementsManager({
   subtitle = "Post and view announcements for your barangay.",
 }: {
@@ -75,7 +70,6 @@ export function AnnouncementsManager({
 
   useEffect(() => {
     fetchAnnouncements();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   const handleImageUpload = (file: File | null) => {
@@ -160,7 +154,6 @@ export function AnnouncementsManager({
           </div>
         </div>
 
-        {/* Create form */}
         <form
           onSubmit={handlePost}
           className="rounded-[24px] border border-sky-200 bg-[#EFF6FF] p-5"
@@ -264,7 +257,6 @@ export function AnnouncementsManager({
         </form>
       </div>
 
-      {/* Viewer */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-4 rounded-[24px] border border-sky-200 bg-[#EFF6FF] p-5 md:flex-row md:items-center md:justify-between">
           <div>

@@ -34,8 +34,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // Super-admin may create the user under any barangay (via the switcher);
-    // a barangay-admin is locked to their own.
     const barangayId = resolveScopeBarangayId(admin, body.barangayId);
 
     const fullName = String(body.fullName || "").trim();

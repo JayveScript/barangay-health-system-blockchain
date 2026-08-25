@@ -2,11 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
-/**
- * GET /api/doctor/referred-residents
- * Returns the referrals sent TO the doctor's barangay (so the receiving doctor
- * can see referred patients and accept/reject them).
- */
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

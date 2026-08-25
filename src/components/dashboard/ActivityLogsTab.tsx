@@ -106,7 +106,6 @@ export function ActivityLogsTab({ barangayId }: { barangayId?: string }) {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [barangayId]);
 
   const roleCounts = useMemo(() => {
@@ -168,7 +167,6 @@ export function ActivityLogsTab({ barangayId }: { barangayId?: string }) {
         </div>
       </div>
 
-      {/* Role filter chips */}
       <div className="-mx-1 mb-4 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {ROLE_FILTERS.map((role) => {
           const count = role === "ALL" ? logs.length : roleCounts[role] || 0;

@@ -19,9 +19,6 @@ async function verifyAdminPassword(userId: string, password: string) {
   return { ok: true, error: "", status: 200 };
 }
 
-// POST /api/staff/[id]/reset-password
-// Lets a barangay admin set a new password for one of their staff/clinical
-// users, confirming with the admin's own password.
 export async function POST(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -76,7 +73,6 @@ export async function POST(
 
     await prisma.user.update({
       where: { id },
-      // Bump tokenVersion to revoke the user's existing sessions immediately.
       data: { password: passwordHash, tokenVersion: { increment: 1 } },
     });
 

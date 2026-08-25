@@ -46,7 +46,6 @@ export default function AccessDeniedPage() {
         className="access-denied-card mx-auto max-w-md w-full overflow-hidden rounded-3xl bg-white shadow-2xl"
         style={{ boxShadow: "0 25px 60px rgba(37, 99, 235, 0.12)" }}
       >
-        {/* Header bar */}
         <div className="bg-gradient-to-r from-red-600 to-rose-500 px-8 py-6 text-white">
           <div className="flex items-center gap-4">
             <div
@@ -66,7 +65,6 @@ export default function AccessDeniedPage() {
           </div>
         </div>
 
-        {/* Body */}
         <div className="px-8 py-10 text-center">
           <p
             className="fade-up text-4xl font-black text-red-500"
@@ -107,7 +105,6 @@ export default function AccessDeniedPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="border-t border-slate-100 bg-slate-50 px-8 py-4 text-center">
           <p className="text-xs text-slate-400">
             If you believe this is an error, please contact your Barangay

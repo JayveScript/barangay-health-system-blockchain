@@ -6,9 +6,6 @@ import {
   isSuperAdmin,
 } from "@/lib/tenant-auth";
 
-// GET /api/barangays
-// Lists barangays for the admin barangay switcher. A SUPER_ADMIN gets every
-// barangay; a barangay admin only gets their own.
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

@@ -34,13 +34,6 @@ const CONDITIONS: { label: string; field: keyof NonNullable<MedicalFlags> }[] = 
   { label: "Other Conditions", field: "hasOtherConditions" },
 ];
 
-/**
- * Recorded-conditions grid where each "Yes" condition is clickable and opens a
- * modal listing every doctor who diagnosed it (with date + barangay). Shared by
- * the admin resident modal and the QR digital-ID view. Diagnoses are append-
- * only, so the modal shows the full history and notes that no doctor can edit
- * another doctor's entry.
- */
 export function ConditionHistoryCard({
   medicalHistory,
   diagnoses,

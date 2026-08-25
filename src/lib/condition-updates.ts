@@ -1,9 +1,3 @@
-// Helpers for showing WHO last changed a resident's medical-record status and
-// WHEN. Medical conditions are flipped from "No" to "Yes" by a Diagnosis (see
-// /api/diagnose). Each Diagnosis records the condition field keys it set, the
-// staff member who recorded it (diagnosedBy), and the timestamp. By scanning a
-// resident's diagnoses we can attribute each positive condition to the most
-// recent diagnosis that set it.
 
 export const CONDITION_FIELD_LABELS: Record<string, string> = {
   hasHypertension: "Hypertension",
@@ -27,17 +21,16 @@ export type DiagnosisLike = {
 };
 
 export type ConditionUpdate = {
-  by: string; // staff/doctor full name
-  at: string; // ISO timestamp
+  by: string;
+  at: string;
 };
 
 export type ConditionDiagnosis = {
-  by: string; // doctor / staff full name
-  at: string; // ISO timestamp
-  barangayName?: string | null; // barangay the diagnoser is assigned to
+  by: string;
+  at: string;
+  barangayName?: string | null;
 };
 
-// Maps each condition field key -> the latest diagnosis that recorded it.
 export function buildConditionUpdates(
   diagnoses: DiagnosisLike[] | null | undefined
 ): Record<string, ConditionUpdate> {
@@ -59,10 +52,6 @@ export function buildConditionUpdates(
   return updates;
 }
 
-// Maps each condition field key -> the FULL list of diagnoses that recorded it,
-// newest first. Used to show every doctor (and date) who diagnosed a condition,
-// since diagnoses are append-only — a new doctor adds a record rather than
-// editing an existing one.
 export function buildConditionHistory(
   diagnoses: DiagnosisLike[] | null | undefined
 ): Record<string, ConditionDiagnosis[]> {

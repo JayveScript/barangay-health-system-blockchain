@@ -148,7 +148,6 @@ export function DiagnoseTab() {
       const json = await res.json();
       if (res.ok) setAppointments(Array.isArray(json) ? json : []);
     } catch {
-      /* silent */
     }
   };
 
@@ -158,7 +157,6 @@ export function DiagnoseTab() {
       const json = await res.json();
       if (res.ok) setResidents(Array.isArray(json) ? json : []);
     } catch {
-      /* silent */
     }
   };
 
@@ -170,7 +168,6 @@ export function DiagnoseTab() {
       const json = await res.json();
       if (res.ok) setDiagnoses(Array.isArray(json) ? json : []);
     } catch {
-      /* silent */
     } finally {
       setLoading(false);
     }
@@ -190,7 +187,6 @@ export function DiagnoseTab() {
     setError("");
     setSuccess("");
     loadDiagnoses(patient?.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patient?.id]);
 
   const toggleCondition = (key: string) => {
@@ -246,7 +242,6 @@ export function DiagnoseTab() {
 
   return (
     <div className="space-y-5 pb-4">
-      {/* Patient selection panel */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
@@ -267,7 +262,6 @@ export function DiagnoseTab() {
           <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{success}</div>
         )}
 
-        {/* Source toggle */}
         <div className="mb-5 inline-flex w-full gap-2 rounded-2xl border border-sky-200 bg-sky-50 p-1.5 sm:w-auto">
           <button
             type="button"
@@ -317,7 +311,6 @@ export function DiagnoseTab() {
         )}
       </div>
 
-      {/* Diagnosis form */}
       {patient && (
         <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
           <PatientSummary
@@ -404,7 +397,6 @@ export function DiagnoseTab() {
         </div>
       )}
 
-      {/* History */}
       <DiagnosisHistory
         diagnoses={diagnoses}
         loading={loading}

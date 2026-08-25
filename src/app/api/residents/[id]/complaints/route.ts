@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 import { SCANNER_ALLOWED_ROLES } from "@/lib/auth-edge";
 
-// Complaints that a scanning health worker records against a resident.
-// Any non-resident staff role that may view a resident's QR info may add one.
 
 async function assertScannerForResident(residentId: string) {
   const user = await getCurrentApiUser();
