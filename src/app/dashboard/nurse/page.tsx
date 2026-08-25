@@ -162,7 +162,7 @@ export default function NurseDashboardPage() {
             />
             <SidebarButton
               active={activeTab === "announcements"}
-              icon={<Megaphone className="h-5 w-5" />}
+              icon={<Megaphone className="h-6 w-6" />}
               label="Announcements"
               onClick={() => {
                 setActiveTab("announcements");
@@ -250,7 +250,7 @@ export default function NurseDashboardPage() {
               />
               <SidebarButton
                 active={activeTab === "announcements"}
-                icon={<Megaphone className="h-5 w-5" />}
+                icon={<Megaphone className="h-6 w-6" />}
                 label="Announcements"
                 onClick={() => setActiveTab("announcements")}
               />
@@ -375,7 +375,7 @@ export default function NurseDashboardPage() {
       <MobileBottomNav
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
-          { id: "announcements", label: "News", icon: <Megaphone className="h-5 w-5" /> },
+          { id: "announcements", label: "News", icon: <Megaphone className="h-6 w-6" /> },
           { id: "referrals", label: "Referrals", icon: <Send className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "maternal", label: "Maternal", icon: <Baby className="h-5 w-5" /> },
