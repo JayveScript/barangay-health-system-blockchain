@@ -5,9 +5,10 @@ export function normalizeScannedQrUrl(
   const text = (scannedText || "").trim();
   const origin = currentOrigin.replace(/\/$/, "");
 
-  const tokenMatch = text.match(/^KALYO:\/\/resident\/([^/?#\s]+)/i);
+  const tokenMatch = text.match(/^KALYO:\/\/resident\/([^/?#\s]+)(\?[^#\s]*)?/i);
   if (tokenMatch) {
-    return `${origin}/resident/${tokenMatch[1]}`;
+    const queryString = tokenMatch[2] || "";
+    return `${origin}/resident/${tokenMatch[1]}${queryString}`;
   }
 
   try {
