@@ -92,7 +92,7 @@ export default function NutritionistDashboardPage() {
   if (!user) return null;
 
   return (
-    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:pb-6">
+    <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 sm:p-6 lg:pb-6">
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"

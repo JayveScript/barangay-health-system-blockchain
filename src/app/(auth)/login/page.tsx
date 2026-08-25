@@ -306,18 +306,14 @@ function LoginForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-2 space-y-4">
-              <div>
-                <Input
-                  label="Username or Email"
-                  icon={<User className="h-5 w-5" />}
-                  value={identifier}
-                  onChange={setIdentifier}
-                  placeholder="Enter username or email"
-                />
-                <p className="mt-1.5 text-xs font-medium text-slate-400">
-                  Residents: include the <span className="font-bold text-slate-500">@barangay.hcms</span> at the end of your username.
-                </p>
-              </div>
+              <Input
+                label="Username or Email"
+                icon={<User className="h-5 w-5" />}
+                value={identifier}
+                onChange={setIdentifier}
+                placeholder="Enter username or email"
+                suffix="@barangay.hcms"
+              />
 
               <Input
                 label="Password"
@@ -399,6 +395,7 @@ function Input({
   placeholder,
   icon,
   type = "text",
+  suffix,
 }: {
   label: string;
   value: string;
@@ -406,10 +403,12 @@ function Input({
   placeholder: string;
   icon: React.ReactNode;
   type?: string;
+  suffix?: string;
 }) {
   const isPassword = type === "password";
   const [show, setShow] = useState(false);
   const inputType = isPassword ? (show ? "text" : "password") : type;
+  const showSuffix = Boolean(suffix) && value.length > 0 && !value.includes("@");
 
   return (
     <div>
@@ -425,6 +424,11 @@ function Input({
           placeholder={placeholder}
           className="w-full bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
         />
+        {showSuffix && (
+          <span className="ml-1 whitespace-nowrap text-base font-semibold text-slate-400">
+            {suffix}
+          </span>
+        )}
         {isPassword && (
           <button
             type="button"

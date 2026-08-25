@@ -212,7 +212,7 @@ export default function DoctorDashboardPage() {
   const currentBarangayName = user.barangay?.name || "Assigned Barangay";
 
   return (
-    <main className="min-h-screen bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:h-screen lg:overflow-hidden lg:pb-6">
+    <main className="min-h-screen bg-[#EFF6FF] p-4 sm:p-6 lg:h-screen lg:overflow-hidden lg:pb-6">
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
