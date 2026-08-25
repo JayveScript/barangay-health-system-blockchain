@@ -6,12 +6,15 @@ import {
   ClipboardList,
   Edit,
   Eye,
+  HeartPulse,
   IdCard,
   Lock,
   Save,
   Search,
   ShieldCheck,
+  Stethoscope,
   UserRound,
+  Users,
   X,
 } from "lucide-react";
 import {
@@ -419,6 +422,7 @@ type ViewDiagnosis = {
 function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
   const yn = (v: unknown) => (v ? "Yes" : "No");
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
+  const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
 
   useEffect(() => {
     (async () => {
@@ -431,25 +435,57 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
       }
     })();
   }, [resident.id]);
+
+  const tabs = [
+    { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
+    { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
+    { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
+    { id: "personal", label: "Personal", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "assessments", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
+  ] as const;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-sky-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white">
-              <UserRound className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-sky-600">Resident Profile</p>
-              <h3 className="text-xl font-black text-slate-900">{fullName(resident)}</h3>
+        <div className="border-b border-sky-200 bg-sky-50/60 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white">
+                <UserRound className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-sky-600">Resident Profile</p>
+                <h3 className="text-xl font-black text-slate-900">{fullName(resident)}</h3>
+              </div>
             </div>
+            <button onClick={onClose} className="rounded-xl bg-white p-2 text-slate-600 ring-1 ring-slate-200">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="rounded-xl bg-white p-2 text-slate-600 ring-1 ring-slate-200">
-            <X className="h-5 w-5" />
-          </button>
+
+          <div className="mt-4 flex items-stretch gap-1 rounded-2xl bg-sky-50 p-1">
+            {tabs.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  aria-label={t.label}
+                  className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold transition ${
+                    active ? "bg-[#0EA5E9] text-white shadow-sm" : "text-slate-500 hover:bg-white"
+                  }`}
+                >
+                  {t.icon}
+                  <span className="max-w-full truncate leading-none">{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
+          {tab === "identifying" && (
           <ViewSection title="Identifying Data">
             <Info label="Full Name" value={fullName(resident)} />
             <Info label="Age" value={resident.age} />
@@ -468,8 +504,9 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
             <Info label="Address" value={resident.completeAddress} />
             <Info label="Sitio" value={resident.barangayName} />
           </ViewSection>
+          )}
 
-          {resident.medicalHistory && (
+          {tab === "medical" && resident.medicalHistory && (
             <ViewSection title="Past Medical History">
               <Info label="Hypertension" value={yn(resident.medicalHistory.hasHypertension)} />
               <Info label="Diabetes" value={yn(resident.medicalHistory.hasDiabetes)} />
@@ -482,7 +519,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
             </ViewSection>
           )}
 
-          {resident.familyHistory && (
+          {tab === "family" && resident.familyHistory && (
             <ViewSection title="Family History">
               <Info label="Asthma / Allergies" value={yn(resident.familyHistory.asthmaAllergies)} />
               <Info label="Birth Defects" value={yn(resident.familyHistory.birthDefects)} />
@@ -495,7 +532,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
             </ViewSection>
           )}
 
-          {resident.personalSocialHistory && (
+          {tab === "personal" && resident.personalSocialHistory && (
             <ViewSection title="Personal / Social History">
               <Info label="Eats Healthy Diet" value={yn(resident.personalSocialHistory.eatsHealthyDiet)} />
               <Info label="Adequate Physical Activity" value={yn(resident.personalSocialHistory.adequatePhysicalActivity)} />
@@ -506,6 +543,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
             </ViewSection>
           )}
 
+          {tab === "assessments" && (
           <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
             <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
               Assessments &amp; Medical Advice
@@ -539,6 +577,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

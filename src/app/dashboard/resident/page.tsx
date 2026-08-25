@@ -27,6 +27,8 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
+import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
+import { Baby } from "lucide-react";
 import {
   buildConditionHistory,
   formatUpdateDate,
@@ -553,7 +555,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "announcements" | "digital"
+  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "announcements" | "digital"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -746,6 +748,24 @@ export default function ResidentDashboard() {
                 Health Concern
               </button>
 
+              {resident.sex === "FEMALE" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSidebarTab("maternal");
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "maternal"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                  }`}
+                >
+                  <Baby className="h-5 w-5 shrink-0" />
+                  Maternal Records
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => {
@@ -858,8 +878,23 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <MessageSquareText className="h-5 w-5 shrink-0" />
-                  Complaints
+                  Health Concern
                 </button>
+
+                {resident.sex === "FEMALE" && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarTab("maternal")}
+                    className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                      sidebarTab === "maternal"
+                        ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                        : "text-slate-600 hover:bg-white hover:text-sky-600"
+                    }`}
+                  >
+                    <Baby className="h-5 w-5 shrink-0" />
+                    Maternal Records
+                  </button>
+                )}
 
                 <button
   type="button"
@@ -1120,6 +1155,18 @@ export default function ResidentDashboard() {
       icon={<MessageSquareText className="h-5 w-5" />}
     >
       <ResidentComplaints />
+    </Section>
+  </div>
+)}
+
+            {sidebarTab === "maternal" && (
+  <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
+    <Section
+      title="Maternal Records"
+      subtitle="Your pregnancy status and maternal health record from your barangay health center."
+      icon={<Baby className="h-5 w-5" />}
+    >
+      <ResidentMaternalTab />
     </Section>
   </div>
 )}
