@@ -516,13 +516,15 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
                     medicalHistory={resident.medicalHistory ?? null}
                     diagnoses={diagnosisData}
                     residentName={fullName}
+                    details={{
+                      hasAllergies: resident.medicalHistory?.allergiesDetails,
+                      hasCancer: resident.medicalHistory?.cancerDetails,
+                      hasOtherConditions: resident.medicalHistory?.otherConditionsDetails,
+                    }}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Info label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} />
-                  <Info label="Cancer Details" value={resident.medicalHistory?.cancerDetails} />
-                  <Info label="Other Conditions Details" value={resident.medicalHistory?.otherConditionsDetails} />
                   <Info label="Maintenance Medications" value={resident.medicalHistory?.maintenanceMedications} />
                   <Info label="Previous Illnesses / Surgeries" value={resident.medicalHistory?.previousIllnessesSurgeries} />
                 </div>

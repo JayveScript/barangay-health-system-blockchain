@@ -38,10 +38,12 @@ export function ConditionHistoryCard({
   medicalHistory,
   diagnoses,
   residentName,
+  details,
 }: {
   medicalHistory: MedicalFlags;
   diagnoses: DiagnosisLike[];
   residentName: string;
+  details?: Record<string, string | null | undefined>;
 }) {
   const [active, setActive] = useState<{ label: string; field: string } | null>(
     null
@@ -92,6 +94,7 @@ export function ConditionHistoryCard({
           label={active.label}
           history={history[active.field] || []}
           selfReportedBy={residentName}
+          detail={details?.[active.field] ?? null}
           onClose={() => setActive(null)}
         />
       )}
@@ -103,11 +106,13 @@ function ConditionHistoryModal({
   label,
   history,
   selfReportedBy,
+  detail,
   onClose,
 }: {
   label: string;
   history: ConditionDiagnosis[];
   selfReportedBy: string;
+  detail?: string | null;
   onClose: () => void;
 }) {
   if (typeof document === "undefined") return null;
@@ -141,6 +146,17 @@ function ConditionHistoryModal({
             <X className="h-4 w-4" />
           </button>
         </div>
+
+        {detail && detail.trim() && (
+          <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-4">
+            <p className="text-[11px] font-black uppercase tracking-wide text-rose-600">
+              {label} Details
+            </p>
+            <p className="mt-1 whitespace-pre-line text-sm font-semibold text-slate-800">
+              {detail}
+            </p>
+          </div>
+        )}
 
         <div className="mt-5 space-y-3">
           {history.length === 0 ? (
