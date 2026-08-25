@@ -6,6 +6,7 @@ import {
   DEFAULT_BARANGAY_CITY,
   getHealthCenterForSitio,
 } from "@/lib/barangay-options";
+import { normalizeBarangayHcmsUsername } from "@/lib/username-validation";
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -78,7 +79,9 @@ export async function POST(req: Request) {
     } = body;
 
     const normalizedEmail = String(email || "").trim().toLowerCase();
-    const normalizedUsername = String(username || "").trim();
+    const normalizedUsername = normalizeBarangayHcmsUsername(
+      String(username || "")
+    );
     const normalizedPhone = String(contactNumber || "").trim();
     const selectedSitio = String(barangayName || "").trim();
     const healthCenterName = getHealthCenterForSitio(selectedSitio);

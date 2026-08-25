@@ -105,7 +105,7 @@ export default function SuperAdminDashboard() {
   ];
 
   return (
-    <main className="h-[100dvh] overflow-hidden bg-[#EFF6FF] px-4 pb-[72px] py-4 md:px-8 md:py-6 lg:px-10 lg:pb-6">
+    <main className="h-[100dvh] overflow-hidden bg-[#EFF6FF] px-4 py-4 md:px-8 md:py-6 lg:px-10 lg:pb-6">
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
       )}

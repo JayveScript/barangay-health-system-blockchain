@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { db } from "@/lib/db";
 import { sign } from "jsonwebtoken";
+import { normalizeBarangayHcmsUsername } from "@/lib/username-validation";
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS    = 15 * 60 * 1000;
@@ -87,12 +88,16 @@ export async function POST(req: Request) {
     }
 
     const normalizedIdentifier = String(identifier).trim();
+    const lowerIdentifier = normalizedIdentifier.toLowerCase();
+    const suffixedUsername = normalizeBarangayHcmsUsername(normalizedIdentifier);
 
     const user = await db.user.findFirst({
       where: {
         OR: [
           { username: normalizedIdentifier },
-          { email: normalizedIdentifier.toLowerCase() },
+          { username: lowerIdentifier },
+          { username: suffixedUsername },
+          { email: lowerIdentifier },
         ],
       },
     });
