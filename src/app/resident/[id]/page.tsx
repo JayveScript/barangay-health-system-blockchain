@@ -390,7 +390,7 @@ export default async function PublicResidentPage({ params }: PageProps) {
               htmlFor="tab-complaints"
               className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
             >
-              Complaints
+              Health Concern
             </label>
           </div>
 
@@ -592,10 +592,10 @@ export default async function PublicResidentPage({ params }: PageProps) {
             </section>
 
             <section className="tab-panel panel-complaints">
-              <SectionTitle title="Patient Complaints" />
+              <SectionTitle title="Health Concern" />
               <p className="mb-4 -mt-2 text-sm font-medium text-slate-500">
-                Record the patient&apos;s complaint below. It is saved to their
-                record with your name and the date.
+                Record the resident&apos;s health concern below. It is saved to
+                their record with your name and the date.
               </p>
               <ResidentComplaints residentId={id} />
             </section>

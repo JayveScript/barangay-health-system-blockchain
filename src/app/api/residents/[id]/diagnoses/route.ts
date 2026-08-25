@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentApiUser, canManageBarangay } from "@/lib/tenant-auth";
+import { getCurrentApiUser, canManageBarangay, isSuperAdmin } from "@/lib/tenant-auth";
+
+const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"];
 
 export async function GET(
   _req: Request,
@@ -10,14 +12,18 @@ export async function GET(
     const { id } = await context.params;
     const currentUser = await getCurrentApiUser();
 
-    if (!canManageBarangay(currentUser) || !currentUser?.barangayId) {
+    const canView =
+      canManageBarangay(currentUser) ||
+      STAFF_ROLES.includes(String(currentUser?.role || ""));
+
+    if (!canView || !currentUser?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const diagnoses = await prisma.diagnosis.findMany({
       where: {
         residentId: id,
-        ...(currentUser.role === "SUPER_ADMIN"
+        ...(isSuperAdmin(currentUser)
           ? {}
           : { barangayId: currentUser.barangayId }),
       },
@@ -26,10 +32,12 @@ export async function GET(
         conditions: true,
         isHealthy: true,
         notes: true,
+        medicalAdvice: true,
         createdAt: true,
         diagnosedBy: {
           select: {
             fullName: true,
+            role: true,
             barangay: { select: { name: true } },
           },
         },

@@ -406,8 +406,31 @@ export function RegisteredResidentsTab() {
   );
 }
 
+type ViewDiagnosis = {
+  id: string;
+  conditions?: string[] | null;
+  isHealthy?: boolean;
+  notes?: string | null;
+  medicalAdvice?: string | null;
+  createdAt: string;
+  diagnosedBy?: { fullName?: string | null; barangay?: { name?: string | null } | null } | null;
+};
+
 function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
   const yn = (v: unknown) => (v ? "Yes" : "No");
+  const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`/api/residents/${resident.id}/diagnoses`, { cache: "no-store" });
+        const json = await res.json();
+        if (res.ok && Array.isArray(json)) setDiagnoses(json);
+      } catch (err) {
+        console.error("VIEW_DIAGNOSES_ERROR", err);
+      }
+    })();
+  }, [resident.id]);
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-sky-200 bg-white shadow-2xl">
@@ -482,6 +505,40 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
               <Info label="Takes Illicit Drugs" value={yn(resident.personalSocialHistory.takesIllicitDrugs)} />
             </ViewSection>
           )}
+
+          <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+            <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+              Assessments &amp; Medical Advice
+            </h4>
+            {diagnoses.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 px-3 py-4 text-center text-sm font-semibold text-slate-500">
+                No assessments recorded yet.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {diagnoses.map((d) => (
+                  <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-800">{d.diagnosedBy?.fullName?.trim() || "Health Worker"}</p>
+                      <span className="text-[11px] font-bold text-slate-400">{new Date(d.createdAt).toLocaleString()}</span>
+                    </div>
+                    {Array.isArray(d.conditions) && d.conditions.length > 0 && (
+                      <p className="mt-1 text-xs font-semibold text-amber-700">{d.conditions.join(", ")}</p>
+                    )}
+                    {d.isHealthy && (
+                      <p className="mt-1 text-xs font-semibold text-emerald-700">Healthy / No findings</p>
+                    )}
+                    {d.notes && d.notes.trim() && (
+                      <p className="mt-1 whitespace-pre-line text-xs text-slate-700"><span className="font-bold">Notes:</span> {d.notes}</p>
+                    )}
+                    {d.medicalAdvice && d.medicalAdvice.trim() && (
+                      <p className="mt-1 whitespace-pre-line text-xs text-emerald-800"><span className="font-bold">Medical Advice:</span> {d.medicalAdvice}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
