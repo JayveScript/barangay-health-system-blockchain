@@ -1889,6 +1889,12 @@ function ResidentMedicalHistoryTab({
     },
   ];
 
+  const conditionDetails: Record<string, string | null | undefined> = {
+    hasAllergies: resident.medicalHistory?.allergiesDetails,
+    hasCancer: resident.medicalHistory?.cancerDetails,
+    hasOtherConditions: resident.medicalHistory?.otherConditionsDetails,
+  };
+
   const activeConditionCount = medicalConditions.filter(
     (item) => item.value === true
   ).length;
@@ -2183,6 +2189,7 @@ function ResidentMedicalHistoryTab({
         <ConditionHistoryModal
           label={activeCondition.label}
           history={conditionHistory[activeCondition.field] || []}
+          detail={conditionDetails[activeCondition.field]}
           selfReportedBy={residentName}
           onClose={() => setActiveCondition(null)}
         />
@@ -2295,11 +2302,13 @@ function HistoryFlag({
 function ConditionHistoryModal({
   label,
   history,
+  detail,
   selfReportedBy,
   onClose,
 }: {
   label: string;
   history: ConditionDiagnosis[];
+  detail?: string | null;
   selfReportedBy: string;
   onClose: () => void;
 }) {
@@ -2377,6 +2386,17 @@ function ConditionHistoryModal({
             ))
           )}
         </div>
+
+        {detail && detail.trim() && (
+          <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-4">
+            <p className="text-[11px] font-black uppercase tracking-wide text-rose-600">
+              {label} Details
+            </p>
+            <p className="mt-1 whitespace-pre-line text-sm font-semibold text-slate-800">
+              {detail}
+            </p>
+          </div>
+        )}
 
         <p className="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-[11px] font-semibold leading-relaxed text-slate-400">
           Each diagnosis is a permanent record. A doctor can add a new diagnosis
