@@ -306,13 +306,18 @@ function LoginForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-2 space-y-4">
-              <Input
-                label="Username or Email"
-                icon={<User className="h-5 w-5" />}
-                value={identifier}
-                onChange={setIdentifier}
-                placeholder="Enter username or email"
-              />
+              <div>
+                <Input
+                  label="Username or Email"
+                  icon={<User className="h-5 w-5" />}
+                  value={identifier}
+                  onChange={setIdentifier}
+                  placeholder="Enter username or email"
+                />
+                <p className="mt-1.5 text-xs font-medium text-slate-400">
+                  Residents: include the <span className="font-bold text-slate-500">@barangay.hcms</span> at the end of your username.
+                </p>
+              </div>
 
               <Input
                 label="Password"
