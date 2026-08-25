@@ -2606,41 +2606,19 @@ function DigitalIdCard({
 }: {
   resident: ResidentData;
 }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState("/images/davao-logo.png");
 
   useEffect(() => {
     toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
   }, []);
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    try {
-      setDownloading(true);
-      const dataUrl = await htmlToImage.toPng(cardRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-        includeQueryParams: true,
-      });
-      const link = document.createElement("a");
-      link.download = `digital-id-${resident.lastName || "resident"}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error("Failed to download card", err);
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   const { qrImageUrl, loading: qrLoading } = useSecureQrUrl(resident.id);
 
   return (
     <div className="flex flex-col items-center justify-center pb-6 pt-2">
       <div
-        ref={cardRef}
-        className="relative w-[340px] overflow-hidden rounded-[18px] border border-sky-200 bg-white font-sans shadow-[0_18px_45px_rgba(14,165,233,0.18)] sm:w-[500px] sm:rounded-[24px] lg:aspect-[760/480] lg:h-auto lg:w-full lg:max-w-[760px] lg:rounded-[30px]"
+        onContextMenu={(e) => e.preventDefault()}
+        className="relative w-[340px] select-none overflow-hidden rounded-[18px] border border-sky-200 bg-white font-sans shadow-[0_18px_45px_rgba(14,165,233,0.18)] [-webkit-touch-callout:none] sm:w-[500px] sm:rounded-[24px] lg:aspect-[760/480] lg:h-auto lg:w-full lg:max-w-[760px] lg:rounded-[30px]"
       >
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#F8FBFF_0%,#FFFFFF_42%,#EEF6FF_100%)]" />
         <div className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,#0EA5E9_0%,#38BDF8_55%,#BAE6FD_100%)] sm:h-2 lg:h-2.5" />
@@ -2681,7 +2659,13 @@ function DigitalIdCard({
             <div className="flex w-[80px] shrink-0 flex-col items-center sm:w-[130px] lg:w-[200px]">
               <div className="w-full rounded-xl border border-sky-100 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3">
                 {qrImageUrl ? (
-                  <img src={qrImageUrl} alt="Encrypted health record QR code" className="aspect-square h-auto w-full object-contain" />
+                  <img
+                    src={qrImageUrl}
+                    alt="Encrypted health record QR code"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="pointer-events-none aspect-square h-auto w-full select-none object-contain [-webkit-touch-callout:none]"
+                  />
                 ) : (
                   <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-slate-100 text-[8px] font-bold text-slate-400">
                     {qrLoading ? "Loading..." : "QR N/A"}
@@ -2742,13 +2726,14 @@ function DigitalIdCard({
       </div>
 
       <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
-        <button
-          onClick={handleDownload}
-          disabled={downloading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0EA5E9] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-sky-500/20 transition hover:bg-sky-600 disabled:opacity-60 lg:py-4 lg:text-base"
-        >
-          {downloading ? "Saving Card Image..." : "Download Digital ID"}
-        </button>
+        <div className="flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs font-semibold text-sky-700">
+          <ShieldIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            For your security, your Digital ID can only be scanned inside the
+            Barangay Health app by authorized health workers. It cannot be
+            downloaded and will not open in other QR scanners or your camera.
+          </span>
+        </div>
       </div>
     </div>
   );
