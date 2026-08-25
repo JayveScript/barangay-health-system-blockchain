@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "../../../lib/prisma";
 import { getScannerUser } from "@/lib/get-scanner-user";
 import { verifyQrAccessToken } from "@/lib/qr-access";
+import { verifyResidentQrToken } from "@/lib/qr-token";
 import { encryptQrPayload } from "@/lib/qr-encryption";
 import { logQrScanActivity } from "@/lib/qr-audit";
 import { formatWelcomeLine } from "@/lib/role-labels";
@@ -23,10 +24,12 @@ export const runtime = "nodejs";
 
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ t?: string }>;
 };
 
-export default async function PublicResidentPage({ params }: PageProps) {
+export default async function PublicResidentPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { t: liveToken } = await searchParams;
 
   const scannerUser = await getScannerUser();
   if (!scannerUser) {
@@ -66,6 +69,34 @@ export default async function PublicResidentPage({ params }: PageProps) {
             <h1 className="text-xl font-black text-slate-900">Resident Not Found</h1>
             <p className="mt-2 text-sm text-slate-500">
               This Digital ID record does not exist.
+            </p>
+          </div>
+        </main>
+      );
+    }
+
+    // A fresh scan must carry a valid, non-expired live token. This blocks
+    // reused screenshots of a resident's rotating QR.
+    const tokenCheck = liveToken ? verifyResidentQrToken(liveToken) : null;
+    if (!tokenCheck || tokenCheck.residentId !== id) {
+      await logQrScanActivity({
+        residentId: id,
+        scannedById: viewer.id,
+        role: viewer.role,
+        action: "SCAN_INITIATED",
+        success: false,
+        failureReason: liveToken ? "Expired or invalid QR token" : "Missing live QR token",
+      });
+      return (
+        <main className="flex min-h-[100dvh] items-center justify-center bg-[#EEF4FF] p-5">
+          <div className="max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-200">
+              <ShieldCheck className="h-8 w-8" />
+            </div>
+            <h1 className="text-xl font-black text-slate-900">QR Code Expired</h1>
+            <p className="mt-2 text-sm text-slate-500">
+              This QR is no longer valid. Screenshots do not work — please ask the
+              resident to open their Digital ID in the app and scan it live.
             </p>
           </div>
         </main>

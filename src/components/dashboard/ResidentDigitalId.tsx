@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as htmlToImage from "html-to-image";
-import { Download } from "lucide-react";
-import { useSecureQrUrl } from "@/hooks/useSecureQrUrl";
+import { Download, RefreshCw } from "lucide-react";
 
 export type DigitalIdResident = {
   id: string;
@@ -91,11 +90,46 @@ export function ResidentDigitalId({
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState("/images/davao-logo.png");
-  const { qrImageUrl, loading: qrLoading } = useSecureQrUrl(resident.id);
+  const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
+  const qrLoading = qrImageUrl === null;
 
   useEffect(() => {
     toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
   }, []);
+
+  // The QR encodes a signed, time-limited token. For a resident viewing their
+  // OWN ID it is short-lived and rotates, so a screenshot expires and becomes
+  // unscannable. Staff/admin (allowDownload) get a durable token for printing.
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    async function refresh() {
+      try {
+        const endpoint = allowDownload
+          ? `/api/qr-token/${resident.id}`
+          : `/api/qr-token`;
+        const res = await fetch(endpoint, { cache: "no-store" });
+        const json = await res.json();
+        if (!active || !json?.token) return;
+        const data = `KALYO://resident/${resident.id}?t=${json.token}`;
+        setQrImageUrl(
+          `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data)}`
+        );
+      } catch (err) {
+        console.error("QR_TOKEN_FETCH_ERROR", err);
+      }
+    }
+
+    refresh();
+    if (!allowDownload) {
+      timer = setInterval(refresh, 45000);
+    }
+    return () => {
+      active = false;
+      if (timer) clearInterval(timer);
+    };
+  }, [resident.id, allowDownload]);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -221,7 +255,7 @@ export function ResidentDigitalId({
         </div>
       </div>
 
-      {allowDownload && (
+      {allowDownload ? (
         <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
           <button
             onClick={handleDownload}
@@ -231,6 +265,25 @@ export function ResidentDigitalId({
             <Download className="h-4 w-4" />
             {downloading ? "Saving Card Image..." : "Download Digital ID"}
           </button>
+        </div>
+      ) : (
+        <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
+          <div className="flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs font-semibold text-sky-700">
+            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+            </span>
+            <span>
+              <span className="inline-flex items-center gap-1 font-black text-emerald-700">
+                <RefreshCw className="h-3.5 w-3.5" /> LIVE
+              </span>{" "}
+              — this QR refreshes automatically and can only be scanned live inside
+              the app by authorized health workers. A screenshot will not work. It
+              cannot be downloaded.
+            </span>
+          </div>
         </div>
       )}
     </div>
