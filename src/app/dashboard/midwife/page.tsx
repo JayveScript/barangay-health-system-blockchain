@@ -91,7 +91,6 @@ export default function MidwifeDashboardPage() {
 
   return (
     <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:pb-6">
-      {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
@@ -100,7 +99,6 @@ export default function MidwifeDashboardPage() {
       )}
 
       <div className="mx-auto flex h-full max-w-7xl gap-6 overflow-hidden">
-        {/* Mobile sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 z-50 w-[280px] transform rounded-r-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-4 text-white shadow-xl transition-transform duration-300 lg:hidden ${
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -173,7 +171,6 @@ export default function MidwifeDashboardPage() {
           </div>
         </aside>
 
-        {/* Desktop sidebar */}
         <aside className="hidden h-full w-[240px] shrink-0 rounded-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-5 text-white shadow-xl lg:flex lg:flex-col">
           <div className="flex min-h-0 flex-1 flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur">
             <div className="mb-6 flex shrink-0 items-center gap-3">
@@ -226,7 +223,6 @@ export default function MidwifeDashboardPage() {
             <div className="mb-6 overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-[#F8FAFC] p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                  {/* Mobile hamburger menu button */}
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#2563EB] text-white hover:bg-blue-700"

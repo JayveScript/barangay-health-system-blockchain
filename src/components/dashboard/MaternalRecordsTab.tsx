@@ -217,7 +217,6 @@ function MaternalFormModal({
     }
   };
 
-  // Small field helpers bound to the form state.
   const Text = ({ k, ph }: { k: string; ph?: string }) => (
     <input
       value={form[k] ?? ""}
@@ -270,7 +269,6 @@ function MaternalFormModal({
       <div>{children}</div>
     </div>
   );
-  // Lab test row: Result + Date.
   const TestRow = ({ label, k }: { label: string; k: string }) => (
     <div className="grid gap-2 sm:grid-cols-[160px_1fr_150px] sm:items-center">
       <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
@@ -293,7 +291,6 @@ function MaternalFormModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-[#BFDBFE] bg-white shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-[#BFDBFE] bg-gradient-to-r from-[#0F172A] to-[#1E3A8A] p-5 text-white">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
@@ -318,7 +315,6 @@ function MaternalFormModal({
           </button>
         </div>
 
-        {/* Body */}
         <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8FAFC] p-5">
           {loading ? (
             <div className="flex min-h-[200px] items-center justify-center gap-3 text-sm font-semibold text-[#2563EB]">
@@ -327,7 +323,6 @@ function MaternalFormModal({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* ── OB-GYNE HISTORY ── */}
               <Section title="For Women — OB-Gyne History">
                 <Row label="OB Score">
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -352,7 +347,6 @@ function MaternalFormModal({
                 <TestRow label="History of STI" k="sti" />
               </Section>
 
-              {/* ── PRENATAL CARE ── */}
               <Section title="Prenatal Care — Present Pregnancy">
                 <Row label="Risk Code"><Text k="risk_code" /></Row>
                 <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
@@ -384,7 +378,6 @@ function MaternalFormModal({
                 <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
               </Section>
 
-              {/* ── POSTNATAL CARE ── */}
               <Section title="Postnatal Care">
                 <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
                 <Row label="Place of Delivery"><Text k="post_place" /></Row>
@@ -408,7 +401,6 @@ function MaternalFormModal({
                 </Row>
               </Section>
 
-              {/* ── PREGNANCY HISTORY ── */}
               <Section title="Pregnancy History">
                 <Row label="Seen by Dentist">
                   <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_dentist" /><Text k="ph_dentist_visits" ph="No. of visits" /></div>
@@ -434,7 +426,6 @@ function MaternalFormModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between gap-3 border-t border-[#BFDBFE] bg-white p-4">
           <div className="text-sm">
             {error && <span className="font-semibold text-red-600">{error}</span>}

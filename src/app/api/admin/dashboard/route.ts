@@ -64,7 +64,6 @@ export async function GET(req: Request) {
     resident.user?.isVerified
 ).length;
 
-    // The barangay actually being viewed (own, or the one a super-admin picked).
     const barangay =
       barangayId === user.barangayId
         ? user.barangay

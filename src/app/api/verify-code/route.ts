@@ -45,7 +45,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check existing user by email
     const existingUserByEmail = await db.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -56,7 +55,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check existing user by username
     const existingUserByUsername = await db.user.findUnique({
       where: { username: pending.username },
     });
@@ -67,7 +65,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check existing resident by email
     const existingResidentByEmail = await db.resident.findUnique({
       where: { email: normalizedEmail },
     });
@@ -78,7 +75,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check existing resident by phone number
     if (pending.contactNumber) {
       const existingResidentByPhone = await db.resident.findFirst({
         where: { phoneNumber: pending.contactNumber },
@@ -92,7 +88,6 @@ export async function POST(req: Request) {
     }
 
     const result = await db.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Use the tenant captured when the registration was started.
       let barangay = await tx.barangay.findUnique({
         where: { id: pending.barangayId },
       });
@@ -107,7 +102,6 @@ export async function POST(req: Request) {
         });
       }
 
-      // Create user
       const user = await tx.user.create({
         data: {
           username: pending.username,
@@ -119,7 +113,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create resident
       const resident = await tx.resident.create({
         data: {
           lastName: pending.lastName,
@@ -149,7 +142,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create medical history
       await tx.residentMedicalHistory.create({
         data: {
           residentId: resident.id,
@@ -171,7 +163,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create family history
       await tx.residentFamilyHistory.create({
         data: {
           residentId: resident.id,
@@ -187,7 +178,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create personal & social history
       await tx.residentPersonalSocialHistory.create({
         data: {
           residentId: resident.id,
@@ -206,7 +196,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Delete pending registration
       await tx.pendingRegistration.delete({
         where: { email: normalizedEmail },
       });
@@ -217,9 +206,6 @@ export async function POST(req: Request) {
       };
     });
 
-    // ── Welcome email (fire-and-forget) ─────────────────────────────────────
-    // Confirms to the resident that their account is registered in the
-    // Barangay Health Center Blockchain. Failures never block registration.
     {
       const residentFullName = `${pending.firstName} ${
         pending.middleName ?? ""
@@ -236,16 +222,12 @@ export async function POST(req: Request) {
         console.error("[mail] registration welcome email failed:", err)
       );
     }
-    // ─────────────────────────────────────────────────────────────────────────
 
-    // ── Blockchain: anchor health records (fire-and-forget, non-blocking) ───
-    // Failures here do NOT affect the registration response.
     ;(async () => {
       try {
         const residentId = result.residentId;
         const barangayId = pending.barangayId;
 
-        // Anchor resident profile hash
         await anchorRecord(
           residentId,
           {
@@ -258,7 +240,6 @@ export async function POST(req: Request) {
           "resident_profile"
         );
 
-        // Anchor medical history hash
         await anchorRecord(
           residentId,
           {
@@ -275,7 +256,6 @@ export async function POST(req: Request) {
           "medical_history"
         );
 
-        // Anchor family history hash
         await anchorRecord(
           residentId,
           {
@@ -288,7 +268,6 @@ export async function POST(req: Request) {
           "family_history"
         );
 
-        // Anchor personal/social history hash
         await anchorRecord(
           residentId,
           {
@@ -304,7 +283,6 @@ export async function POST(req: Request) {
           "personal_social"
         );
 
-        // Log RECORD_CREATED audit event
         await logAuditEvent(
           AuditEventType.RECORD_CREATED,
           result.userId,
@@ -317,7 +295,6 @@ export async function POST(req: Request) {
         console.error("[blockchain] verify-code anchor failed:", blockchainErr);
       }
     })();
-    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json({
       success: true,
@@ -329,7 +306,6 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     console.error("VERIFY_CODE_ERROR", error);
 
-    // Handle Prisma unique constraint violations
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const target = error.meta?.target;
       const field = Array.isArray(target) ? target[0] : "field";

@@ -17,7 +17,6 @@ import {
   Lock,
 } from "lucide-react";
 
-// ── Types (mirror the referral JSON returned by the API) ──────────────────────
 type Identifying = Record<string, unknown> | null | undefined;
 type HistoryJson = Record<string, unknown> | null | undefined;
 
@@ -38,7 +37,6 @@ export type InboxReferral = {
 
 type TabId = "identifying" | "medical" | "family" | "social";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtValue(value: unknown) {
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (value === null || value === undefined || String(value).trim() === "") return "N/A";
@@ -88,7 +86,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export function ReferralInbox({
   endpoint = "/api/doctor/referred-residents",
   title = "Referred Residents",
@@ -275,7 +272,6 @@ export function ReferralInbox({
   );
 }
 
-// ── Detail modal ──────────────────────────────────────────────────────────────
 function ReferralModal({
   referral,
   busy,
@@ -329,7 +325,6 @@ function ReferralModal({
             <StatusBadge status={referral.status} />
           </div>
 
-          {/* One-line icon tab strip */}
           <div className="mt-4 flex items-stretch gap-1 rounded-2xl bg-sky-50 p-1">
             {tabs.map((t) => {
               const active = tab === t.id;
@@ -486,8 +481,6 @@ function DetailInfo({ label, value }: { label: string; value: unknown }) {
   );
 }
 
-// Password confirmation gate — the user must re-enter their password before
-// the referral's full record is revealed. Exported for reuse (staff + doctor).
 export function PasswordGate({
   residentName,
   onCancel,

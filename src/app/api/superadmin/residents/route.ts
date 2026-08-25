@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
-// GET /api/superadmin/residents — all residents across every barangay.
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

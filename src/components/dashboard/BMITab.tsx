@@ -84,7 +84,6 @@ export function BMITab() {
       const json = await res.json();
       if (res.ok) setResidents(Array.isArray(json) ? json : []);
     } catch {
-      /* silent */
     }
   };
 
@@ -96,7 +95,6 @@ export function BMITab() {
       const json = await res.json();
       if (res.ok) setRecords(Array.isArray(json) ? json : []);
     } catch {
-      /* silent */
     } finally {
       setLoading(false);
     }
@@ -145,7 +143,6 @@ export function BMITab() {
 
   return (
     <div className="space-y-5 pb-4">
-      {/* Input Panel */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
@@ -165,7 +162,6 @@ export function BMITab() {
         )}
 
         <form onSubmit={submitBMI} className="space-y-5">
-          {/* Resident search */}
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
               Select Resident *
@@ -238,7 +234,6 @@ export function BMITab() {
             )}
           </div>
 
-          {/* Measurements grid */}
           <div className="grid gap-4 sm:grid-cols-3">
             <MeasurementInput
               label="Height (cm)"
@@ -266,7 +261,6 @@ export function BMITab() {
             />
           </div>
 
-          {/* Live BMI Preview */}
           {previewBMI > 0 && (
             <div className={`rounded-2xl border p-4 ${previewCategory.bg}`}>
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">Live BMI Preview</p>
@@ -293,7 +287,6 @@ export function BMITab() {
         </form>
       </div>
 
-      {/* BMI Reference Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
           { label: "Underweight", range: "< 18.5", color: "bg-blue-50 border-blue-200 text-blue-700" },
@@ -310,7 +303,6 @@ export function BMITab() {
         ))}
       </div>
 
-      {/* Records Table */}
       <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">

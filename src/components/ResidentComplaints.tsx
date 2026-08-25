@@ -27,13 +27,6 @@ function formatDateTime(value: string) {
   });
 }
 
-/**
- * Complaints panel.
- * - When `residentId` is provided (QR scan / staff view), the viewer can add
- *   complaints and see the list (uses /api/residents/[id]/complaints).
- * - Without it (resident's own dashboard), it is read-only
- *   (uses /api/residents/me/complaints).
- */
 export function ResidentComplaints({ residentId }: { residentId?: string }) {
   const canAdd = !!residentId;
   const endpoint = residentId

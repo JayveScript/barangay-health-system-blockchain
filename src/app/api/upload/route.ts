@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
-// Allowed MIME types and their magic bytes
 const ALLOWED_TYPES: Record<string, number[][]> = {
   "image/jpeg": [[0xff, 0xd8, 0xff]],
   "image/png":  [[0x89, 0x50, 0x4e, 0x47]],
@@ -21,13 +20,11 @@ function detectMimeType(buffer: Buffer): string | null {
 }
 
 export async function POST(req: Request) {
-  // ── Auth check ──────────────────────────────────────────────────────────
   const authedUser = await resolveAuthedUser();
   if (!authedUser) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  // ── Parse form ───────────────────────────────────────────────────────────
   let file: File | null;
   try {
     const formData = await req.formData();
@@ -41,7 +38,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
   }
 
-  // ── Size check ───────────────────────────────────────────────────────────
   if (file.size > MAX_SIZE_BYTES) {
     return NextResponse.json(
       { error: "File too large. Maximum size is 5 MB." },
@@ -49,7 +45,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // ── Read bytes ───────────────────────────────────────────────────────────
   let buffer: Buffer;
   try {
     const bytes = await file.arrayBuffer();
@@ -59,7 +54,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to read file data." }, { status: 500 });
   }
 
-  // ── Magic-byte MIME check ────────────────────────────────────────────────
   const detectedMime = detectMimeType(buffer);
   if (!detectedMime) {
     return NextResponse.json(
@@ -68,7 +62,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // ── Return as base64 data URL (works on serverless / read-only filesystems) ──
   const base64 = buffer.toString("base64");
   const imageUrl = `data:${detectedMime};base64,${base64}`;
   return NextResponse.json({ imageUrl });

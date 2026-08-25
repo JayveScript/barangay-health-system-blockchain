@@ -200,7 +200,6 @@ export default function RegisterPage() {
     setForm((prev) => ({
       ...prev,
       sex: value,
-      // Pregnancy only applies to female residents.
       isPregnant: value === "FEMALE" ? prev.isPregnant : null,
     }));
     if (value === "FEMALE") {
@@ -1015,7 +1014,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Pregnancy prompt — shown when Female is selected */}
       {showPregnancyModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
           <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-2xl">
@@ -1050,11 +1048,9 @@ export default function RegisterPage() {
         </div>
       )}
 
-      {/* Registration Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
           <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-2xl">
-            {/* Green top bar */}
             <div className="flex flex-col items-center bg-gradient-to-br from-emerald-400 to-teal-500 px-6 pb-8 pt-10 text-white">
               <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
                 <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-white stroke-[2.5]">
@@ -1067,7 +1063,6 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Body */}
             <div className="px-6 py-6">
               <div className="mb-5 space-y-3">
                 <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">

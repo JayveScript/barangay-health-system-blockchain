@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 
-// Returns the logged-in resident's diagnoses, used to attribute each medical
-// condition to the staff member who recorded it and when.
 async function getApiUser() {
   return resolveAuthedUser({ resident: true });
 }

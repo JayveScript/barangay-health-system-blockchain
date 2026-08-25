@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// ---------------------------------------------------------------------------
-// In-memory rate limiter (resets on cold-start / redeploy — good enough for
-// Vercel serverless. For persistent limits, replace with Upstash Redis.)
-// ---------------------------------------------------------------------------
 
 type RateLimitEntry = { count: number; resetAt: number };
 const store = new Map<string, RateLimitEntry>();
@@ -31,18 +27,15 @@ function rateLimit(
   return { allowed: true, retryAfterSec: 0 };
 }
 
-// ---------------------------------------------------------------------------
-// Route-specific limits
-// ---------------------------------------------------------------------------
 
 const LIMITS: Record<string, { max: number; windowMs: number }> = {
-  "/api/login":                        { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
-  "/api/forgot-password/send-code":    { max: 3,  windowMs: 15 * 60 * 1000 }, // 3 / 15 min
-  "/api/forgot-password/reset":        { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
-  "/api/verify-code":                  { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
-  "/api/register":                     { max: 10, windowMs: 60 * 60 * 1000 }, // 10 / hour
-  "/api/admin/verify-password":        { max: 5,  windowMs: 15 * 60 * 1000 }, // 5 / 15 min
-  "/api/verify-password":              { max: 10, windowMs: 15 * 60 * 1000 }, // 10 / 15 min
+  "/api/login":                        { max: 5,  windowMs: 15 * 60 * 1000 },
+  "/api/forgot-password/send-code":    { max: 3,  windowMs: 15 * 60 * 1000 },
+  "/api/forgot-password/reset":        { max: 5,  windowMs: 15 * 60 * 1000 },
+  "/api/verify-code":                  { max: 5,  windowMs: 15 * 60 * 1000 },
+  "/api/register":                     { max: 10, windowMs: 60 * 60 * 1000 },
+  "/api/admin/verify-password":        { max: 5,  windowMs: 15 * 60 * 1000 },
+  "/api/verify-password":              { max: 10, windowMs: 15 * 60 * 1000 },
 };
 
 export function middleware(req: NextRequest) {
@@ -50,7 +43,6 @@ export function middleware(req: NextRequest) {
   const limit = LIMITS[pathname];
 
   if (limit) {
-    // Key = IP + path  (falls back to "unknown" if IP header is absent)
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
       req.headers.get("x-real-ip") ??

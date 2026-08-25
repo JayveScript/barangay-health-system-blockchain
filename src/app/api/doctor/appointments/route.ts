@@ -242,7 +242,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Send email notifications to all barangay residents with an email on file
     const barangay = await db.barangay.findUnique({
       where: { id: barangayId },
       select: { name: true },
@@ -278,7 +277,6 @@ export async function POST(req: Request) {
         )
       );
 
-    // Fire-and-forget — don't block the response
     Promise.all(emailPromises);
 
     return NextResponse.json(

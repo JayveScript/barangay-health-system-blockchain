@@ -8,9 +8,6 @@ async function getApiUser() {
   return resolveAuthedUser({ barangay: true });
 }
 
-// Maps a diagnosis "condition" choice back to the boolean / detail fields
-// captured during resident registration (Step 2 — Past Medical History), so
-// a diagnosis can flip the matching field from "No" to "Yes".
 const CONDITION_FIELDS: Record<string, { label: string; detailField?: string }> = {
   hasHypertension: { label: "Hypertension" },
   hasDiabetes: { label: "Diabetes" },
@@ -123,8 +120,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Reflect findings on the resident's medical history — flip matching
-    // Step 2 fields from "No" to "Yes" and append any typed detail notes.
     if (finalConditions.length > 0) {
       const history = resident.medicalHistory;
       const updateData: Record<string, boolean | string | null> = {};

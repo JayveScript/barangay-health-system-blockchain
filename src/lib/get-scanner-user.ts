@@ -7,10 +7,6 @@ export type ScannerUser = {
   role: string;
 };
 
-/**
- * Returns the verified user from the auth_token cookie directly.
- * Uses jsonwebtoken since this runs in a Server Component (Node.js runtime).
- */
 export async function getScannerUser(): Promise<ScannerUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;

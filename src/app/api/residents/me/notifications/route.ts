@@ -2,14 +2,6 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 
-// Notification feed for the logged-in resident. Aggregates several sources into
-// a single, time-sorted list:
-//   1. diagnosis        — who diagnosed their condition (doctor name + barangay)
-//   2. record-update    — who changed their medical-record status (a diagnosis
-//                         that flipped a Past Medical History flag)
-//   3. suggestion       — checkup / appointment suggestions from a doctor
-//   4. announcement     — barangay health center announcements
-//   5. scan             — staff/admin who scanned & viewed their QR digital ID
 
 type NotificationItem = {
   id: string;
@@ -74,7 +66,6 @@ export async function GET() {
 
     const [diagnoses, suggestionAppointments, announcements, scanLogs] =
       await Promise.all([
-        // Diagnoses made for this resident
         db.diagnosis.findMany({
           where: { residentId: resident.id },
           include: {
@@ -89,7 +80,6 @@ export async function GET() {
           orderBy: { createdAt: "desc" },
           take: 50,
         }),
-        // Appointments carrying a doctor suggestion
         db.appointment.findMany({
           where: {
             residentId: resident.id,
@@ -107,13 +97,11 @@ export async function GET() {
           orderBy: { createdAt: "desc" },
           take: 50,
         }),
-        // Health center announcements for the barangay
         db.announcement.findMany({
           where: { barangayId },
           orderBy: { publishDate: "desc" },
           take: 30,
         }),
-        // Staff/admin who successfully scanned & viewed this resident's QR ID
         db.qrScanAuditLog.findMany({
           where: { residentId: resident.id, action: "ACCESS_GRANTED" },
           include: { scannedBy: { select: { fullName: true } } },
@@ -131,7 +119,6 @@ export async function GET() {
         (key) => CONDITION_LABELS[key] || key
       );
 
-      // The diagnosis itself — who diagnosed the resident's condition.
       items.push({
         id: `diagnosis-${d.id}`,
         type: "diagnosis",
@@ -151,7 +138,6 @@ export async function GET() {
         createdAt: d.createdAt.toISOString(),
       });
 
-      // A condition flip means the resident's medical record status changed.
       if (!d.isHealthy && conditionLabels.length > 0) {
         items.push({
           id: `record-update-${d.id}`,
@@ -192,8 +178,6 @@ export async function GET() {
     }
 
     for (const log of scanLogs) {
-      // Only use a real name when one is recorded; otherwise rely on the role
-      // so we never mislabel (e.g. a Barangay Admin shown as "a staff member").
       const actorName = log.scannedBy?.fullName?.trim() || null;
       const actorRole = humanizeRole(log.role);
       const article = /^[AEIOU]/.test(actorRole) ? "An" : "A";

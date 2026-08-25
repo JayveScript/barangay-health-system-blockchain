@@ -308,7 +308,6 @@ if (alreadyHasAppointmentSameDay) {
       },
     });
 
-    // ── Blockchain: log appointment booked (fire-and-forget) ─────────────────
     logAuditEvent(
       AuditEventType.APPT_BOOKED,
       user.id,
@@ -317,7 +316,6 @@ if (alreadyHasAppointmentSameDay) {
       null,
       { role: user.role, appointmentId: appointment.id, date: appointment.date.toISOString(), time }
     ).catch(err => console.error("[blockchain] appt log failed:", err));
-    // ─────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(
       {

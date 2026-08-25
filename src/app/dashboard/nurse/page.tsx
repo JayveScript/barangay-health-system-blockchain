@@ -101,7 +101,6 @@ export default function NurseDashboardPage() {
 
   return (
     <main className="h-screen overflow-hidden bg-[#EFF6FF] p-4 pb-[72px] sm:p-6 lg:pb-6">
-      {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
@@ -110,7 +109,6 @@ export default function NurseDashboardPage() {
       )}
 
       <div className="mx-auto flex h-full max-w-7xl gap-6 overflow-hidden">
-        {/* Mobile sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 z-50 w-[280px] transform rounded-r-[30px] border border-[#DCEAF7] bg-white/95 p-4 text-slate-800 shadow-2xl shadow-sky-900/10 transition-transform duration-300 lg:hidden ${
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -219,7 +217,6 @@ export default function NurseDashboardPage() {
           </div>
         </aside>
 
-        {/* Desktop sidebar */}
         <aside className="hidden h-full w-[240px] shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-5 text-slate-800 shadow-2xl shadow-sky-900/10 lg:flex lg:flex-col">
           <div className="flex min-h-0 flex-1 flex-col rounded-[24px] border border-sky-200 bg-sky-50/60 p-5">
             <div className="mb-6 flex shrink-0 items-center gap-3">
@@ -296,7 +293,6 @@ export default function NurseDashboardPage() {
             <div className="mb-6 overflow-hidden rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-5 shadow-lg shadow-sky-900/5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                  {/* Mobile hamburger menu button */}
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#0EA5E9] text-white hover:bg-sky-600"

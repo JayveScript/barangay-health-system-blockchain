@@ -16,7 +16,6 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify admin password
     const admin = await prisma.user.findUnique({ where: { id: currentUser.id } });
     if (!admin) {
       return NextResponse.json({ error: "Admin account not found." }, { status: 404 });
@@ -26,7 +25,6 @@ export async function POST(
       return NextResponse.json({ error: "Invalid admin password." }, { status: 401 });
     }
 
-    // Ensure resident belongs to this barangay
     const resident = await prisma.resident.findFirst({
       where: {
         id,
@@ -37,7 +35,6 @@ export async function POST(
       return NextResponse.json({ error: "Resident not found." }, { status: 404 });
     }
 
-    // Toggle archive
     const nowArchived = !resident.isArchived;
     await prisma.resident.update({
       where: { id },

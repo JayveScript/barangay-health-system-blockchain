@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { sign } from "jsonwebtoken";
 
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS    = 15 * 60 * 1000; // 15 minutes
+const WINDOW_MS    = 15 * 60 * 1000;
 
 async function checkRateLimit(ip: string): Promise<{ blocked: boolean; retryAfterSec: number }> {
   const now  = new Date();
@@ -14,7 +14,6 @@ async function checkRateLimit(ip: string): Promise<{ blocked: boolean; retryAfte
     const record = await (db as any).loginAttempt.findUnique({ where: { key } });
 
     if (!record || now > record.windowEnd) {
-      // No record or window expired — fresh window, allow
       return { blocked: false, retryAfterSec: 0 };
     }
 
@@ -23,7 +22,6 @@ async function checkRateLimit(ip: string): Promise<{ blocked: boolean; retryAfte
       return { blocked: true, retryAfterSec };
     }
   } catch {
-    // If LoginAttempt table doesn't exist yet, fail open (don't block login)
   }
 
   return { blocked: false, retryAfterSec: 0 };
@@ -50,14 +48,13 @@ async function recordFailedAttempt(ip: string): Promise<void> {
       });
     }
   } catch {
-    // Fail silently if table isn't available
   }
 }
 
 async function clearAttempts(ip: string): Promise<void> {
   try {
     await (db as any).loginAttempt.deleteMany({ where: { key: `login:${ip}` } });
-  } catch { /* ignore */ }
+  } catch { }
 }
 
 export async function POST(req: Request) {
@@ -80,7 +77,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Rate limit check ────────────────────────────────────────────────────
     const ip = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
     const { blocked, retryAfterSec } = await checkRateLimit(ip);
     if (blocked) {
@@ -126,7 +122,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Successful login — clear any recorded failed attempts ───────────────
     await clearAttempts(ip);
 
     const token = sign(
@@ -150,7 +145,7 @@ export async function POST(req: Request) {
       path: "/",
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24,
     });
 
     return res;

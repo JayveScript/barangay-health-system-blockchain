@@ -2,28 +2,9 @@
 
 import React from "react";
 
-/**
- * Shared, mobile-first chart primitives for every dashboard.
- *
- * These replace the hand-rolled CSS charts that were copy-pasted across the
- * admin / doctor / staff / nurse / midwife / bhw pages. They are built to never
- * overflow horizontally on small screens (down to 320px):
- *   - the donut circle is fluid (shrinks to fit, capped width) instead of a
- *     fixed 208px square,
- *   - grid columns use minmax(0,…) so they can actually shrink,
- *   - every label/value row uses min-w-0 + truncate + shrink-0 so long labels
- *     ellipsize instead of pushing the value out and overlapping,
- *   - wrappers carry the .chart-safe guard (max-width:100%; overflow-x:hidden).
- */
 
-/** Default palette — matches the colors previously inlined in each dashboard. */
 export const CHART_COLORS = ["#0EA5E9", "#EC4899", "#94A3B8", "#10B981", "#F59E0B"];
 
-/**
- * Flexible datum so existing call-sites stay untouched: the admin pie passes
- * `{ name, value }`, the admin bars pass `{ name, total }`, and the doctor
- * charts pass `{ label, value }`. We normalize all of them here.
- */
 export type ChartDatum = {
   label?: string;
   name?: string;
@@ -34,7 +15,6 @@ export type ChartDatum = {
 const labelOf = (d: ChartDatum) => d.label ?? d.name ?? "";
 const valueOf = (d: ChartDatum) => d.value ?? d.total ?? 0;
 
-/** Donut chart (conic-gradient ring + center total) with a stacked legend. */
 export function DonutChart({
   data,
   colors = CHART_COLORS,
@@ -60,7 +40,6 @@ export function DonutChart({
 
   return (
     <div className="chart-safe grid w-full min-w-0 items-center gap-5 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
-      {/* Fluid ring — fills its column up to 12rem, never a fixed 208px square. */}
       <div className="relative mx-auto flex aspect-square w-full max-w-[12rem] items-center justify-center rounded-full bg-sky-50">
         <div
           className="absolute inset-0 rounded-full"
@@ -93,7 +72,6 @@ export function DonutChart({
   );
 }
 
-/** Horizontal labeled bar list, scaled to the max value in the set. */
 export function BarList({ data }: { data: ChartDatum[] }) {
   const items = data.map((d) => ({ label: labelOf(d), value: valueOf(d) }));
   const max = Math.max(...items.map((i) => i.value), 1);
@@ -121,7 +99,6 @@ export function BarList({ data }: { data: ChartDatum[] }) {
   );
 }
 
-/** Single percentage progress bar (0–100). */
 export function ProgressBar({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-0">

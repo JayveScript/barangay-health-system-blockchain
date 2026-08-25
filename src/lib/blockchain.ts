@@ -1,20 +1,7 @@
-/**
- * blockchain.ts
- * ─────────────────────────────────────────────────────────────────────────────
- * Server-side singleton for interacting with the private Ethereum network.
- * Run ONLY in Next.js API routes (server-side). Never import on the client.
- *
- * Environment variables required (add to .env):
- *   BLOCKCHAIN_RPC_URL                 – e.g. http://127.0.0.1:8545
- *   BLOCKCHAIN_PRIVATE_KEY             – deployer/operator wallet private key
- *   HEALTH_RECORD_REGISTRY_ADDRESS     – deployed contract address
- *   AUDIT_LOG_ADDRESS                  – deployed contract address
- */
 
 import { ethers } from "ethers";
 import crypto from "crypto";
 
-// ── ABIs (minimal — only the functions we call) ──────────────────────────────
 
 const HEALTH_RECORD_REGISTRY_ABI = [
   "function anchorRecord(string calldata residentId, bytes32 recordHash, string calldata recordType) external",
@@ -33,7 +20,6 @@ const AUDIT_LOG_ABI = [
   "event Logged(uint256 indexed id, uint8 indexed eventType, string actorId, string targetId, string barangayId, bytes32 dataHash, uint256 timestamp)",
 ];
 
-// ── Audit event type constants (mirror AuditLog.sol) ─────────────────────────
 
 export const AuditEventType = {
   QR_SCAN_GRANTED:   1,
@@ -57,7 +43,6 @@ export type RecordType =
   | "bmi_record"
   | "referral";
 
-// ── Singleton provider / contracts ────────────────────────────────────────────
 
 let _provider: ethers.JsonRpcProvider | null = null;
 let _wallet: ethers.Wallet | null = null;
@@ -89,36 +74,18 @@ function getBlockchainClient() {
   return { provider: _provider, wallet: _wallet, registry: _registry, auditLog: _auditLog };
 }
 
-// ── Hash helpers ──────────────────────────────────────────────────────────────
 
-/**
- * Compute a deterministic SHA-256 hash of any JSON-serialisable object.
- * Returns a hex string prefixed with 0x, suitable for bytes32 on-chain.
- */
 export function hashRecord(data: object): string {
-  const json = JSON.stringify(data, Object.keys(data).sort()); // stable key order
+  const json = JSON.stringify(data, Object.keys(data).sort());
   const hash = crypto.createHash("sha256").update(json).digest("hex");
   return "0x" + hash;
 }
 
-/**
- * Compute a one-way hash of an IP address for privacy-safe audit logging.
- */
 export function hashIp(ip: string): string {
   return crypto.createHash("sha256").update(ip + process.env.IP_HASH_SALT || "bhcms").digest("hex").slice(0, 16);
 }
 
-// ── HealthRecordRegistry helpers ──────────────────────────────────────────────
 
-/**
- * Anchor a health record hash on-chain.
- * Call this after creating or updating any health record in the database.
- *
- * @param residentId  The resident's UUID (from Prisma).
- * @param recordData  The full record object (will be hashed — not stored on-chain).
- * @param recordType  The type of record being anchored.
- * @returns           Transaction hash and the computed record hash.
- */
 export async function anchorRecord(
   residentId: string,
   recordData: object,
@@ -133,14 +100,6 @@ export async function anchorRecord(
   return { txHash: receipt.hash, recordHash };
 }
 
-/**
- * Verify whether a record's current data matches what was anchored on-chain.
- * Returns true if the hash matches the latest active record of that type.
- *
- * @param residentId  The resident's UUID.
- * @param recordData  The current record object from the database.
- * @param recordType  The record type to check.
- */
 export async function verifyRecord(
   residentId: string,
   recordData: object,
@@ -161,9 +120,6 @@ export async function verifyRecord(
   };
 }
 
-/**
- * Get the full anchoring history for a resident's record type.
- */
 export async function getRecordHistory(
   residentId: string,
   recordType: RecordType
@@ -188,19 +144,7 @@ export async function getRecordHistory(
   return history;
 }
 
-// ── AuditLog helpers ──────────────────────────────────────────────────────────
 
-/**
- * Log a sensitive event to the immutable on-chain audit trail.
- *
- * @param eventType   One of AuditEventType constants.
- * @param actorId     UUID of the staff/user performing the action.
- * @param targetId    UUID of the resident or resource.
- * @param barangayId  UUID of the barangay.
- * @param dataHash    Optional hash of the related data payload (pass null to skip).
- * @param meta        Optional metadata object (role, ip, etc). Max ~512 chars when serialised.
- * @returns           On-chain audit entry ID and transaction hash.
- */
 export async function logAuditEvent(
   eventType: AuditEventTypeValue,
   actorId: string,
@@ -224,7 +168,6 @@ export async function logAuditEvent(
   );
   const receipt = await tx.wait();
 
-  // Parse the returned ID from the Logged event
   const iface = new ethers.Interface(AUDIT_LOG_ABI);
   let auditId = 0;
   for (const log of receipt.logs) {
@@ -235,16 +178,12 @@ export async function logAuditEvent(
         break;
       }
     } catch {
-      // not our event
     }
   }
 
   return { auditId, txHash: receipt.hash };
 }
 
-/**
- * Fetch a single audit entry by its on-chain ID.
- */
 export async function getAuditEntry(id: number): Promise<{
   eventType: number;
   actorId: string;
@@ -269,9 +208,6 @@ export async function getAuditEntry(id: number): Promise<{
   };
 }
 
-/**
- * Check if the blockchain node is reachable.
- */
 export async function isBlockchainReachable(): Promise<boolean> {
   try {
     const { provider } = getBlockchainClient();

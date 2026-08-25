@@ -56,13 +56,11 @@ export function RegisteredResidentsTab() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  // Re-auth modal
   const [pw, setPw] = useState<{ resident: StaffResident; action: "view" | "edit" } | null>(null);
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
 
-  // Opened modals
   const [viewResident, setViewResident] = useState<StaffResident | null>(null);
   const [editResident, setEditResident] = useState<StaffResident | null>(null);
   const [editPassword, setEditPassword] = useState("");
@@ -225,7 +223,6 @@ export function RegisteredResidentsTab() {
         )}
       </div>
 
-      {/* Re-auth modal */}
       {pw && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">

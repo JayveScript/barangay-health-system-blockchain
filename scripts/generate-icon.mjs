@@ -1,14 +1,9 @@
-/**
- * Kalyo PWA icon — with full text branding.
- * Run: node scripts/generate-icon.mjs
- */
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
 
 const OUT = "public/icons";
 await mkdir(OUT, { recursive: true });
 
-// ── 512 × 512 — full branded icon ────────────────────────────────────────────
 const SVG_512 = `<svg width="512" height="512" viewBox="0 0 512 512"
      xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -118,9 +113,6 @@ const SVG_512 = `<svg width="512" height="512" viewBox="0 0 512 512"
 
 </svg>`;
 
-// ── 192 × 192 — condensed: keep all text but tighter ─────────────────────────
-// Same design, just rendered smaller via resize
-// ── Generate all sizes ────────────────────────────────────────────────────────
 
 const buf512 = Buffer.from(SVG_512);
 

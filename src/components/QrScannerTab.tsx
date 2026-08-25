@@ -29,7 +29,6 @@ export function QrScannerTab() {
   const handleError = (error: unknown) => {
     console.error("QR Scanner Error:", error);
 
-    // Normalize: handle Error, DOMException, and plain objects
     const name = (error as { name?: string })?.name ?? "";
     const message = (error as { message?: string })?.message ?? "";
 

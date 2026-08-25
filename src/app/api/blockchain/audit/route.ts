@@ -1,20 +1,3 @@
-/**
- * POST /api/blockchain/audit
- * Log a sensitive event to the immutable on-chain audit trail.
- *
- * Body: {
- *   eventType: number,   // AuditEventType constant
- *   actorId: string,     // user UUID
- *   targetId: string,    // resident UUID
- *   barangayId: string,
- *   dataHash?: string,   // optional bytes32 hex
- *   meta?: object        // optional small metadata object
- * }
- * Response: { auditId, txHash }
- *
- * GET /api/blockchain/audit?id=<number>
- * Retrieve a single audit entry by ID.
- */
 
 import { NextRequest, NextResponse } from "next/server";
 import {

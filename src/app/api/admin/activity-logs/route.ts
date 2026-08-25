@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser, canManageBarangay } from "@/lib/tenant-auth";
 
-// Unified activity feed of what STAFF / NURSE / DOCTOR / BHW did, aggregated
-// from the actor-attributed records in the database and scoped to the admin's
-// barangay (SUPER_ADMIN sees all).
 
 type ActivityItem = {
   id: string;
@@ -43,8 +40,6 @@ export async function GET(req: Request) {
 
     const isSuper = String(admin.role) === "SUPER_ADMIN";
     const requestedBarangayId = new URL(req.url).searchParams.get("barangayId");
-    // Super-admin: a specific barangay if chosen, otherwise all barangays.
-    // Barangay-admin: always their own.
     const barangayId =
       isSuper && requestedBarangayId ? requestedBarangayId : admin.barangayId;
     const allBarangays = isSuper && !requestedBarangayId;
@@ -96,7 +91,6 @@ export async function GET(req: Request) {
         }),
       ]);
 
-    // Resolve resident names for QR scans (no direct relation on the log).
     const scanResidentIds = [...new Set(scans.map((s) => s.residentId))];
     const scanResidents = scanResidentIds.length
       ? await db.resident.findMany({

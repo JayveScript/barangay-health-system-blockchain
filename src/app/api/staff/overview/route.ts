@@ -2,15 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
-// Clinical / support roles that may view their barangay's activity overview.
 const ALLOWED_ROLES = ["BHW", "NURSE", "MIDWIFE", "DOCTOR"];
 
-/**
- * GET /api/staff/overview
- * Aggregate health-center activity counts for the current user's barangay —
- * surfaced on the staff/BHW dashboard Overview by pulling the headline numbers
- * from the Registration, Referrals, Logbook, BMI and Announcements tabs.
- */
 export async function GET() {
   try {
     const user = await getCurrentApiUser();

@@ -16,8 +16,6 @@ enum Role {
   PHARMACIST
   MEDTECH
   NUTRITIONIST
-  // STAFF role retired — folded into BHW. Value kept to match the existing
-  // Postgres enum (0 rows use it); the app no longer assigns or accepts it.
   STAFF
   RESIDENT
 }
@@ -69,8 +67,6 @@ model User {
   role        Role    @default(RESIDENT)
   isVerified  Boolean @default(false)
 
-  // Bumped to invalidate all existing sessions for this user (e.g. on a
-  // password reset). The value is embedded in the JWT and must match.
   tokenVersion Int @default(0)
 
   barangayId String
@@ -96,7 +92,6 @@ model User {
 model Resident {
   id String @id @default(uuid())
 
-  // Step 1 - Identifying Data
   lastName              String
   firstName             String
   middleName            String?
@@ -154,7 +149,6 @@ model ResidentMedicalHistory {
   barangayId String
   barangay   Barangay @relation(fields: [barangayId], references: [id])
 
-  // Step 2 - Past Medical History
   hasHypertension  Boolean @default(false)
   hasDiabetes      Boolean @default(false)
   hasStiHiv        Boolean @default(false)
@@ -188,7 +182,6 @@ model ResidentFamilyHistory {
   barangayId String
   barangay   Barangay @relation(fields: [barangayId], references: [id])
 
-  // Step 3 - Family History
   asthmaAllergies Boolean @default(false)
   birthDefects    Boolean @default(false)
   cancer          Boolean @default(false)
@@ -212,7 +205,6 @@ model ResidentPersonalSocialHistory {
   barangayId String
   barangay   Barangay @relation(fields: [barangayId], references: [id])
 
-  // Step 4 - Personal / Social History
   eatsHealthyDiet          Boolean @default(false)
   adequatePhysicalActivity Boolean @default(false)
   sufficientRestSleep      Boolean @default(false)
@@ -237,7 +229,6 @@ model ResidentPersonalSocialHistory {
 model PendingRegistration {
   id String @id @default(uuid())
 
-  // Step 1 - Identifying Data
   lastName              String
   firstName             String
   middleName            String?
@@ -259,7 +250,6 @@ model PendingRegistration {
   spouseOccupation      String?
   spouseContactNumber   String?
 
-  // Step 2 - Past Medical History
   hasHypertension  Boolean @default(false)
   hasDiabetes      Boolean @default(false)
   hasStiHiv        Boolean @default(false)
@@ -279,7 +269,6 @@ model PendingRegistration {
   maintenanceMedications     String?
   previousIllnessesSurgeries String?
 
-  // Step 3 - Family History
   familyAsthmaAllergies Boolean @default(false)
   familyBirthDefects    Boolean @default(false)
   familyCancer          Boolean @default(false)
@@ -289,7 +278,6 @@ model PendingRegistration {
   familyKidneyDisease   Boolean @default(false)
   familyMentalIllness   Boolean @default(false)
 
-  // Step 4 - Personal / Social History
   eatsHealthyDiet          Boolean @default(false)
   adequatePhysicalActivity Boolean @default(false)
   sufficientRestSleep      Boolean @default(false)
@@ -305,7 +293,6 @@ model PendingRegistration {
   takesIllicitDrugs   Boolean @default(false)
   illicitDrugsDetails String?
 
-  // Step 5 - Account Setup + Verification
   username     String
   email        String
   passwordHash String
@@ -473,9 +460,9 @@ model PasswordResetToken {
 
 model LoginAttempt {
   id        String   @id @default(cuid())
-  key       String   // IP address or identifier
+  key       String
   attempts  Int      @default(1)
-  windowEnd DateTime // when the 15-min window expires
+  windowEnd DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

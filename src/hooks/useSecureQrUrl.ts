@@ -3,10 +3,6 @@
 import { useEffect, useState } from "react";
 import { buildResidentQrUrl, getQrBaseUrl } from "@/lib/qr-url";
 
-/**
- * QR encodes: {your-vercel-url}/resident/{id}
- * On your live Vercel site, the QR auto-uses that site's domain.
- */
 export function useSecureQrUrl(residentId: string, size = 200) {
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const [scanUrl, setScanUrl] = useState("");

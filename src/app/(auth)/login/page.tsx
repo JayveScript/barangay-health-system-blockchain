@@ -196,7 +196,6 @@ function LoginForm() {
       `}</style>
       <div className="auth-card mx-auto flex overflow-hidden rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
 
-        {/* ── LEFT PANEL ── */}
         <section className="relative hidden min-w-0 flex-[1.5] overflow-hidden lg:flex lg:flex-col lg:justify-between">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -213,7 +212,6 @@ function LoginForm() {
 
               <div className="w-full max-w-2xl">
                 <div className="flex items-center gap-[clamp(1rem,2vw,1.75rem)]">
-                  {/* Davao logo beside the title */}
                   <div className="logo-float relative flex-shrink-0">
                     <span className="logo-ring-1" />
                     <span className="logo-ring-2" />
@@ -261,11 +259,9 @@ function LoginForm() {
           </div>
         </section>
 
-        {/* ── RIGHT PANEL ── */}
         <section className="flex w-full min-w-0 min-h-0 items-center justify-center overflow-y-auto bg-[#F8FAFC] px-5 py-5 sm:px-8 lg:flex-1 lg:px-10">
           <div className="w-full max-w-md">
 
-            {/* Kalyo app icon + KALYO letters + meaning */}
             <div className="mb-4 flex flex-col items-center gap-3 lg:mb-4 lg:gap-2">
               <div className="app-float relative">
                 <span className="app-ring-1" />
@@ -279,7 +275,6 @@ function LoginForm() {
                 </div>
               </div>
 
-              {/* KALYO letter badges */}
               <div className="flex items-center gap-2 lg:gap-1.5">
                 {["K", "A", "L", "Y", "O"].map((letter, i) => (
                   <span
@@ -291,7 +286,6 @@ function LoginForm() {
                 ))}
               </div>
 
-              {/* Meaning */}
               <div className="text-center">
                 <p className="text-sm font-bold text-sky-600 tracking-wide">
                   Kalusugan At Ligtas Yang Obyektibo

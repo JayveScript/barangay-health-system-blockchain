@@ -1,7 +1,3 @@
-/**
- * Rewrites scanned QR URLs to the current deployment origin.
- * Old printed QR codes may still point at a previous Vercel preview URL.
- */
 export function normalizeScannedQrUrl(
   scannedText: string,
   currentOrigin: string

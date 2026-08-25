@@ -3,16 +3,8 @@ import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
-// Roles (of the receiving / target barangay) allowed to accept or reject.
 const ALLOWED_ROLES = ["BHW", "DOCTOR", "NURSE"];
 
-/**
- * PATCH /api/referrals/[id]
- * Body: { action: "accept" | "reject" }
- *
- * Either a STAFF member or a DOCTOR of the referral's TARGET barangay may
- * accept or reject a PENDING referral.
- */
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -41,7 +33,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Referral not found." }, { status: 404 });
     }
 
-    // Only the receiving (target) barangay's staff/doctor may act on it.
     if (referral.targetBarangayId !== user.barangayId) {
       return NextResponse.json(
         { error: "You can only act on referrals sent to your barangay." },
@@ -70,7 +61,6 @@ export async function PATCH(
       },
     });
 
-    // On-chain audit trail (fire-and-forget — never block the response).
     logAuditEvent(
       action === "accept"
         ? AuditEventType.REFERRAL_ACCEPTED

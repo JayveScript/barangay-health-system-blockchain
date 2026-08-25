@@ -14,10 +14,6 @@ interface MobileBottomNavProps {
   onChange: (id: string) => void;
 }
 
-/**
- * Fixed bottom navigation bar — visible only on mobile (lg:hidden).
- * Renders up to 5 thumb-friendly tabs with icon + label.
- */
 export function MobileBottomNav({ items, active, onChange }: MobileBottomNavProps) {
   return (
     <nav
@@ -38,7 +34,6 @@ export function MobileBottomNav({ items, active, onChange }: MobileBottomNavProp
             }`}
             style={{ minHeight: 56 }}
           >
-            {/* Active indicator dot */}
             <span className="relative flex items-center justify-center">
               {isActive && (
                 <span className="absolute -top-1 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-sky-500" />

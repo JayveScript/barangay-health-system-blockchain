@@ -1,7 +1,3 @@
-/**
- * GET /api/blockchain/status
- * Health check — returns whether the blockchain node is reachable.
- */
 
 import { NextResponse } from "next/server";
 import { isBlockchainReachable } from "@/lib/blockchain";

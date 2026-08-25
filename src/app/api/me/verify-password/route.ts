@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 
-// Verifies the CURRENT authenticated user's own password. Used to gate
-// sensitive actions (e.g. viewing/editing a resident) behind a re-auth.
 export async function POST(req: Request) {
   try {
     const currentUser = await getCurrentApiUser();

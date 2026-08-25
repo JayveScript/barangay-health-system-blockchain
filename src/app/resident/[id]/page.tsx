@@ -28,14 +28,10 @@ type PageProps = {
 export default async function PublicResidentPage({ params }: PageProps) {
   const { id } = await params;
 
-  // ── Security gate (defence-in-depth) ─────────────────────────────────────
-  // Middleware already verified the JWT and checked the role. We read the
-  // trusted headers it forwarded. If they're missing, reject immediately.
   const scannerUser = await getScannerUser();
   if (!scannerUser) {
     redirect("/access-denied");
   }
-  // ─────────────────────────────────────────────────────────────────────────
 
   const viewer = await prisma.user.findUnique({
     where: { id: scannerUser.userId },
@@ -450,7 +446,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
             <section className="tab-panel panel-medical">
               <SectionTitle title="Medical History" />
               <div className="space-y-5">
-                {/* Conditions summary */}
                 <div>
                   <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">Recorded Conditions</p>
                   <ConditionHistoryCard
@@ -460,7 +455,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   />
                 </div>
 
-                {/* Extra condition details */}
                 <div className="space-y-2">
                   <Info label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} />
                   <Info label="Cancer Details" value={resident.medicalHistory?.cancerDetails} />
@@ -469,7 +463,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   <Info label="Previous Illnesses / Surgeries" value={resident.medicalHistory?.previousIllnessesSurgeries} />
                 </div>
 
-                {/* BMI Records */}
                 {bmiRecords.length > 0 && (
                   <div>
                     <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">BMI Records</p>
@@ -491,7 +484,6 @@ export default async function PublicResidentPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {/* Appointment history */}
                 <div>
                   <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">
                     Appointment History ({appointments.length})

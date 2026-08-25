@@ -80,7 +80,6 @@ export async function POST(req: Request) {
     const normalizedEmail = String(email || "").trim().toLowerCase();
     const normalizedUsername = String(username || "").trim();
     const normalizedPhone = String(contactNumber || "").trim();
-    // The resident picks their sitio; it maps to one of the two health centers.
     const selectedSitio = String(barangayName || "").trim();
     const healthCenterName = getHealthCenterForSitio(selectedSitio);
 
@@ -154,7 +153,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Route the resident to their health center (tenant) based on their sitio.
     const barangay =
       (await db.barangay.findFirst({
         where: { name: healthCenterName },
