@@ -29,10 +29,12 @@ export async function GET() {
         conditions: true,
         isHealthy: true,
         notes: true,
+        medicalAdvice: true,
         createdAt: true,
         diagnosedBy: {
           select: {
             fullName: true,
+            role: true,
             barangay: { select: { name: true } },
           },
         },

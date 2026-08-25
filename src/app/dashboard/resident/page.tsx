@@ -624,7 +624,7 @@ export default function ResidentDashboard() {
     { id: "medical-history",label: "Medical",      icon: <Stethoscope className="h-5 w-5" /> },
     { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
     { id: "notifications",  label: "Alerts",       icon: <Bell className="h-5 w-5" /> },
-    { id: "complaints",     label: "Complaints",   icon: <MessageSquareText className="h-5 w-5" /> },
+    { id: "complaints",     label: "Concern",      icon: <MessageSquareText className="h-5 w-5" /> },
     { id: "announcements",  label: "News",         icon: <Megaphone className="h-6 w-6" /> },
     { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
   ];
@@ -743,7 +743,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <MessageSquareText className="h-5 w-5 shrink-0" />
-                Complaints
+                Health Concern
               </button>
 
               <button
@@ -1115,8 +1115,8 @@ export default function ResidentDashboard() {
             {sidebarTab === "complaints" && (
   <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
     <Section
-      title="Patient Complaints"
-      subtitle="Complaints recorded during your health center visits — showing the health worker who logged each one and when."
+      title="Health Concern"
+      subtitle="Health concerns recorded during your health center visits — showing the health worker who logged each one and when."
       icon={<MessageSquareText className="h-5 w-5" />}
     >
       <ResidentComplaints />
@@ -1700,6 +1700,20 @@ function bmiCategoryStyle(cat: string) {
   return "bg-red-50 border-red-200 text-red-700";
 }
 
+type ResidentAssessment = {
+  id: string;
+  conditions?: string[] | null;
+  isHealthy?: boolean;
+  notes?: string | null;
+  medicalAdvice?: string | null;
+  createdAt: string;
+  diagnosedBy?: {
+    fullName?: string | null;
+    role?: string | null;
+    barangay?: { name?: string | null } | null;
+  } | null;
+};
+
 function ResidentMedicalHistoryTab({
   resident,
 }: {
@@ -1713,6 +1727,7 @@ function ResidentMedicalHistoryTab({
   const [conditionHistory, setConditionHistory] = useState<
     Record<string, ConditionDiagnosis[]>
   >({});
+  const [assessments, setAssessments] = useState<ResidentAssessment[]>([]);
   const [activeCondition, setActiveCondition] = useState<{
     label: string;
     field: string;
@@ -1778,6 +1793,13 @@ function ResidentMedicalHistoryTab({
         const json = await res.json();
         if (res.ok && Array.isArray(json)) {
           setConditionHistory(buildConditionHistory(json));
+          setAssessments(
+            json.filter(
+              (d: ResidentAssessment) =>
+                (d.notes && d.notes.trim()) ||
+                (d.medicalAdvice && d.medicalAdvice.trim())
+            )
+          );
         }
       } catch {
       }
@@ -1924,6 +1946,54 @@ function ResidentMedicalHistoryTab({
                 })}
               </div>
             </div>
+          </div>
+
+          <div className="rounded-[28px] border border-emerald-200 bg-gradient-to-br from-white to-emerald-50/40 p-5 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-black text-slate-900">
+                Assessments &amp; Medical Advice
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Notes and medical advice recorded by your health workers.
+              </p>
+            </div>
+            {assessments.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 px-4 py-6 text-center text-sm font-semibold text-slate-500">
+                No assessments or medical advice recorded yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {assessments.map((a) => (
+                  <div key={a.id} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-slate-900">
+                        {a.diagnosedBy?.fullName?.trim() || "Health Worker"}
+                        {a.diagnosedBy?.barangay?.name ? (
+                          <span className="ml-1 text-xs font-semibold text-slate-400">
+                            · {a.diagnosedBy.barangay.name}
+                          </span>
+                        ) : null}
+                      </p>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-500">
+                        {formatLongDate(a.createdAt)}
+                      </span>
+                    </div>
+                    {a.notes && a.notes.trim() && (
+                      <div className="mt-3">
+                        <p className="text-[11px] font-black uppercase tracking-wide text-slate-500">Doctor&apos;s Notes</p>
+                        <p className="mt-1 whitespace-pre-line text-sm leading-6 text-slate-700">{a.notes}</p>
+                      </div>
+                    )}
+                    {a.medicalAdvice && a.medicalAdvice.trim() && (
+                      <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
+                        <p className="text-[11px] font-black uppercase tracking-wide text-emerald-700">Medical Advice</p>
+                        <p className="mt-1 whitespace-pre-line text-sm leading-6 text-slate-800">{a.medicalAdvice}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-5">

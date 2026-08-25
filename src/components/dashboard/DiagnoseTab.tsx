@@ -58,6 +58,7 @@ type DiagnosisRecord = {
   isHealthy: boolean;
   conditions: string[];
   notes?: string | null;
+  medicalAdvice?: string | null;
   createdAt: string;
   resident?: { firstName: string; lastName: string; middleName?: string | null } | null;
   diagnosedBy?: { fullName?: string | null; role?: string } | null;
@@ -130,6 +131,7 @@ export function DiagnoseTab() {
   const [conditions, setConditions] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
+  const [medicalAdvice, setMedicalAdvice] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -184,6 +186,7 @@ export function DiagnoseTab() {
     setConditions([]);
     setDetails({});
     setNotes("");
+    setMedicalAdvice("");
     setError("");
     setSuccess("");
     loadDiagnoses(patient?.id);
@@ -202,8 +205,8 @@ export function DiagnoseTab() {
       setError("Please select a patient first.");
       return;
     }
-    if (!isHealthy && conditions.length === 0 && !notes.trim()) {
-      setError("Select at least one finding, mark the patient as healthy, or add notes.");
+    if (!isHealthy && conditions.length === 0 && !notes.trim() && !medicalAdvice.trim()) {
+      setError("Select at least one finding, mark the patient as healthy, or add notes / medical advice.");
       return;
     }
 
@@ -219,18 +222,20 @@ export function DiagnoseTab() {
           conditions,
           details,
           notes: notes.trim(),
+          medicalAdvice: medicalAdvice.trim(),
         }),
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "Failed to save diagnosis.");
+        setError(json.error || "Failed to save assessment.");
         return;
       }
-      setSuccess(`Diagnosis saved for ${fullName(patient)}. Their medical history has been updated.`);
+      setSuccess(`Assessment saved for ${fullName(patient)}. Their medical records have been updated.`);
       setIsHealthy(false);
       setConditions([]);
       setDetails({});
       setNotes("");
+      setMedicalAdvice("");
       await Promise.all([loadDiagnoses(patient.id), loadResidents(), loadAppointments()]);
       setTimeout(() => setSuccess(""), 5000);
     } catch {
@@ -385,13 +390,28 @@ export function DiagnoseTab() {
               />
             </div>
 
+            <div>
+              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+                Medical Advice
+              </label>
+              <textarea
+                value={medicalAdvice}
+                onChange={(e) => setMedicalAdvice(e.target.value)}
+                placeholder="Example: Take medications as prescribed, stay hydrated, avoid strenuous activity, and return immediately if symptoms worsen."
+                className="min-h-[120px] w-full resize-none rounded-2xl border border-emerald-200 bg-emerald-50/40 px-4 py-4 text-sm font-semibold leading-7 text-slate-900 outline-none transition focus:border-emerald-500 focus:bg-white"
+              />
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                Shown to the resident in their medical records.
+              </p>
+            </div>
+
             <button
               type="submit"
               disabled={submitting}
               className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
-              {submitting ? "Saving Diagnosis..." : "Save Diagnosis"}
+              {submitting ? "Saving Assessment..." : "Save Assessment"}
             </button>
           </form>
         </div>
@@ -725,6 +745,7 @@ function DiagnosisHistory({
                 <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Patient</th>
                 <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Findings</th>
                 <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Notes</th>
+                <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Medical Advice</th>
                 <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Diagnosed By</th>
                 <th className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Date</th>
               </tr>
@@ -763,6 +784,9 @@ function DiagnosisHistory({
                     </td>
                     <td className="max-w-xs px-4 py-3 text-xs text-slate-600">
                       {d.notes ? <p className="line-clamp-2">{d.notes}</p> : <span className="text-slate-400">—</span>}
+                    </td>
+                    <td className="max-w-xs px-4 py-3 text-xs text-emerald-700">
+                      {d.medicalAdvice ? <p className="line-clamp-2">{d.medicalAdvice}</p> : <span className="text-slate-400">—</span>}
                     </td>
                     <td className="px-4 py-3 text-xs font-semibold text-slate-700">
                       {d.diagnosedBy?.fullName || "—"}

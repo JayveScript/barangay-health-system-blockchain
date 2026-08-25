@@ -72,6 +72,7 @@ export async function POST(req: Request) {
     const appointmentId = body.appointmentId ? String(body.appointmentId).trim() : null;
     const isHealthy = Boolean(body.isHealthy);
     const notes = String(body.notes || "").trim();
+    const medicalAdvice = String(body.medicalAdvice || "").trim();
     const rawConditions: string[] = Array.isArray(body.conditions) ? body.conditions : [];
     const details: Record<string, string> =
       body.details && typeof body.details === "object" ? body.details : {};
@@ -82,9 +83,9 @@ export async function POST(req: Request) {
 
     const conditions = rawConditions.filter((key) => key in CONDITION_FIELDS);
 
-    if (!isHealthy && conditions.length === 0 && !notes) {
+    if (!isHealthy && conditions.length === 0 && !notes && !medicalAdvice) {
       return NextResponse.json(
-        { error: "Select at least one finding, mark the patient as healthy, or add notes." },
+        { error: "Select at least one finding, mark the patient as healthy, or add notes / medical advice." },
         { status: 400 }
       );
     }
@@ -117,6 +118,7 @@ export async function POST(req: Request) {
         isHealthy,
         conditions: finalConditions,
         notes: notes || null,
+        medicalAdvice: medicalAdvice || null,
       },
     });
 

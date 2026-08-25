@@ -364,9 +364,10 @@ model Diagnosis {
   barangayId    String
   appointmentId String?
 
-  isHealthy  Boolean  @default(false)
-  conditions String[] @default([])
-  notes      String?
+  isHealthy      Boolean  @default(false)
+  conditions     String[] @default([])
+  notes          String?
+  medicalAdvice  String?
 
   createdAt DateTime @default(now())
 

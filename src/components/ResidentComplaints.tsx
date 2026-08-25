@@ -48,7 +48,7 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
       const res = await fetch(endpoint, { cache: "no-store" });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "Failed to load complaints.");
+        setError(json.error || "Failed to load health concerns.");
         return;
       }
       setComplaints(Array.isArray(json) ? json : []);
@@ -68,7 +68,7 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
     if (!residentId) return;
     const value = text.trim();
     if (!value) {
-      setError("Please type the complaint first.");
+      setError("Please type the health concern first.");
       return;
     }
     try {
@@ -82,10 +82,10 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "Failed to add complaint.");
+        setError(json.error || "Failed to add health concern.");
         return;
       }
-      setMessage("Complaint added.");
+      setMessage("Health concern added.");
       setText("");
       await load();
     } catch (err) {
@@ -101,14 +101,14 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
       {canAdd && (
         <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:p-5">
           <label className="mb-2 block text-xs font-black uppercase tracking-wide text-sky-700">
-            Add Patient Complaint
+            Add Health Concern
           </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             maxLength={2000}
-            placeholder="Type the patient's complaint (e.g. fever and cough for 3 days)..."
+            placeholder="Type the resident's health concern (e.g. fever and cough for 3 days)..."
             className="w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500"
           />
           <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -119,7 +119,7 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
               className="inline-flex min-h-[46px] items-center gap-2 rounded-2xl bg-[#0EA5E9] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
-              {submitting ? "Adding..." : "Add Complaint"}
+              {submitting ? "Adding..." : "Add Health Concern"}
             </button>
             {message && (
               <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">
@@ -140,18 +140,18 @@ export function ResidentComplaints({ residentId }: { residentId?: string }) {
       {loading ? (
         <div className="flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-sky-200 bg-white px-4 py-8 text-center">
           <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-sky-200 border-t-sky-500" />
-          <p className="text-sm font-semibold text-sky-600">Loading complaints...</p>
+          <p className="text-sm font-semibold text-sky-600">Loading health concerns...</p>
         </div>
       ) : complaints.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sky-200 bg-gradient-to-br from-sky-50 to-white p-8 text-center">
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-sky-600 shadow-sm ring-1 ring-sky-200">
             <MessageSquareWarning className="h-7 w-7" />
           </div>
-          <h3 className="text-lg font-black text-slate-900">No complaints yet</h3>
+          <h3 className="text-lg font-black text-slate-900">No health concerns yet</h3>
           <p className="mt-1 text-sm text-slate-500">
             {canAdd
-              ? "Recorded complaints will appear here."
-              : "Complaints recorded by health workers will appear here."}
+              ? "Recorded health concerns will appear here."
+              : "Health concerns recorded by health workers will appear here."}
           </p>
         </div>
       ) : (
