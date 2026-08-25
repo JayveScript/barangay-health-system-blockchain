@@ -60,6 +60,7 @@ import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { PortalLoader } from "@/components/PortalLoader";
 import { HEALTH_CENTERS } from "@/lib/barangay-options";
+import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
 
 type ResidentRecord = {
@@ -2836,37 +2837,14 @@ function ResidentDigitalIdModal({
   resident: ResidentRecord;
   onClose: () => void;
 }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
-
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    try {
-      setDownloading(true);
-      const dataUrl = await htmlToImage.toPng(cardRef.current, { pixelRatio: 3 });
-      const link = document.createElement("a");
-      link.download = `digital-id-${resident.lastName || "resident"}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error("Failed to download card", err);
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const fullName = `${resident.firstName || ""} ${resident.middleName || ""} ${
-    resident.lastName || ""
-  }`
-    .replace(/\s+/g, " ")
+  const fullName = `${resident.firstName || ""} ${resident.middleName || ""} ${resident.lastName || ""}`
+    .replace(/s+/g, " ")
     .trim();
-
-  const { qrImageUrl, loading: qrLoading } = useSecureQrUrl(resident.id);
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
       <div className="flex w-full max-w-[min(100%,52.5rem)] flex-col items-center rounded-[1.875rem] bg-white p-4 shadow-[0_1.875rem_5rem_rgba(15,23,42,0.30)] sm:p-6">
-        <div className="mb-6 w-full flex items-center justify-between">
+        <div className="mb-2 w-full flex items-center justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
               Resident Digital ID
@@ -2881,129 +2859,7 @@ function ResidentDigitalIdModal({
             Close
           </button>
         </div>
-
-        <div 
-          ref={cardRef}
-          className="relative aspect-[340/215] w-full max-w-[min(100%,47.5rem)] overflow-hidden rounded-[1.125rem] border border-sky-200 bg-white font-sans shadow-[0_1.125rem_2.8rem_rgba(37,99,235,0.18)] sm:rounded-[1.5rem] lg:rounded-[1.875rem]"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,#F8FBFF_0%,#FFFFFF_42%,#EEF6FF_100%)]" />
-          <div className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,#0EA5E9_0%,#38BDF8_48%,#BAE6FD_100%)] sm:h-2 lg:h-2.5" />
-          <div className="absolute inset-y-0 left-0 w-1.5 bg-[linear-gradient(180deg,#0EA5E9_0%,#38BDF8_55%,#BAE6FD_100%)] sm:w-2 lg:w-2.5" />
-          <div className="absolute right-[-42px] top-[-60px] h-[150px] w-[150px] rounded-full border-[22px] border-sky-200/70 sm:right-[-58px] sm:top-[-82px] sm:h-[230px] sm:w-[230px] sm:border-[34px] lg:right-[-78px] lg:top-[-108px] lg:h-[320px] lg:w-[320px] lg:border-[48px]" />
-          <div className="absolute bottom-[-58px] left-[70px] h-[150px] w-[150px] rounded-full border-[18px] border-emerald-100/70 sm:bottom-[-86px] sm:left-[110px] sm:h-[220px] sm:w-[220px] sm:border-[26px] lg:bottom-[-120px] lg:left-[170px] lg:h-[300px] lg:w-[300px] lg:border-[36px]" />
-          <div className="absolute inset-0 opacity-[0.18]">
-            <div className="h-full w-full bg-[repeating-linear-gradient(125deg,rgba(37,99,235,0.16)_0px,rgba(37,99,235,0.16)_1px,transparent_1px,transparent_12px)] lg:bg-[repeating-linear-gradient(125deg,rgba(37,99,235,0.15)_0px,rgba(37,99,235,0.15)_1px,transparent_1px,transparent_16px)]" />
-          </div>
-          <div className="absolute left-[56%] top-[53%] -translate-x-1/2 -translate-y-1/2 opacity-[0.16] mix-blend-multiply [mask-image:radial-gradient(circle,black_0%,black_50%,transparent_76%)]">
-            <img
-              src="/images/davao-logo.png"
-              alt="Watermark"
-              className="h-[250px] w-[250px] object-contain contrast-125 saturate-75 sm:h-[380px] sm:w-[380px] lg:h-[540px] lg:w-[540px]"
-            />
-          </div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_53%,rgba(219,234,254,0.08)_0%,rgba(255,255,255,0.20)_38%,rgba(248,251,255,0.84)_74%,rgba(248,251,255,0.94)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0.58)_100%)]" />
-
-          <div className="relative z-10 flex h-full flex-col p-3 pl-4 sm:p-5 sm:pl-6 lg:p-7 lg:pl-9">
-            <div className="flex items-center justify-between border-b border-sky-200/90 pb-2 sm:pb-3 lg:pb-4">
-              <img
-                src="/images/davao-logo.png"
-                alt="Barangay logo"
-                className="h-9 w-9 object-contain drop-shadow-sm sm:h-14 sm:w-14 lg:h-[74px] lg:w-[74px]"
-              />
-              <div className="flex-1 px-2 text-center sm:px-4">
-                <p className="text-[7px] font-black leading-tight text-slate-800 sm:text-[10px] lg:text-[13px]">REPUBLIC OF THE PHILIPPINES</p>
-                <p className="text-[7px] font-black leading-tight text-slate-800 sm:text-[10px] lg:text-[13px]">{(resident.barangayName || "Barangay").toUpperCase()} HEALTH OFFICE</p>
-                <h2 className="mt-1 text-[11px] font-black uppercase tracking-wide text-[#075985] sm:text-[17px] lg:text-[25px]">BARANGAY HEALTH DIGITAL ID</h2>
-              </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 shadow-sm ring-1 ring-sky-200 sm:h-14 sm:w-14 sm:rounded-2xl lg:h-[74px] lg:w-[74px] lg:rounded-[22px]">
-                <HealthLogoIcon className="h-7 w-7 sm:h-11 sm:w-11 lg:h-14 lg:w-14" />
-              </div>
-            </div>
-
-            <div className="flex flex-1 gap-3 pt-3 sm:gap-5 sm:pt-5 lg:gap-8 lg:pt-6">
-              <div className="flex w-[92px] shrink-0 flex-col items-center sm:w-[142px] lg:w-[205px]">
-                <div className="w-full rounded-xl border border-sky-200 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3">
-                  {qrImageUrl ? (
-                    <img
-                      src={qrImageUrl}
-                      alt="Encrypted health record QR code"
-                      className="aspect-square h-auto w-full object-contain"
-                    />
-                  ) : (
-                    <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-slate-100 text-[8px] font-bold text-slate-400">
-                      {qrLoading ? "Securing QR..." : "QR unavailable"}
-                    </div>
-                  )}
-                </div>
-                <p className="mt-1.5 text-center text-[7px] font-bold leading-tight text-slate-500 sm:mt-2 sm:text-[10px] lg:mt-3 lg:text-[13px]">Scan for Health Record</p>
-              </div>
-
-              <div className="flex min-w-0 flex-1 flex-col justify-start">
-                <div className="mb-1.5 rounded-lg border border-sky-200/70 bg-white/70 px-2 py-1.5 shadow-sm backdrop-blur-sm sm:mb-2.5 sm:rounded-xl sm:px-3 sm:py-2 lg:mb-4 lg:rounded-2xl lg:px-4 lg:py-3">
-                  <p className="text-[6px] font-black uppercase text-[#075985] sm:text-[8px] lg:text-[11px]">Last Name, First Name, Middle Name</p>
-                  <h3 className="text-[12px] font-black uppercase leading-tight text-slate-950 sm:text-[18px] lg:text-[27px]">
-                    {formatResidentIdName(resident)}
-                  </h3>
-                </div>
-
-                <div className="mb-1.5 grid grid-cols-[30%_24%_46%] gap-x-1 sm:mb-2.5 sm:gap-x-2 lg:mb-4 lg:gap-x-4">
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Nationality</p>
-                    <p className="text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">PHL</p>
-                  </div>
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Sex</p>
-                    <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.sex}</p>
-                  </div>
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Date of Birth</p>
-                    <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{formatResidentDate(resident.birthDate)}</p>
-                  </div>
-                </div>
-
-                <div className="mb-1.5 sm:mb-2.5 lg:mb-4">
-                  <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Address</p>
-                  <p className="line-clamp-2 text-[9px] font-black uppercase leading-[1.2] text-slate-950 sm:text-[13px] lg:text-[20px]">
-                    {resident.completeAddress}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-[30%_32%_38%] gap-x-1 sm:gap-x-2 lg:gap-x-4">
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Civil Status</p>
-                    <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.civilStatus || "-"}</p>
-                  </div>
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Religion</p>
-                    <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.religion || "-"}</p>
-                  </div>
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-[6px] font-black uppercase text-sky-600 sm:text-[8px] lg:text-[11px]">Occupation</p>
-                    <p className="truncate text-[9px] font-black uppercase text-slate-950 sm:text-[13px] lg:text-[19px]">{resident.occupation || "-"}</p>
-                  </div>
-                </div>
-                
-                <div className="mt-auto flex justify-end">
-                  <div className="rounded-lg bg-[#075985] px-2 py-1 text-right shadow-sm sm:rounded-xl sm:px-3 sm:py-1.5 lg:rounded-2xl lg:px-4 lg:py-2">
-                    <p className="text-[5px] font-black uppercase text-sky-100 sm:text-[7px] lg:text-[10px]">Agency Code</p>
-                    <p className="text-[8px] font-black uppercase text-white sm:text-[11px] lg:text-[16px]">B19B</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 w-full max-w-[min(100%,47.5rem)]">
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0EA5E9] px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-sky-600 disabled:opacity-60 lg:py-4 lg:text-base"
-          >
-            {downloading ? "Saving Card Image..." : "Download Digital ID"}
-          </button>
-        </div>
+        <ResidentDigitalId resident={resident} allowDownload />
       </div>
     </div>
   );

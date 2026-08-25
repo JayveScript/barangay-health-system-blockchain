@@ -25,6 +25,7 @@ X,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
+import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import {
   buildConditionHistory,
@@ -757,7 +758,7 @@ export default function ResidentDashboard() {
                     : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
                 }`}
               >
-                <Megaphone className="h-5 w-5 shrink-0 stroke-[2.8]" />
+                <Megaphone className="h-5 w-5 shrink-0" />
                 Announcements
               </button>
 
@@ -869,7 +870,7 @@ export default function ResidentDashboard() {
       : "text-slate-600 hover:bg-white hover:text-sky-600"
   }`}
 >
-  <Megaphone className="h-5 w-5 shrink-0 stroke-[2.8]" />
+  <Megaphone className="h-5 w-5 shrink-0" />
   Announcements
 </button>
 
@@ -1133,7 +1134,7 @@ export default function ResidentDashboard() {
                   subtitle="This is the resident's official barangay health digital identification card."
                   icon={<IdCardIcon className="h-5 w-5" />}
                 >
-                  <DigitalIdCard resident={resident} />
+                  <ResidentDigitalId resident={resident} />
                 </Section>
               </div>
             )}

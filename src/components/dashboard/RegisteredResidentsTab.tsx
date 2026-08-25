@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Edit,
   Eye,
+  IdCard,
   Lock,
   Save,
   Search,
@@ -17,6 +18,7 @@ import {
   EDUCATIONAL_ATTAINMENT_OPTIONS,
   RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
+import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 
 type History = Record<string, boolean | string | null> | null;
 
@@ -96,12 +98,13 @@ export function RegisteredResidentsTab() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  const [pw, setPw] = useState<{ resident: StaffResident; action: "view" | "edit" } | null>(null);
+  const [pw, setPw] = useState<{ resident: StaffResident; action: "view" | "edit" | "digital-id" } | null>(null);
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
 
   const [viewResident, setViewResident] = useState<StaffResident | null>(null);
+  const [digitalIdResident, setDigitalIdResident] = useState<StaffResident | null>(null);
   const [editResident, setEditResident] = useState<StaffResident | null>(null);
   const [editPassword, setEditPassword] = useState("");
 
@@ -139,7 +142,7 @@ export function RegisteredResidentsTab() {
     );
   });
 
-  const openReAuth = (resident: StaffResident, action: "view" | "edit") => {
+  const openReAuth = (resident: StaffResident, action: "view" | "edit" | "digital-id") => {
     setPw({ resident, action });
     setPassword("");
     setPwError("");
@@ -166,6 +169,8 @@ export function RegisteredResidentsTab() {
       }
       if (pw.action === "view") {
         setViewResident(pw.resident);
+      } else if (pw.action === "digital-id") {
+        setDigitalIdResident(pw.resident);
       } else {
         setEditResident(pw.resident);
         setEditPassword(password);
@@ -187,6 +192,12 @@ export function RegisteredResidentsTab() {
         dense={dense}
         icon={<Eye className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
         onClick={() => openReAuth(r, "view")}
+      />
+      <IconActionButton
+        label="Digital ID"
+        dense={dense}
+        icon={<IdCard className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
+        onClick={() => openReAuth(r, "digital-id")}
       />
       <IconActionButton
         label="Edit Resident"
@@ -348,6 +359,29 @@ export function RegisteredResidentsTab() {
       {viewResident && (
         <Portal>
           <ViewModal resident={viewResident} onClose={() => setViewResident(null)} />
+        </Portal>
+      )}
+
+      {digitalIdResident && (
+        <Portal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
+            <div className="flex w-full max-w-[min(100%,52.5rem)] flex-col items-center rounded-[28px] bg-white p-4 shadow-2xl sm:p-6">
+              <div className="mb-2 flex w-full items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Resident Digital ID</p>
+                  <h3 className="text-xl font-black text-slate-900 line-clamp-1">{fullName(digitalIdResident)}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDigitalIdResident(null)}
+                  className="ml-4 shrink-0 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Close
+                </button>
+              </div>
+              <ResidentDigitalId resident={digitalIdResident} allowDownload />
+            </div>
+          </div>
         </Portal>
       )}
 
