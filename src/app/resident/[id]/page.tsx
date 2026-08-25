@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
+import { MaternalRecordView } from "@/components/dashboard/MaternalRecordView";
+import { Baby, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -300,6 +302,19 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
     );
   }
 
+  const showMaternal =
+    String(resident.sex) === "FEMALE" && Boolean(resident.isPregnant);
+  const maternalRecord = showMaternal
+    ? await prisma.maternalRecord.findUnique({
+        where: { residentId: id },
+        select: {
+          data: true,
+          updatedAt: true,
+          createdBy: { select: { fullName: true, role: true } },
+        },
+      })
+    : null;
+
   const fullName = `${resident.firstName ?? ""} ${resident.middleName ?? ""} ${
     resident.lastName ?? ""
   }`
@@ -320,7 +335,8 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
         #tab-medical:checked ~ .tab-panels .panel-medical,
         #tab-family:checked ~ .tab-panels .panel-family,
         #tab-social:checked ~ .tab-panels .panel-social,
-        #tab-complaints:checked ~ .tab-panels .panel-complaints {
+        #tab-complaints:checked ~ .tab-panels .panel-complaints,
+        #tab-maternal:checked ~ .tab-panels .panel-maternal {
           display: block;
         }
 
@@ -328,7 +344,8 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
         #tab-medical:checked ~ .tab-nav label[for="tab-medical"],
         #tab-family:checked ~ .tab-nav label[for="tab-family"],
         #tab-social:checked ~ .tab-nav label[for="tab-social"],
-        #tab-complaints:checked ~ .tab-nav label[for="tab-complaints"] {
+        #tab-complaints:checked ~ .tab-nav label[for="tab-complaints"],
+        #tab-maternal:checked ~ .tab-nav label[for="tab-maternal"] {
           background: #2563eb;
           color: white;
           box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
@@ -391,6 +408,14 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             name="resident-tab"
             id="tab-complaints"
           />
+          {showMaternal && (
+            <input
+              className="tab-input"
+              type="radio"
+              name="resident-tab"
+              id="tab-maternal"
+            />
+          )}
 
           <div className="tab-nav flex gap-2 overflow-x-auto border-b border-blue-100 bg-white p-3">
             <label
@@ -423,6 +448,14 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             >
               Health Concern
             </label>
+            {showMaternal && (
+              <label
+                htmlFor="tab-maternal"
+                className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
+              >
+                Maternal Records
+              </label>
+            )}
           </div>
 
           <div className="tab-panels p-5">
@@ -630,6 +663,34 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
               </p>
               <ResidentComplaints residentId={id} />
             </section>
+
+            {showMaternal && (
+              <section className="tab-panel panel-maternal">
+                <SectionTitle title="Maternal Records" />
+                <div className="mb-4 -mt-2 inline-flex items-center gap-2 rounded-full bg-pink-100 px-3 py-1 text-xs font-black uppercase text-pink-700">
+                  <Baby className="h-3.5 w-3.5" />
+                  Pregnant
+                </div>
+                {maternalRecord ? (
+                  <MaternalRecordView
+                    data={maternalRecord.data as Record<string, string>}
+                    updatedBy={maternalRecord.createdBy}
+                    updatedAt={maternalRecord.updatedAt.toISOString()}
+                  />
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/50 p-8 text-center">
+                    <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-amber-600 shadow-sm ring-1 ring-amber-200">
+                      <Clock className="h-7 w-7" />
+                    </div>
+                    <h3 className="text-lg font-black text-slate-900">Processing Information</h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      The maternal record is being prepared by the barangay health
+                      worker. Details will appear here once recorded.
+                    </p>
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         </div>
       </div>
