@@ -152,10 +152,11 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
+import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr"
+  "overview" | "personal" | "residents" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -305,6 +306,16 @@ export default function DoctorDashboardPage() {
             />
 
             <SidebarButton
+              active={activeTab === "residents"}
+              icon={<Users className="h-5 w-5" />}
+              label="Registered Residents"
+              onClick={() => {
+                setActiveTab("residents");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -370,6 +381,13 @@ export default function DoctorDashboardPage() {
                 icon={<UserRound className="h-5 w-5" />}
                 label="Personal Info"
                 onClick={() => setActiveTab("personal")}
+              />
+
+              <SidebarButton
+                active={activeTab === "residents"}
+                icon={<Users className="h-5 w-5" />}
+                label="Registered Residents"
+                onClick={() => setActiveTab("residents")}
               />
 
               <SidebarButton
@@ -439,6 +457,8 @@ export default function DoctorDashboardPage() {
 
             {activeTab === "overview" && <OverviewTab />}
 
+            {activeTab === "residents" && <RegisteredResidentsTab />}
+
             {activeTab === "appointments" && <AppointmentsTab />}
 
             {activeTab === "referrals" && (
@@ -470,6 +490,7 @@ export default function DoctorDashboardPage() {
       <MobileBottomNav
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
+          { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
           { id: "appointments", label: "Schedule", icon: <CalendarCheck className="h-5 w-5" /> },
           { id: "referrals", label: "Referrals", icon: <Inbox className="h-5 w-5" /> },
           { id: "diagnose", label: "Diagnose", icon: <Stethoscope className="h-5 w-5" /> },

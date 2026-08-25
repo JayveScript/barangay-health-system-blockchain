@@ -48,7 +48,7 @@ export async function PATCH(
     const role = String(currentUser?.role || "");
     const canEditResident =
       canManageBarangay(currentUser) ||
-      ["BHW", "NURSE", "MIDWIFE"].includes(role);
+      ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"].includes(role);
 
     if (!canEditResident || !currentUserId || !barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
