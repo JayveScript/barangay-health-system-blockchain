@@ -440,7 +440,7 @@ function SidebarButton({
           : "text-white/80 hover:bg-white/10"
       }`}
     >
-      {icon}
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center">{icon}</span>
       {label}
     </button>
   );

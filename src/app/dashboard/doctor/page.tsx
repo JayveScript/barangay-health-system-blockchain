@@ -1182,7 +1182,7 @@ function SidebarButton({
           : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
       }`}
     >
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center">
         {icon}
       </span>
 
