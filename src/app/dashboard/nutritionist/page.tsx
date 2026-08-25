@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Utensils,
   UserRound,
+  Users,
   ScanLine,
   X,
 } from "lucide-react";
@@ -36,9 +37,10 @@ type NutritionistUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { BMITab } from "@/components/dashboard/BMITab";
+import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function NutritionistDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "scan-qr" | "bmi">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "scan-qr" | "bmi">(
     "overview"
   );
   const [user, setUser] = useState<NutritionistUser | null>(null);
@@ -125,6 +127,7 @@ export default function NutritionistDashboardPage() {
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => { setActiveTab("overview"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "bmi"} icon={<Scale className="h-5 w-5" />} label="BMI Records" onClick={() => { setActiveTab("bmi"); setMobileSidebarOpen(false); }} />
           </div>
@@ -145,6 +148,7 @@ export default function NutritionistDashboardPage() {
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
               <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => setActiveTab("overview")} />
               <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
+              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
               <SidebarButton active={activeTab === "bmi"} icon={<Scale className="h-5 w-5" />} label="BMI Records" onClick={() => setActiveTab("bmi")} />
             </div>
@@ -200,6 +204,8 @@ export default function NutritionistDashboardPage() {
 
             {activeTab === "overview" && <OverviewTab />}
 
+            {activeTab === "residents" && <RegisteredResidentsTab />}
+
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5">
                 <QrScannerTab />
@@ -219,6 +225,7 @@ export default function NutritionistDashboardPage() {
         items={[
           { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
           { id: "personal", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+          { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
           { id: "scan-qr", label: "Scan QR", icon: <ScanLine className="h-5 w-5" /> },
           { id: "bmi", label: "BMI", icon: <Scale className="h-5 w-5" /> },
         ]}

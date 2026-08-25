@@ -1,15 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
+  ClipboardList,
+  Edit,
   Eye,
   Lock,
-  Pencil,
   Save,
   Search,
   ShieldCheck,
   UserRound,
-  Users,
   X,
 } from "lucide-react";
 import {
@@ -49,6 +50,45 @@ type StaffResident = {
 
 const fullName = (r: { firstName: string; middleName: string | null; lastName: string }) =>
   `${r.firstName} ${r.middleName ?? ""} ${r.lastName}`.replace(/\s+/g, " ").trim();
+
+const tableName = (r: { firstName: string; middleName: string | null; lastName: string }) =>
+  `${r.lastName}, ${r.firstName} ${r.middleName ?? ""}`.replace(/\s+/g, " ").trim();
+
+function Portal({ children }: { children: React.ReactNode }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
+function IconActionButton({
+  icon,
+  label,
+  variant = "primary",
+  dense = false,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  variant?: "primary" | "warning" | "danger";
+  dense?: boolean;
+  onClick: () => void;
+}) {
+  const color =
+    variant === "danger"
+      ? "bg-red-50 text-red-600 hover:bg-red-100"
+      : variant === "warning"
+      ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
+      : "bg-sky-50 text-sky-600 hover:bg-sky-100";
+  return (
+    <button
+      type="button"
+      title={label}
+      onClick={onClick}
+      className={`inline-flex ${dense ? "h-8 w-8" : "h-10 w-10"} items-center justify-center rounded-xl transition ${color}`}
+    >
+      {icon}
+    </button>
+  );
+}
 
 export function RegisteredResidentsTab() {
   const [residents, setResidents] = useState<StaffResident[]>([]);
@@ -94,7 +134,8 @@ export function RegisteredResidentsTab() {
     return (
       fullName(r).toLowerCase().includes(query) ||
       String(r.age).includes(query) ||
-      (r.contactNumber ?? "").toLowerCase().includes(query)
+      (r.contactNumber ?? "").toLowerCase().includes(query) ||
+      (r.sex ?? "").toLowerCase().includes(query)
     );
   });
 
@@ -139,151 +180,193 @@ export function RegisteredResidentsTab() {
     }
   };
 
-  return (
-    <div className="space-y-5 pb-4">
-      <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
-              <Users className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-black text-slate-900">Registered Residents</h2>
-              <p className="text-sm text-slate-500">
-                View or edit residents in your barangay. Your password is required for each action.
-              </p>
-            </div>
-          </div>
+  const actions = (r: StaffResident, dense: boolean) => (
+    <div className={`flex items-center ${dense ? "gap-0.5" : "justify-center gap-2"}`}>
+      <IconActionButton
+        label="View Details"
+        dense={dense}
+        icon={<Eye className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
+        onClick={() => openReAuth(r, "view")}
+      />
+      <IconActionButton
+        label="Edit Resident"
+        dense={dense}
+        variant="warning"
+        icon={<Edit className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
+        onClick={() => openReAuth(r, "edit")}
+      />
+    </div>
+  );
 
-          <div className="relative w-full md:max-w-xs">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search resident..."
-              className="min-h-[50px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-            />
+  return (
+    <div className="rounded-[24px] border border-sky-200 bg-white p-3 sm:p-5">
+      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+            <ClipboardList className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Registered Residents</h2>
+            <p className="text-sm text-slate-500">
+              View or edit residents. Your password is required for each action.
+            </p>
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex min-h-[140px] items-center justify-center gap-3 rounded-2xl border border-sky-200 bg-white text-sm font-semibold text-sky-600">
-            <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-sky-200 border-t-sky-500" />
-            Loading residents...
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="rounded-2xl bg-sky-50 px-4 py-10 text-center text-sm font-semibold text-slate-500">
-            No residents found.
-          </div>
-        ) : (
-          <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
-            {filtered.map((r) => (
-              <div
-                key={r.id}
-                className="flex flex-col gap-3 rounded-2xl border border-sky-100 bg-sky-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-sky-600 ring-1 ring-sky-200">
-                    <UserRound className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">{fullName(r)}</p>
-                    <p className="truncate text-xs font-semibold text-slate-500">
-                      {r.sex} · {r.age} yrs{r.barangayName ? ` · ${r.barangayName}` : ""}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openReAuth(r, "view")}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-white px-3 py-2 text-xs font-bold text-sky-600 hover:bg-sky-50"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openReAuth(r, "edit")}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#0EA5E9] px-3 py-2 text-xs font-bold text-white hover:bg-sky-600"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="relative w-full lg:max-w-sm">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, contact, age..."
+            className="min-h-[52px] w-full rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
+          />
+        </div>
       </div>
 
-      {pw && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex flex-col items-center text-center">
-              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-                <Lock className="h-7 w-7" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">Confirm your password</h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Enter your password to {pw.action} {fullName(pw.resident)}.
-              </p>
+      {error && (
+        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex min-h-[140px] items-center justify-center gap-3 rounded-2xl border border-sky-200 bg-white text-sm font-semibold text-sky-600">
+          <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-sky-200 border-t-sky-500" />
+          Loading residents...
+        </div>
+      ) : (
+        <>
+          {/* Mobile compact list */}
+          <div className="md:hidden">
+            <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Resident Name
             </div>
-            <input
-              type="password"
-              value={password}
-              autoFocus
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && confirmReAuth()}
-              placeholder="Your password"
-              className="min-h-[50px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-            />
-            {pwError && <p className="mt-2 text-sm font-semibold text-red-600">{pwError}</p>}
-            <div className="mt-5 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPw(null)}
-                className="min-h-[46px] flex-1 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmReAuth}
-                disabled={pwLoading}
-                className="min-h-[46px] flex-1 rounded-2xl bg-[#0EA5E9] text-sm font-bold text-white hover:bg-sky-600 disabled:opacity-60"
-              >
-                {pwLoading ? "Verifying..." : "Confirm"}
-              </button>
+            <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+              {filtered.length === 0 && (
+                <div className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
+                  No resident found.
+                </div>
+              )}
+              {filtered.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between gap-2 rounded-2xl bg-sky-50 px-2.5 py-2.5 shadow-sm"
+                >
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
+                    {tableName(r)}
+                  </p>
+                  {actions(r, true)}
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+
+          {/* Desktop table */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                  <th className="w-[46%] px-3">Resident Name</th>
+                  <th className="w-[12%] px-3">Sex</th>
+                  <th className="w-[10%] px-3">Age</th>
+                  <th className="w-[20%] px-3">Contact</th>
+                  <th className="w-[12%] px-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="rounded-2xl bg-sky-50 px-4 py-6 text-center text-sm text-slate-500">
+                      No resident found.
+                    </td>
+                  </tr>
+                )}
+                {filtered.map((r) => (
+                  <tr key={r.id} className="bg-sky-50 shadow-sm">
+                    <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-900">
+                      <span className="block truncate whitespace-nowrap">{tableName(r)}</span>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{r.sex}</td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{r.age}</td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{r.contactNumber || "—"}</td>
+                    <td className="rounded-r-2xl px-3 py-3">{actions(r, false)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {pw && (
+        <Portal>
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-[28px] border border-sky-200 bg-white p-6 shadow-2xl">
+              <div className="mb-4 flex flex-col items-center text-center">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+                  <Lock className="h-7 w-7" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900">Confirm your password</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Enter your password to {pw.action} {fullName(pw.resident)}.
+                </p>
+              </div>
+              <input
+                type="password"
+                value={password}
+                autoFocus
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && confirmReAuth()}
+                placeholder="Your password"
+                className="min-h-[50px] w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
+              />
+              {pwError && <p className="mt-2 text-sm font-semibold text-red-600">{pwError}</p>}
+              <div className="mt-5 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPw(null)}
+                  className="min-h-[46px] flex-1 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmReAuth}
+                  disabled={pwLoading}
+                  className="min-h-[46px] flex-1 rounded-2xl bg-[#0EA5E9] text-sm font-bold text-white hover:bg-sky-600 disabled:opacity-60"
+                >
+                  {pwLoading ? "Verifying..." : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       {viewResident && (
-        <ViewModal resident={viewResident} onClose={() => setViewResident(null)} />
+        <Portal>
+          <ViewModal resident={viewResident} onClose={() => setViewResident(null)} />
+        </Portal>
       )}
 
       {editResident && (
-        <EditModal
-          resident={editResident}
-          password={editPassword}
-          onClose={() => {
-            setEditResident(null);
-            setEditPassword("");
-          }}
-          onSaved={() => {
-            setEditResident(null);
-            setEditPassword("");
-            load();
-          }}
-        />
+        <Portal>
+          <EditModal
+            resident={editResident}
+            password={editPassword}
+            onClose={() => {
+              setEditResident(null);
+              setEditPassword("");
+            }}
+            onSaved={() => {
+              setEditResident(null);
+              setEditPassword("");
+              load();
+            }}
+          />
+        </Portal>
       )}
     </div>
   );
@@ -449,7 +532,7 @@ function EditModal({
         <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-5">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-white">
-              <Pencil className="h-5 w-5" />
+              <Edit className="h-5 w-5" />
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-amber-600">Edit Resident</p>
