@@ -13,9 +13,11 @@ export function useSecureQrUrl(residentId: string, size = 200) {
     const url = buildResidentQrUrl(residentId, base);
 
     setScanUrl(url);
+
+    const appOnlyToken = `KALYO://resident/${residentId}`;
     setQrImageUrl(
       `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
-        url
+        appOnlyToken
       )}`
     );
     setLoading(false);
