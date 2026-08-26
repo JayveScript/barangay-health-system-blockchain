@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  CheckCircle2,
   ClipboardList,
   Edit,
   Eye,
   HeartPulse,
   IdCard,
   Lock,
+  MapPin,
+  Phone,
   Save,
   Search,
   ShieldCheck,
@@ -419,22 +422,39 @@ type ViewDiagnosis = {
   diagnosedBy?: { fullName?: string | null; barangay?: { name?: string | null } | null } | null;
 };
 
+const ASSESSMENT_CONDITIONS: { key: string; label: string; detailField?: string }[] = [
+  { key: "hasHypertension", label: "Hypertension" },
+  { key: "hasDiabetes", label: "Diabetes" },
+  { key: "hasStiHiv", label: "STI / HIV" },
+  { key: "hasHeartDisease", label: "Heart Disease" },
+  { key: "hasKidneyFailure", label: "Kidney Failure" },
+  { key: "hasTuberculosis", label: "Tuberculosis" },
+  { key: "hasAllergies", label: "Allergies", detailField: "allergiesDetails" },
+  { key: "hasCancer", label: "Cancer", detailField: "cancerDetails" },
+  { key: "hasOtherConditions", label: "Other Conditions", detailField: "otherConditionsDetails" },
+];
+
 function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
-  const yn = (v: unknown) => (v ? "Yes" : "No");
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
   const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch(`/api/residents/${resident.id}/diagnoses`, { cache: "no-store" });
-        const json = await res.json();
-        if (res.ok && Array.isArray(json)) setDiagnoses(json);
-      } catch (err) {
-        console.error("VIEW_DIAGNOSES_ERROR", err);
-      }
-    })();
+  const loadDiagnoses = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/residents/${resident.id}/diagnoses`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok && Array.isArray(json)) setDiagnoses(json);
+    } catch (err) {
+      console.error("VIEW_DIAGNOSES_ERROR", err);
+    }
   }, [resident.id]);
+
+  useEffect(() => {
+    loadDiagnoses();
+  }, [loadDiagnoses]);
+
+  const mh = resident.medicalHistory;
+  const fh = resident.familyHistory;
+  const ph = resident.personalSocialHistory;
 
   const tabs = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
@@ -484,102 +504,352 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto p-5">
           {tab === "identifying" && (
-          <ViewSection title="Identifying Data">
-            <Info label="Full Name" value={fullName(resident)} />
-            <Info label="Age" value={resident.age} />
-            <Info label="Sex" value={resident.sex} />
-            {resident.sex === "FEMALE" && (
-              <Info label="Pregnant" value={resident.isPregnant == null ? "N/A" : resident.isPregnant ? "Yes" : "No"} />
-            )}
-            <Info label="Birth Date" value={resident.birthDate ? new Date(resident.birthDate).toLocaleDateString() : ""} />
-            <Info label="Civil Status" value={resident.civilStatus} />
-            <Info label="Religion" value={resident.religion} />
-            <Info label="Education" value={resident.educationalAttainment} />
-            <Info label="Occupation" value={resident.occupation} />
-            <Info label="Contact Number" value={resident.contactNumber} />
-            <Info label="Email" value={resident.user?.email} />
-            <Info label="Username" value={resident.user?.username} />
-            <Info label="Address" value={resident.completeAddress} />
-            <Info label="Sitio" value={resident.barangayName} />
-          </ViewSection>
+            <div>
+              <SectionTitle title="Identifying Data" />
+              <div className="grid gap-x-10 gap-y-6 lg:grid-cols-2">
+                <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
+                  <QrInfoRow label="Full Name" value={fullName(resident)} />
+                  <QrInfoRow label="Age" value={resident.age} />
+                  <QrInfoRow label="Sex" value={resident.sex} />
+                  {resident.sex === "FEMALE" && (
+                    <QrInfoRow
+                      label="Pregnant"
+                      value={resident.isPregnant == null ? "Not specified" : resident.isPregnant ? "Yes" : "No"}
+                    />
+                  )}
+                  <QrInfoRow label="Birth Date" value={resident.birthDate ? new Date(resident.birthDate).toLocaleDateString() : ""} />
+                  <QrInfoRow label="Civil Status" value={resident.civilStatus} />
+                  <QrInfoRow label="Religion" value={resident.religion} />
+                  <QrInfoRow label="Education" value={resident.educationalAttainment} />
+                  <QrInfoRow label="Occupation" value={resident.occupation} />
+                </QrInfoGroup>
+
+                <div className="space-y-6">
+                  <QrInfoGroup title="Contact & Account" icon={<Phone className="h-4 w-4" />}>
+                    <QrInfoRow label="Contact Number" value={resident.contactNumber} />
+                    <QrInfoRow label="Email" value={resident.user?.email} />
+                    <QrInfoRow label="Phone Number" value={resident.user?.phoneNumber} />
+                    <QrInfoRow label="Username" value={resident.user?.username} />
+                    <QrInfoRow label="Verified Resident" value={resident.user?.isVerified ? "Yes" : "No"} />
+                    <QrInfoRow label="Accompanying Person" value={resident.accompanyingPerson} />
+                    <QrInfoRow label="Relationship" value={resident.relationship} />
+                    <QrInfoRow label="Spouse Maiden Name" value={resident.spouseMaidenName} />
+                    <QrInfoRow label="Spouse Occupation" value={resident.spouseOccupation} />
+                    <QrInfoRow label="Spouse Contact Number" value={resident.spouseContactNumber} />
+                  </QrInfoGroup>
+
+                  <QrInfoGroup title="Address" icon={<MapPin className="h-4 w-4" />}>
+                    <QrInfoRow label="Sitio" value={resident.barangayName} />
+                    <QrInfoRow label="City" value={resident.city} />
+                    <QrInfoRow label="Complete Address" value={resident.completeAddress} />
+                  </QrInfoGroup>
+                </div>
+              </div>
+            </div>
           )}
 
-          {tab === "medical" && resident.medicalHistory && (
-            <ViewSection title="Past Medical History">
-              <Info label="Hypertension" value={yn(resident.medicalHistory.hasHypertension)} />
-              <Info label="Diabetes" value={yn(resident.medicalHistory.hasDiabetes)} />
-              <Info label="STI / HIV" value={yn(resident.medicalHistory.hasStiHiv)} />
-              <Info label="Heart Disease" value={yn(resident.medicalHistory.hasHeartDisease)} />
-              <Info label="Kidney Failure" value={yn(resident.medicalHistory.hasKidneyFailure)} />
-              <Info label="Tuberculosis" value={yn(resident.medicalHistory.hasTuberculosis)} />
-              <Info label="Allergies" value={yn(resident.medicalHistory.hasAllergies)} />
-              <Info label="Cancer" value={yn(resident.medicalHistory.hasCancer)} />
-            </ViewSection>
+          {tab === "medical" && (
+            <div className="space-y-5">
+              <SectionTitle title="Medical History" />
+              <QrFlagGroup
+                title="Recorded Conditions"
+                icon={<Stethoscope className="h-4 w-4" />}
+                tone="bad"
+                columns={2}
+                items={[
+                  { label: "Hypertension", value: Boolean(mh?.hasHypertension) },
+                  { label: "Diabetes", value: Boolean(mh?.hasDiabetes) },
+                  { label: "STI / HIV", value: Boolean(mh?.hasStiHiv) },
+                  { label: "Heart Disease", value: Boolean(mh?.hasHeartDisease) },
+                  { label: "Kidney Failure", value: Boolean(mh?.hasKidneyFailure) },
+                  { label: "Tuberculosis", value: Boolean(mh?.hasTuberculosis) },
+                  { label: "Allergies", value: Boolean(mh?.hasAllergies) },
+                  { label: "Cancer", value: Boolean(mh?.hasCancer) },
+                  { label: "Other Conditions", value: Boolean(mh?.hasOtherConditions) },
+                ]}
+              />
+              <div className="grid gap-2 sm:grid-cols-2">
+                {mh?.allergiesDetails && <Info label="Allergies Details" value={mh.allergiesDetails} />}
+                {mh?.cancerDetails && <Info label="Cancer Details" value={mh.cancerDetails} />}
+                {mh?.otherConditionsDetails && <Info label="Other Conditions Details" value={mh.otherConditionsDetails} />}
+                {mh?.maintenanceMedications && <Info label="Maintenance Medications" value={mh.maintenanceMedications} />}
+                {mh?.previousIllnessesSurgeries && <Info label="Previous Illnesses / Surgeries" value={mh.previousIllnessesSurgeries} />}
+              </div>
+            </div>
           )}
 
-          {tab === "family" && resident.familyHistory && (
-            <ViewSection title="Family History">
-              <Info label="Asthma / Allergies" value={yn(resident.familyHistory.asthmaAllergies)} />
-              <Info label="Birth Defects" value={yn(resident.familyHistory.birthDefects)} />
-              <Info label="Cancer" value={yn(resident.familyHistory.cancer)} />
-              <Info label="Dementia" value={yn(resident.familyHistory.dementia)} />
-              <Info label="Diabetes" value={yn(resident.familyHistory.diabetes)} />
-              <Info label="Hypertension" value={yn(resident.familyHistory.hypertension)} />
-              <Info label="Kidney Disease" value={yn(resident.familyHistory.kidneyDisease)} />
-              <Info label="Mental Illness" value={yn(resident.familyHistory.mentalIllness)} />
-            </ViewSection>
+          {tab === "family" && (
+            <div className="space-y-5">
+              <SectionTitle title="Family History" />
+              <QrFlagGroup
+                title="Hereditary Conditions"
+                icon={<Users className="h-4 w-4" />}
+                tone="bad"
+                columns={2}
+                items={[
+                  { label: "Asthma / Allergies", value: Boolean(fh?.asthmaAllergies) },
+                  { label: "Birth Defects", value: Boolean(fh?.birthDefects) },
+                  { label: "Cancer", value: Boolean(fh?.cancer) },
+                  { label: "Dementia", value: Boolean(fh?.dementia) },
+                  { label: "Diabetes", value: Boolean(fh?.diabetes) },
+                  { label: "Hypertension", value: Boolean(fh?.hypertension) },
+                  { label: "Kidney Disease", value: Boolean(fh?.kidneyDisease) },
+                  { label: "Mental Illness", value: Boolean(fh?.mentalIllness) },
+                ]}
+              />
+            </div>
           )}
 
-          {tab === "personal" && resident.personalSocialHistory && (
-            <ViewSection title="Personal / Social History">
-              <Info label="Eats Healthy Diet" value={yn(resident.personalSocialHistory.eatsHealthyDiet)} />
-              <Info label="Adequate Physical Activity" value={yn(resident.personalSocialHistory.adequatePhysicalActivity)} />
-              <Info label="Sufficient Rest / Sleep" value={yn(resident.personalSocialHistory.sufficientRestSleep)} />
-              <Info label="Smokes Tobacco" value={yn(resident.personalSocialHistory.smokesTobacco)} />
-              <Info label="Drinks Alcohol" value={yn(resident.personalSocialHistory.drinksAlcohol)} />
-              <Info label="Takes Illicit Drugs" value={yn(resident.personalSocialHistory.takesIllicitDrugs)} />
-            </ViewSection>
+          {tab === "personal" && (
+            <div className="space-y-5">
+              <SectionTitle title="Personal / Social History" />
+              <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                <QrFlagGroup
+                  title="Healthy Lifestyle"
+                  icon={<HeartPulse className="h-4 w-4" />}
+                  tone="good"
+                  items={[
+                    { label: "Eats Healthy Diet", value: Boolean(ph?.eatsHealthyDiet) },
+                    { label: "Adequate Physical Activity", value: Boolean(ph?.adequatePhysicalActivity) },
+                    { label: "Sufficient Rest / Sleep", value: Boolean(ph?.sufficientRestSleep) },
+                    { label: "Normal Growth / Development", value: Boolean(ph?.normalGrowthDevelopment) },
+                    { label: "Multiple Sex Partners", value: Boolean(ph?.multipleSexPartners), tone: "bad" },
+                  ]}
+                />
+                <QrFlagGroup
+                  title="Risk Factors"
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  tone="bad"
+                  items={[
+                    { label: "Smokes Tobacco", value: Boolean(ph?.smokesTobacco) },
+                    { label: "Tobacco Packs / Year", value: ph?.tobaccoPacksPerYear ?? null },
+                    { label: "Drinks Alcohol", value: Boolean(ph?.drinksAlcohol) },
+                    { label: "Alcohol Bottles / Day", value: ph?.alcoholBottlesPerDay ?? null },
+                    { label: "Takes Illicit Drugs", value: Boolean(ph?.takesIllicitDrugs) },
+                    { label: "Illicit Drugs Details", value: ph?.illicitDrugsDetails ?? null },
+                  ]}
+                />
+              </div>
+            </div>
           )}
 
           {tab === "assessments" && (
-          <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
-            <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
-              Assessments &amp; Medical Advice
-            </h4>
-            {diagnoses.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 px-3 py-4 text-center text-sm font-semibold text-slate-500">
-                No assessments recorded yet.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {diagnoses.map((d) => (
-                  <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-xs font-bold text-slate-800">{d.diagnosedBy?.fullName?.trim() || "Health Worker"}</p>
-                      <span className="text-[11px] font-bold text-slate-400">{new Date(d.createdAt).toLocaleString()}</span>
-                    </div>
-                    {Array.isArray(d.conditions) && d.conditions.length > 0 && (
-                      <p className="mt-1 text-xs font-semibold text-amber-700">{d.conditions.join(", ")}</p>
-                    )}
-                    {d.isHealthy && (
-                      <p className="mt-1 text-xs font-semibold text-emerald-700">Healthy / No findings</p>
-                    )}
-                    {d.notes && d.notes.trim() && (
-                      <p className="mt-1 whitespace-pre-line text-xs text-slate-700"><span className="font-bold">Notes:</span> {d.notes}</p>
-                    )}
-                    {d.medicalAdvice && d.medicalAdvice.trim() && (
-                      <p className="mt-1 whitespace-pre-line text-xs text-emerald-800"><span className="font-bold">Medical Advice:</span> {d.medicalAdvice}</p>
-                    )}
+            <div className="space-y-5">
+              <SectionTitle title="Assessment" />
+              <AssessmentForm residentId={resident.id} onSaved={loadDiagnoses} />
+
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                  Recorded Assessments
+                </h4>
+                {diagnoses.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 px-3 py-4 text-center text-sm font-semibold text-slate-500">
+                    No assessments recorded yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {diagnoses.map((d) => (
+                      <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-xs font-bold text-slate-800">{d.diagnosedBy?.fullName?.trim() || "Health Worker"}</p>
+                          <span className="text-[11px] font-bold text-slate-400">{new Date(d.createdAt).toLocaleString()}</span>
+                        </div>
+                        {Array.isArray(d.conditions) && d.conditions.length > 0 && (
+                          <p className="mt-1 text-xs font-semibold text-amber-700">{d.conditions.join(", ")}</p>
+                        )}
+                        {d.isHealthy && (
+                          <p className="mt-1 text-xs font-semibold text-emerald-700">Healthy / No findings</p>
+                        )}
+                        {d.notes && d.notes.trim() && (
+                          <p className="mt-1 whitespace-pre-line text-xs text-slate-700"><span className="font-bold">Notes:</span> {d.notes}</p>
+                        )}
+                        {d.medicalAdvice && d.medicalAdvice.trim() && (
+                          <p className="mt-1 whitespace-pre-line text-xs text-emerald-800"><span className="font-bold">Medical Advice:</span> {d.medicalAdvice}</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
+            </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function AssessmentForm({ residentId, onSaved }: { residentId: string; onSaved: () => void }) {
+  const [isHealthy, setIsHealthy] = useState(false);
+  const [conditions, setConditions] = useState<string[]>([]);
+  const [details, setDetails] = useState<Record<string, string>>({});
+  const [notes, setNotes] = useState("");
+  const [medicalAdvice, setMedicalAdvice] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const reset = () => {
+    setIsHealthy(false);
+    setConditions([]);
+    setDetails({});
+    setNotes("");
+    setMedicalAdvice("");
+  };
+
+  const setHealthy = (v: boolean) => {
+    setError("");
+    setSuccess("");
+    setIsHealthy(v);
+    if (v) {
+      setConditions([]);
+      setDetails({});
+    }
+  };
+
+  const toggleCondition = (key: string) => {
+    setError("");
+    setSuccess("");
+    setIsHealthy(false);
+    setConditions((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const submit = async () => {
+    setError("");
+    setSuccess("");
+    if (!isHealthy && conditions.length === 0 && !notes.trim() && !medicalAdvice.trim()) {
+      setError("Select a finding, mark the resident healthy, or add notes / medical advice.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const res = await fetch("/api/diagnose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          residentId,
+          isHealthy,
+          conditions: isHealthy ? [] : conditions,
+          details,
+          notes: notes.trim(),
+          medicalAdvice: medicalAdvice.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Failed to save assessment.");
+        return;
+      }
+      setSuccess("Assessment saved to the resident's record.");
+      reset();
+      onSaved();
+    } catch (err) {
+      console.error("ASSESSMENT_SAVE_ERROR", err);
+      setError("Unable to save the assessment.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-sky-200 bg-white p-4 shadow-sm">
+      <h4 className="mb-3 rounded-lg bg-[#0EA5E9] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+        New Assessment
+      </h4>
+
+      <label
+        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-3 text-sm font-bold transition ${
+          isHealthy ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-sky-200 bg-white text-slate-700 hover:bg-sky-50"
+        }`}
+      >
+        <input
+          type="checkbox"
+          checked={isHealthy}
+          onChange={(e) => setHealthy(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+        />
+        Healthy / No findings
+        <CheckCircle2 className={`ml-auto h-5 w-5 ${isHealthy ? "text-emerald-500" : "text-slate-300"}`} />
+      </label>
+
+      {!isHealthy && (
+        <div className="mt-3">
+          <p className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">Findings</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {ASSESSMENT_CONDITIONS.map((c) => {
+              const active = conditions.includes(c.key);
+              return (
+                <div key={c.key}>
+                  <button
+                    type="button"
+                    onClick={() => toggleCondition(c.key)}
+                    className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition ${
+                      active ? "border-rose-300 bg-rose-50 text-rose-700" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${active ? "border-rose-400 bg-rose-500 text-white" : "border-slate-300"}`}>
+                      {active && <CheckCircle2 className="h-3 w-3" />}
+                    </span>
+                    {c.label}
+                  </button>
+                  {active && c.detailField && (
+                    <input
+                      type="text"
+                      value={details[c.detailField] ?? ""}
+                      onChange={(e) => setDetails((prev) => ({ ...prev, [c.detailField!]: e.target.value }))}
+                      placeholder={`${c.label} details`}
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none focus:border-sky-500"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-3">
+        <p className="mb-1.5 text-xs font-black uppercase tracking-wide text-slate-500">Notes</p>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          placeholder="Assessment notes / observations"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none focus:border-sky-500"
+        />
+      </div>
+
+      <div className="mt-3">
+        <p className="mb-1.5 text-xs font-black uppercase tracking-wide text-slate-500">Medical Advice</p>
+        <textarea
+          value={medicalAdvice}
+          onChange={(e) => setMedicalAdvice(e.target.value)}
+          rows={3}
+          placeholder="Advice / recommendations for the resident"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none focus:border-sky-500"
+        />
+      </div>
+
+      {error && (
+        <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{error}</p>
+      )}
+      {success && (
+        <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">{success}</p>
+      )}
+
+      <button
+        type="button"
+        onClick={submit}
+        disabled={submitting}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0EA5E9] px-5 py-3 text-sm font-black text-white shadow-md shadow-sky-500/20 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <Stethoscope className="h-4 w-4" />
+        {submitting ? "Saving Assessment..." : "Save Assessment"}
+      </button>
     </div>
   );
 }
@@ -768,13 +1038,109 @@ function EditModal({
   );
 }
 
-function ViewSection({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionTitle({ title }: { title: string }) {
   return (
-    <div className="rounded-2xl border border-sky-200 bg-white p-4 shadow-sm">
-      <h4 className="mb-3 rounded-lg bg-[#0EA5E9] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
-        {title}
-      </h4>
-      <div className="grid gap-2 sm:grid-cols-2">{children}</div>
+    <div className="mb-4">
+      <h2 className="text-xl font-black text-blue-950">{title}</h2>
+      <div className="mt-2 h-1 w-20 rounded-full bg-blue-600" />
+    </div>
+  );
+}
+
+function QrInfoGroup({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+          {icon}
+        </span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{title}</h4>
+      </div>
+      <dl className="divide-y divide-slate-100">{children}</dl>
+    </div>
+  );
+}
+
+function QrInfoRow({ label, value }: { label: string; value: unknown }) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return null;
+  }
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-3">
+      <span className="shrink-0 text-sm text-slate-500">{label}</span>
+      <span className="break-words text-right text-sm font-bold text-slate-900">{String(value)}</span>
+    </div>
+  );
+}
+
+function QrFlagGroup({
+  title,
+  icon,
+  items,
+  tone = "bad",
+  columns = 1,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  items: { label: string; value: unknown; tone?: "good" | "bad" }[];
+  tone?: "good" | "bad";
+  columns?: 1 | 2;
+}) {
+  const visible = items.filter((item) =>
+    typeof item.value === "boolean"
+      ? true
+      : item.value !== null && item.value !== undefined && String(item.value).trim() !== ""
+  );
+
+  if (visible.length === 0) {
+    return <p className="text-sm font-semibold text-slate-400">No records in this section.</p>;
+  }
+
+  const headerBadge =
+    tone === "bad"
+      ? "bg-rose-50 text-rose-600 ring-rose-100"
+      : "bg-emerald-50 text-emerald-600 ring-emerald-100";
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${headerBadge}`}>{icon}</span>
+        <h4 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{title}</h4>
+      </div>
+      <div className={columns === 2 ? "grid sm:grid-cols-2 sm:gap-x-10" : ""}>
+        {visible.map((item) => {
+          const isBool = typeof item.value === "boolean";
+          const itemTone = item.tone ?? tone;
+          return (
+            <div key={item.label} className="flex items-center justify-between gap-4 border-b border-slate-100 py-3">
+              <span className="text-sm text-slate-500">{item.label}</span>
+              {isBool ? (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${
+                    item.value === true
+                      ? itemTone === "good"
+                        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                        : "bg-rose-50 text-rose-700 ring-rose-100"
+                      : "bg-slate-100 text-slate-500 ring-slate-200"
+                  }`}
+                >
+                  {item.value === true ? "Yes" : "No"}
+                </span>
+              ) : (
+                <span className="break-words text-right text-sm font-bold text-slate-900">{String(item.value)}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
