@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import {
+  ArrowLeftRight,
   CalendarCheck,
   CalendarDays,
   CheckCircle2,
   ClipboardList,
   Clock,
+  MapPin,
   RefreshCw,
   Save,
   Search,
@@ -51,6 +53,15 @@ type DiagnoseAppointment = {
   doctorName?: string | null;
   diagnosedCount: number;
   resident: ResidentLite | null;
+};
+
+type DiagnoseReferralItem = {
+  referralId: string;
+  status: string;
+  reason?: string | null;
+  sourceBarangayName?: string | null;
+  createdAt: string;
+  resident: ResidentLite;
 };
 
 type DiagnosisRecord = {
@@ -116,14 +127,16 @@ function formatTime(value: string) {
 }
 
 export function DiagnoseTab() {
-  const [source, setSource] = useState<"appointment" | "resident">("appointment");
+  const [source, setSource] = useState<"appointment" | "referral" | "resident">("appointment");
 
   const [appointments, setAppointments] = useState<DiagnoseAppointment[]>([]);
   const [residents, setResidents] = useState<ResidentLite[]>([]);
+  const [referrals, setReferrals] = useState<DiagnoseReferralItem[]>([]);
   const [diagnoses, setDiagnoses] = useState<DiagnosisRecord[]>([]);
 
   const [selectedAppointment, setSelectedAppointment] = useState<DiagnoseAppointment | null>(null);
   const [selectedResident, setSelectedResident] = useState<ResidentLite | null>(null);
+  const [selectedReferral, setSelectedReferral] = useState<DiagnoseReferralItem | null>(null);
   const [residentSearch, setResidentSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -138,7 +151,12 @@ export function DiagnoseTab() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const patient = source === "appointment" ? selectedAppointment?.resident ?? null : selectedResident;
+  const patient =
+    source === "appointment"
+      ? selectedAppointment?.resident ?? null
+      : source === "referral"
+      ? selectedReferral?.resident ?? null
+      : selectedResident;
 
   const filteredResidents = residents.filter((r) =>
     fullName(r).toLowerCase().includes(residentSearch.toLowerCase())
@@ -162,6 +180,15 @@ export function DiagnoseTab() {
     }
   };
 
+  const loadReferrals = async () => {
+    try {
+      const res = await fetch("/api/diagnose/referrals");
+      const json = await res.json();
+      if (res.ok) setReferrals(Array.isArray(json) ? json : []);
+    } catch {
+    }
+  };
+
   const loadDiagnoses = async (residentId?: string) => {
     try {
       setLoading(true);
@@ -178,6 +205,7 @@ export function DiagnoseTab() {
   useEffect(() => {
     loadAppointments();
     loadResidents();
+    loadReferrals();
     loadDiagnoses();
   }, []);
 
@@ -218,6 +246,7 @@ export function DiagnoseTab() {
         body: JSON.stringify({
           residentId: patient.id,
           appointmentId: source === "appointment" ? selectedAppointment?.id : null,
+          referralId: source === "referral" ? selectedReferral?.referralId : undefined,
           isHealthy,
           conditions,
           details,
@@ -236,7 +265,7 @@ export function DiagnoseTab() {
       setDetails({});
       setNotes("");
       setMedicalAdvice("");
-      await Promise.all([loadDiagnoses(patient.id), loadResidents(), loadAppointments()]);
+      await Promise.all([loadDiagnoses(patient.id), loadResidents(), loadAppointments(), loadReferrals()]);
       setTimeout(() => setSuccess(""), 5000);
     } catch {
       setError("Unable to connect to the server.");
@@ -255,7 +284,7 @@ export function DiagnoseTab() {
           <div>
             <h3 className="text-xl font-bold text-slate-900">Diagnose Patient</h3>
             <p className="text-sm text-slate-500">
-              Choose a patient from today&apos;s accepted appointments or your registered residents, then record your findings.
+              Choose a patient from today&apos;s accepted appointments, residents referred to your barangay, or your registered residents, then record your findings.
             </p>
           </div>
         </div>
@@ -285,8 +314,24 @@ export function DiagnoseTab() {
           <button
             type="button"
             onClick={() => {
+              setSource("referral");
+              setSelectedAppointment(null);
+              setSelectedResident(null);
+              setResidentSearch("");
+            }}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition sm:flex-none ${
+              source === "referral" ? "bg-white text-sky-600 shadow-sm" : "text-slate-500 hover:text-sky-600"
+            }`}
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+            From Referral Residents
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               setSource("resident");
               setSelectedAppointment(null);
+              setSelectedReferral(null);
             }}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition sm:flex-none ${
               source === "resident" ? "bg-white text-sky-600 shadow-sm" : "text-slate-500 hover:text-sky-600"
@@ -302,6 +347,12 @@ export function DiagnoseTab() {
             appointments={appointments}
             selected={selectedAppointment}
             onSelect={setSelectedAppointment}
+          />
+        ) : source === "referral" ? (
+          <ReferralPicker
+            referrals={referrals}
+            selected={selectedReferral}
+            onSelect={setSelectedReferral}
           />
         ) : (
           <ResidentPicker
@@ -482,6 +533,71 @@ function AppointmentPicker({
             <p className="truncate text-xs font-semibold text-slate-600">
               {appt.reason === "Others" ? appt.otherReason || "Others" : appt.reason}
             </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ReferralPicker({
+  referrals,
+  selected,
+  onSelect,
+}: {
+  referrals: DiagnoseReferralItem[];
+  selected: DiagnoseReferralItem | null;
+  onSelect: (referral: DiagnoseReferralItem) => void;
+}) {
+  if (referrals.length === 0) {
+    return (
+      <div className="rounded-[20px] border border-dashed border-sky-200 bg-sky-50/50 py-10 text-center">
+        <ArrowLeftRight className="mx-auto mb-3 h-10 w-10 text-sky-300" />
+        <p className="text-sm font-bold text-slate-500">No residents referred to your barangay.</p>
+        <p className="mt-1 text-xs text-slate-400">Residents referred from other barangays will appear here for diagnosis.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid max-h-[440px] gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
+      {referrals.map((item) => {
+        const isSelected = selected?.referralId === item.referralId;
+        const r = item.resident;
+        return (
+          <button
+            key={item.referralId}
+            type="button"
+            onClick={() => onSelect(item)}
+            className={`flex flex-col gap-2 rounded-2xl border p-4 text-left transition ${
+              isSelected ? "border-sky-400 bg-sky-50 ring-2 ring-sky-200" : "border-sky-200 bg-white hover:bg-sky-50"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex min-w-0 items-center gap-2 text-sm font-bold text-slate-900">
+                <User className="h-4 w-4 shrink-0 text-sky-500" />
+                <span className="truncate">{fullName(r)}</span>
+              </span>
+              <span className="shrink-0 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-black uppercase text-sky-600">
+                {item.status}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+              {item.sourceBarangayName && (
+                <span className="inline-flex items-center gap-1 text-sky-600">
+                  <MapPin className="h-3.5 w-3.5" /> From {item.sourceBarangayName}
+                </span>
+              )}
+              {(r.age || r.sex) && (
+                <span>
+                  {r.age ? `${r.age} yrs` : ""}
+                  {r.sex ? ` · ${r.sex}` : ""}
+                </span>
+              )}
+            </div>
+            {item.reason && (
+              <p className="truncate text-xs font-semibold text-slate-600">{item.reason}</p>
+            )}
           </button>
         );
       })}

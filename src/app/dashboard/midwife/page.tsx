@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  Stethoscope,
   UserRound,
   Users,
   ScanLine,
@@ -36,9 +37,10 @@ type MidwifeUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
+import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 
 export default function MidwifeDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr" | "diagnose">(
     "overview"
   );
   const [user, setUser] = useState<MidwifeUser | null>(null);
@@ -168,6 +170,15 @@ export default function MidwifeDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "diagnose"}
+              icon={<Stethoscope className="h-5 w-5" />}
+              label="Diagnose Patient"
+              onClick={() => {
+                setActiveTab("diagnose");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -213,6 +224,12 @@ export default function MidwifeDashboardPage() {
                 icon={<ScanLine className="h-5 w-5" />}
                 label="Scan QR"
                 onClick={() => setActiveTab("scan-qr")}
+              />
+              <SidebarButton
+                active={activeTab === "diagnose"}
+                icon={<Stethoscope className="h-5 w-5" />}
+                label="Diagnose Patient"
+                onClick={() => setActiveTab("diagnose")}
               />
             </div>
           </div>
@@ -279,6 +296,8 @@ export default function MidwifeDashboardPage() {
                 <QrScannerTab />
               </div>
             )}
+
+            {activeTab === "diagnose" && <DiagnoseTab />}
 
             {activeTab === "personal" && (
               <PersonalInfoTab user={user} initials={initials} />
