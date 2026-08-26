@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as htmlToImage from "html-to-image";
-import { Download, Eye, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 
 export type DigitalIdResident = {
   id: string;
@@ -91,18 +91,7 @@ export function ResidentDigitalId({
   const [downloading, setDownloading] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState("/images/davao-logo.png");
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
-  const [qrRevealed, setQrRevealed] = useState(false);
   const qrLoading = qrImageUrl === null;
-
-  const holdToReveal = !allowDownload;
-  const holdHandlers = holdToReveal
-    ? {
-        onPointerDown: () => setQrRevealed(true),
-        onPointerUp: () => setQrRevealed(false),
-        onPointerLeave: () => setQrRevealed(false),
-        onPointerCancel: () => setQrRevealed(false),
-      }
-    : {};
 
   useEffect(() => {
     toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
@@ -198,36 +187,15 @@ export function ResidentDigitalId({
 
           <div className="flex flex-1 gap-2 pt-2 sm:gap-4 sm:pt-4 lg:gap-8 lg:pt-6">
             <div className="flex w-[80px] shrink-0 flex-col items-center sm:w-[130px] lg:w-[200px]">
-              <div
-                className={`relative w-full rounded-xl border border-sky-100 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3 ${
-                  holdToReveal && qrImageUrl
-                    ? "cursor-pointer select-none touch-none [-webkit-touch-callout:none]"
-                    : ""
-                }`}
-                {...holdHandlers}
-              >
+              <div className="w-full rounded-xl border border-sky-100 bg-white p-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)] sm:rounded-2xl sm:p-2 lg:rounded-[24px] lg:p-3">
                 {qrImageUrl ? (
-                  <>
-                    <img
-                      src={qrImageUrl}
-                      alt="Encrypted health record QR code"
-                      draggable={false}
-                      onContextMenu={allowDownload ? undefined : (e) => e.preventDefault()}
-                      className={`aspect-square h-auto w-full object-contain transition-[filter,transform] duration-150 ${
-                        allowDownload ? "" : "pointer-events-none select-none [-webkit-touch-callout:none]"
-                      } ${holdToReveal && !qrRevealed ? "scale-105 blur-md" : ""}`}
-                    />
-                    {holdToReveal && !qrRevealed && (
-                      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-lg bg-white/50 text-center backdrop-blur-[1px]">
-                        <Eye className="h-4 w-4 text-sky-700 sm:h-5 sm:w-5 lg:h-7 lg:w-7" />
-                        <span className="px-1 text-[6px] font-black uppercase leading-tight tracking-wide text-sky-800 sm:text-[9px] lg:text-[12px]">
-                          Press &amp; hold
-                          <br />
-                          to show
-                        </span>
-                      </div>
-                    )}
-                  </>
+                  <img
+                    src={qrImageUrl}
+                    alt="Encrypted health record QR code"
+                    draggable={false}
+                    onContextMenu={allowDownload ? undefined : (e) => e.preventDefault()}
+                    className={`aspect-square h-auto w-full object-contain ${allowDownload ? "" : "pointer-events-none select-none [-webkit-touch-callout:none]"}`}
+                  />
                 ) : (
                   <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-slate-100 text-[8px] font-bold text-slate-400">
                     {qrLoading ? "Loading..." : "QR N/A"}
@@ -311,9 +279,9 @@ export function ResidentDigitalId({
               <span className="inline-flex items-center gap-1 font-black text-emerald-700">
                 <RefreshCw className="h-3.5 w-3.5" /> LIVE
               </span>{" "}
-              — press and hold the code to reveal it, then have a health worker scan
-              it live. It refreshes every few seconds, so a screenshot expires within
-              ~20 seconds and cannot be scanned. It cannot be downloaded.
+              — this QR refreshes every few seconds and can only be scanned live
+              inside the app by authorized health workers. A screenshot expires
+              within ~20 seconds and cannot be scanned. It cannot be downloaded.
             </span>
           </div>
         </div>
