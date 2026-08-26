@@ -22,6 +22,7 @@ import {
   BookOpen,
   RefreshCw,
   Scale,
+  Stethoscope,
   Search,
   Send,
   ShieldCheck,
@@ -50,6 +51,7 @@ type BHWUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
+import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
@@ -67,6 +69,7 @@ export default function BHWDashboardPage() {
     | "scan-qr"
     | "logbook"
     | "bmi"
+    | "diagnose"
   >("overview");
   const [user, setUser] = useState<BHWUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -242,6 +245,15 @@ export default function BHWDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "diagnose"}
+              icon={<Stethoscope className="h-5 w-5" />}
+              label="Diagnose Patient"
+              onClick={() => {
+                setActiveTab("diagnose");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -317,6 +329,12 @@ export default function BHWDashboardPage() {
                 icon={<Scale className="h-5 w-5" />}
                 label="BMI Records"
                 onClick={() => setActiveTab("bmi")}
+              />
+              <SidebarButton
+                active={activeTab === "diagnose"}
+                icon={<Stethoscope className="h-5 w-5" />}
+                label="Diagnose Patient"
+                onClick={() => setActiveTab("diagnose")}
               />
             </div>
           </div>
@@ -404,6 +422,8 @@ export default function BHWDashboardPage() {
             {activeTab === "logbook" && <LogbookTab />}
 
             {activeTab === "bmi" && <BMITab />}
+
+            {activeTab === "diagnose" && <DiagnoseTab />}
           </div>
         </section>
       </div>

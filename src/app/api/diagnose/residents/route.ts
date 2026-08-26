@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 
-const ALLOWED_ROLES = ["DOCTOR", "NURSE"];
+const ALLOWED_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST", "BARANGAY_ADMIN"];
 
 async function getApiUser() {
   return resolveAuthedUser({ barangay: true });
