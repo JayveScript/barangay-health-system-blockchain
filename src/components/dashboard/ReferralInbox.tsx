@@ -15,13 +15,27 @@ import {
   Inbox,
   RefreshCw,
   Lock,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Stethoscope,
+  UserRound,
 } from "lucide-react";
+import {
+  SectionTitle,
+  QrInfoGroup,
+  QrInfoRow,
+  QrFlagGroup,
+  InfoCard,
+} from "@/components/dashboard/ResidentInfoSections";
+import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
 
 type Identifying = Record<string, unknown> | null | undefined;
 type HistoryJson = Record<string, unknown> | null | undefined;
 
 export type InboxReferral = {
   id: string;
+  residentId: string;
   status: string;
   reason?: string | null;
   notes?: string | null;
@@ -35,13 +49,18 @@ export type InboxReferral = {
   referredByStaff?: { fullName?: string | null; username: string } | null;
 };
 
-type TabId = "identifying" | "medical" | "family" | "social";
+type TabId = "identifying" | "medical" | "family" | "social" | "assessment";
 
-function fmtValue(value: unknown) {
-  if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (value === null || value === undefined || String(value).trim() === "") return "N/A";
-  return String(value);
-}
+type ReferralDiagnosis = {
+  id: string;
+  conditions?: string[] | null;
+  isHealthy?: boolean;
+  notes?: string | null;
+  medicalAdvice?: string | null;
+  createdAt: string;
+  diagnosedBy?: { fullName?: string | null } | null;
+};
+
 function fmtDate(value: unknown) {
   if (!value) return "N/A";
   const d = new Date(String(value));
@@ -286,17 +305,33 @@ function ReferralModal({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<TabId>("identifying");
+  const [diagnoses, setDiagnoses] = useState<ReferralDiagnosis[]>([]);
   const identifying = (referral.identifyingData || {}) as Record<string, unknown>;
   const medical = (referral.medicalHistory || {}) as Record<string, unknown>;
   const family = (referral.familyHistory || {}) as Record<string, unknown>;
   const social = (referral.personalSocialHistory || {}) as Record<string, unknown>;
   const pending = (referral.status || "PENDING").toUpperCase() === "PENDING";
 
+  const loadDiagnoses = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/residents/${referral.residentId}/diagnoses`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok && Array.isArray(json)) setDiagnoses(json);
+    } catch (err) {
+      console.error("REFERRAL_DIAGNOSES_ERROR", err);
+    }
+  }, [referral.residentId]);
+
+  useEffect(() => {
+    loadDiagnoses();
+  }, [loadDiagnoses]);
+
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
     { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
     { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
     { id: "social", label: "Social", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "assessment", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
   ];
 
   if (typeof document === "undefined") return null;
@@ -347,79 +382,178 @@ function ReferralModal({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto bg-sky-50 p-4 sm:p-5">
-          <div className="mb-5 grid gap-4 md:grid-cols-2">
-            <DetailInfo label="Referral Reason" value={referral.reason} />
-            <DetailInfo label="Notes" value={referral.notes} />
+          <div className="mb-5 rounded-[24px] border border-sky-200 bg-white p-4 shadow-sm sm:p-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <InfoCard label="Referral Reason" value={referral.reason} />
+              <InfoCard label="Notes" value={referral.notes} />
+            </div>
           </div>
 
-          {tab === "identifying" && (
-            <DetailSection icon={<IdCard className="h-5 w-5" />} title="Identifying Data">
-              <DetailInfo label="Full Name" value={identifying.fullName} />
-              <DetailInfo label="Age" value={identifying.age} />
-              <DetailInfo label="Sex" value={identifying.sex} />
-              <DetailInfo label="Birth Date" value={fmtDate(identifying.birthDate)} />
-              <DetailInfo label="Civil Status" value={identifying.civilStatus} />
-              <DetailInfo label="Religion" value={identifying.religion} />
-              <DetailInfo label="Educational Attainment" value={identifying.educationalAttainment} />
-              <DetailInfo label="Occupation" value={identifying.occupation} />
-              <DetailInfo label="Contact Number" value={identifying.contactNumber} />
-              <DetailInfo label="Email" value={identifying.email} />
-              <DetailInfo label="House / Street" value={identifying.houseStreet} />
-              <DetailInfo label="Complete Address" value={identifying.completeAddress} />
-              <DetailInfo label="Barangay" value={identifying.barangayName} />
-              <DetailInfo label="City" value={identifying.city} />
-              <DetailInfo label="Accompanying Person" value={identifying.accompanyingPerson} />
-              <DetailInfo label="Relationship" value={identifying.relationship} />
-            </DetailSection>
-          )}
+          <div className="rounded-[24px] border border-sky-200 bg-white p-4 shadow-sm sm:p-6">
+            {tab === "identifying" && (
+              <div>
+                <SectionTitle title="Identifying Data" />
+                <div className="grid gap-x-10 gap-y-6 lg:grid-cols-2">
+                  <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
+                    <QrInfoRow label="Full Name" value={identifying.fullName} />
+                    <QrInfoRow label="Age" value={identifying.age} />
+                    <QrInfoRow label="Sex" value={identifying.sex} />
+                    <QrInfoRow label="Birth Date" value={fmtDate(identifying.birthDate)} />
+                    <QrInfoRow label="Civil Status" value={identifying.civilStatus} />
+                    <QrInfoRow label="Religion" value={identifying.religion} />
+                    <QrInfoRow label="Educational Attainment" value={identifying.educationalAttainment} />
+                    <QrInfoRow label="Occupation" value={identifying.occupation} />
+                  </QrInfoGroup>
 
-          {tab === "medical" && (
-            <DetailSection icon={<HeartPulse className="h-5 w-5" />} title="Past Medical History">
-              <DetailInfo label="Hypertension" value={medical.hasHypertension} />
-              <DetailInfo label="Diabetes" value={medical.hasDiabetes} />
-              <DetailInfo label="STI / HIV" value={medical.hasStiHiv} />
-              <DetailInfo label="Heart Disease" value={medical.hasHeartDisease} />
-              <DetailInfo label="Kidney Failure" value={medical.hasKidneyFailure} />
-              <DetailInfo label="Tuberculosis" value={medical.hasTuberculosis} />
-              <DetailInfo label="Allergies" value={medical.hasAllergies} />
-              <DetailInfo label="Allergies Details" value={medical.allergiesDetails} />
-              <DetailInfo label="Cancer" value={medical.hasCancer} />
-              <DetailInfo label="Cancer Details" value={medical.cancerDetails} />
-              <DetailInfo label="Other Conditions" value={medical.hasOtherConditions} />
-              <DetailInfo label="Other Conditions Details" value={medical.otherConditionsDetails} />
-              <DetailInfo label="Maintenance Medications" value={medical.maintenanceMedications} />
-              <DetailInfo label="Previous Illnesses / Surgeries" value={medical.previousIllnessesSurgeries} />
-            </DetailSection>
-          )}
+                  <div className="space-y-6">
+                    <QrInfoGroup title="Contact" icon={<Phone className="h-4 w-4" />}>
+                      <QrInfoRow label="Contact Number" value={identifying.contactNumber} />
+                      <QrInfoRow label="Email" value={identifying.email} />
+                      <QrInfoRow label="Accompanying Person" value={identifying.accompanyingPerson} />
+                      <QrInfoRow label="Relationship" value={identifying.relationship} />
+                    </QrInfoGroup>
 
-          {tab === "family" && (
-            <DetailSection icon={<Users className="h-5 w-5" />} title="Family History">
-              <DetailInfo label="Asthma / Allergies" value={family.asthmaAllergies} />
-              <DetailInfo label="Birth Defects" value={family.birthDefects} />
-              <DetailInfo label="Cancer" value={family.cancer} />
-              <DetailInfo label="Dementia" value={family.dementia} />
-              <DetailInfo label="Diabetes" value={family.diabetes} />
-              <DetailInfo label="Hypertension" value={family.hypertension} />
-              <DetailInfo label="Kidney Disease" value={family.kidneyDisease} />
-              <DetailInfo label="Mental Illness" value={family.mentalIllness} />
-            </DetailSection>
-          )}
+                    <QrInfoGroup title="Address" icon={<MapPin className="h-4 w-4" />}>
+                      <QrInfoRow label="House / Street" value={identifying.houseStreet} />
+                      <QrInfoRow label="Barangay" value={identifying.barangayName} />
+                      <QrInfoRow label="City" value={identifying.city} />
+                      <QrInfoRow label="Complete Address" value={identifying.completeAddress} />
+                    </QrInfoGroup>
+                  </div>
+                </div>
+              </div>
+            )}
 
-          {tab === "social" && (
-            <DetailSection icon={<ClipboardList className="h-5 w-5" />} title="Personal / Social History">
-              <DetailInfo label="Eats Healthy Diet" value={social.eatsHealthyDiet} />
-              <DetailInfo label="Adequate Physical Activity" value={social.adequatePhysicalActivity} />
-              <DetailInfo label="Sufficient Rest / Sleep" value={social.sufficientRestSleep} />
-              <DetailInfo label="Normal Growth / Development" value={social.normalGrowthDevelopment} />
-              <DetailInfo label="Multiple Sex Partners" value={social.multipleSexPartners} />
-              <DetailInfo label="Smokes Tobacco" value={social.smokesTobacco} />
-              <DetailInfo label="Tobacco Packs Per Year" value={social.tobaccoPacksPerYear} />
-              <DetailInfo label="Drinks Alcohol" value={social.drinksAlcohol} />
-              <DetailInfo label="Alcohol Bottles Per Day" value={social.alcoholBottlesPerDay} />
-              <DetailInfo label="Takes Illicit Drugs" value={social.takesIllicitDrugs} />
-              <DetailInfo label="Illicit Drugs Details" value={social.illicitDrugsDetails} />
-            </DetailSection>
-          )}
+            {tab === "medical" && (
+              <div className="space-y-5">
+                <SectionTitle title="Medical History" />
+                <QrFlagGroup
+                  title="Recorded Conditions"
+                  icon={<Stethoscope className="h-4 w-4" />}
+                  tone="bad"
+                  columns={2}
+                  items={[
+                    { label: "Hypertension", value: Boolean(medical.hasHypertension) },
+                    { label: "Diabetes", value: Boolean(medical.hasDiabetes) },
+                    { label: "STI / HIV", value: Boolean(medical.hasStiHiv) },
+                    { label: "Heart Disease", value: Boolean(medical.hasHeartDisease) },
+                    { label: "Kidney Failure", value: Boolean(medical.hasKidneyFailure) },
+                    { label: "Tuberculosis", value: Boolean(medical.hasTuberculosis) },
+                    { label: "Allergies", value: Boolean(medical.hasAllergies) },
+                    { label: "Cancer", value: Boolean(medical.hasCancer) },
+                    { label: "Other Conditions", value: Boolean(medical.hasOtherConditions) },
+                  ]}
+                />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <InfoCard label="Allergies Details" value={medical.allergiesDetails} />
+                  <InfoCard label="Cancer Details" value={medical.cancerDetails} />
+                  <InfoCard label="Other Conditions Details" value={medical.otherConditionsDetails} />
+                  <InfoCard label="Maintenance Medications" value={medical.maintenanceMedications} />
+                  <InfoCard label="Previous Illnesses / Surgeries" value={medical.previousIllnessesSurgeries} />
+                </div>
+              </div>
+            )}
+
+            {tab === "family" && (
+              <div className="space-y-5">
+                <SectionTitle title="Family History" />
+                <QrFlagGroup
+                  title="Hereditary Conditions"
+                  icon={<Users className="h-4 w-4" />}
+                  tone="bad"
+                  columns={2}
+                  items={[
+                    { label: "Asthma / Allergies", value: Boolean(family.asthmaAllergies) },
+                    { label: "Birth Defects", value: Boolean(family.birthDefects) },
+                    { label: "Cancer", value: Boolean(family.cancer) },
+                    { label: "Dementia", value: Boolean(family.dementia) },
+                    { label: "Diabetes", value: Boolean(family.diabetes) },
+                    { label: "Hypertension", value: Boolean(family.hypertension) },
+                    { label: "Kidney Disease", value: Boolean(family.kidneyDisease) },
+                    { label: "Mental Illness", value: Boolean(family.mentalIllness) },
+                  ]}
+                />
+              </div>
+            )}
+
+            {tab === "social" && (
+              <div className="space-y-5">
+                <SectionTitle title="Personal / Social History" />
+                <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                  <QrFlagGroup
+                    title="Healthy Lifestyle"
+                    icon={<HeartPulse className="h-4 w-4" />}
+                    tone="good"
+                    items={[
+                      { label: "Eats Healthy Diet", value: Boolean(social.eatsHealthyDiet) },
+                      { label: "Adequate Physical Activity", value: Boolean(social.adequatePhysicalActivity) },
+                      { label: "Sufficient Rest / Sleep", value: Boolean(social.sufficientRestSleep) },
+                      { label: "Normal Growth / Development", value: Boolean(social.normalGrowthDevelopment) },
+                      { label: "Multiple Sex Partners", value: Boolean(social.multipleSexPartners), tone: "bad" },
+                    ]}
+                  />
+                  <QrFlagGroup
+                    title="Risk Factors"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                    tone="bad"
+                    items={[
+                      { label: "Smokes Tobacco", value: Boolean(social.smokesTobacco) },
+                      { label: "Tobacco Packs / Year", value: social.tobaccoPacksPerYear ?? null },
+                      { label: "Drinks Alcohol", value: Boolean(social.drinksAlcohol) },
+                      { label: "Alcohol Bottles / Day", value: social.alcoholBottlesPerDay ?? null },
+                      { label: "Takes Illicit Drugs", value: Boolean(social.takesIllicitDrugs) },
+                      { label: "Illicit Drugs Details", value: social.illicitDrugsDetails ?? null },
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+
+            {tab === "assessment" && (
+              <div className="space-y-5">
+                <SectionTitle title="Assessment" />
+                <AssessmentForm
+                  residentId={referral.residentId}
+                  referralId={referral.id}
+                  onSaved={loadDiagnoses}
+                />
+
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                  <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                    Recorded Assessments
+                  </h4>
+                  {diagnoses.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 px-3 py-4 text-center text-sm font-semibold text-slate-500">
+                      No assessments recorded yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {diagnoses.map((d) => (
+                        <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-xs font-bold text-slate-800">{d.diagnosedBy?.fullName?.trim() || "Health Worker"}</p>
+                            <span className="text-[11px] font-bold text-slate-400">{new Date(d.createdAt).toLocaleString()}</span>
+                          </div>
+                          {Array.isArray(d.conditions) && d.conditions.length > 0 && (
+                            <p className="mt-1 text-xs font-semibold text-amber-700">{d.conditions.join(", ")}</p>
+                          )}
+                          {d.isHealthy && (
+                            <p className="mt-1 text-xs font-semibold text-emerald-700">Healthy / No findings</p>
+                          )}
+                          {d.notes && d.notes.trim() && (
+                            <p className="mt-1 whitespace-pre-line text-xs text-slate-700"><span className="font-bold">Notes:</span> {d.notes}</p>
+                          )}
+                          {d.medicalAdvice && d.medicalAdvice.trim() && (
+                            <p className="mt-1 whitespace-pre-line text-xs text-emerald-800"><span className="font-bold">Medical Advice:</span> {d.medicalAdvice}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {pending && (
@@ -447,37 +581,6 @@ function ReferralModal({
       </div>
     </div>,
     document.body
-  );
-}
-
-function DetailSection({
-  icon,
-  title,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[24px] border border-sky-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-          {icon}
-        </div>
-        <h3 className="text-lg font-black text-slate-900">{title}</h3>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
-    </div>
-  );
-}
-
-function DetailInfo({ label, value }: { label: string; value: unknown }) {
-  return (
-    <div className="min-w-0 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3">
-      <p className="text-[11px] font-black uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-900">{fmtValue(value)}</p>
-    </div>
   );
 }
 

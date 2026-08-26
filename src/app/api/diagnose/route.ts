@@ -78,6 +78,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const residentId = String(body.residentId || "").trim();
+    const referralId = body.referralId ? String(body.referralId).trim() : null;
     const appointmentId = body.appointmentId ? String(body.appointmentId).trim() : null;
     const isHealthy = Boolean(body.isHealthy);
     const notes = String(body.notes || "").trim();
@@ -99,20 +100,55 @@ export async function POST(req: Request) {
       );
     }
 
-    const resident = await db.resident.findFirst({
-      where: { id: residentId, barangayId: user.barangayId },
-      include: { medicalHistory: true },
-    });
-    if (!resident) {
-      return NextResponse.json({ error: "Resident not found." }, { status: 404 });
-    }
+    let effectiveResidentId = residentId;
+    let historyMedical: Record<string, unknown> | null = null;
+    let syncHistory = true;
+    let effectiveAppointmentId = appointmentId;
 
-    if (appointmentId) {
-      const appointment = await db.appointment.findFirst({
-        where: { id: appointmentId, residentId, barangayId: user.barangayId },
+    if (referralId) {
+      const referral = await db.residentReferral.findUnique({
+        where: { id: referralId },
       });
-      if (!appointment) {
-        return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
+      if (!referral) {
+        return NextResponse.json({ error: "Referral not found." }, { status: 404 });
+      }
+      if (
+        referral.targetBarangayId !== user.barangayId &&
+        referral.sourceBarangayId !== user.barangayId
+      ) {
+        return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+      }
+
+      effectiveResidentId = referral.residentId;
+      effectiveAppointmentId = null;
+      // Only the resident's home (source) barangay updates the canonical medical
+      // history. A cross-barangay consult records the assessment on its own.
+      syncHistory = referral.sourceBarangayId === user.barangayId;
+
+      if (syncHistory) {
+        const homeResident = await db.resident.findFirst({
+          where: { id: effectiveResidentId },
+          include: { medicalHistory: true },
+        });
+        historyMedical = (homeResident?.medicalHistory ?? null) as Record<string, unknown> | null;
+      }
+    } else {
+      const resident = await db.resident.findFirst({
+        where: { id: residentId, barangayId: user.barangayId },
+        include: { medicalHistory: true },
+      });
+      if (!resident) {
+        return NextResponse.json({ error: "Resident not found." }, { status: 404 });
+      }
+      historyMedical = (resident.medicalHistory ?? null) as Record<string, unknown> | null;
+
+      if (appointmentId) {
+        const appointment = await db.appointment.findFirst({
+          where: { id: appointmentId, residentId, barangayId: user.barangayId },
+        });
+        if (!appointment) {
+          return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
+        }
       }
     }
 
@@ -120,10 +156,10 @@ export async function POST(req: Request) {
 
     const diagnosis = await db.diagnosis.create({
       data: {
-        residentId,
+        residentId: effectiveResidentId,
         diagnosedById: user.id,
         barangayId: user.barangayId,
-        appointmentId,
+        appointmentId: effectiveAppointmentId,
         isHealthy,
         conditions: finalConditions,
         notes: notes || null,
@@ -131,8 +167,8 @@ export async function POST(req: Request) {
       },
     });
 
-    if (finalConditions.length > 0) {
-      const history = resident.medicalHistory;
+    if (syncHistory && finalConditions.length > 0) {
+      const history = historyMedical;
       const updateData: Record<string, boolean | string | null> = {};
 
       for (const key of finalConditions) {
@@ -140,17 +176,17 @@ export async function POST(req: Request) {
         updateData[key] = true;
         if (field.detailField) {
           updateData[field.detailField] = mergeDetail(
-            history?.[field.detailField as keyof typeof history] as string | null | undefined,
+            history?.[field.detailField] as string | null | undefined,
             details[field.detailField]
           );
         }
       }
 
       await db.residentMedicalHistory.upsert({
-        where: { residentId },
+        where: { residentId: effectiveResidentId },
         update: updateData,
         create: {
-          residentId,
+          residentId: effectiveResidentId,
           barangayId: user.barangayId,
           ...updateData,
         },
