@@ -113,7 +113,39 @@ export function MaternalRecordsTab() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="space-y-2 md:hidden">
+              {filtered.map((r) => (
+                <div key={r.id} className="flex items-center gap-3 rounded-2xl bg-[#EFF6FF] p-3 shadow-sm">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#2563EB]">
+                    <UserRound className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-slate-900">{fullName(r)}</p>
+                    <p className="truncate text-xs font-semibold text-slate-500">
+                      {r.age} yrs{r.sitio ? ` · ${r.sitio}` : ""}
+                    </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                        r.hasRecord ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {r.hasRecord ? "Has Record" : "No Record"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(r)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[#2563EB] px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                  >
+                    <ClipboardList className="h-3.5 w-3.5" />
+                    {r.hasRecord ? "Update" : "Input"}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
             <table className="min-w-full w-full border-separate border-spacing-y-2">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
@@ -163,7 +195,8 @@ export function MaternalRecordsTab() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
 
