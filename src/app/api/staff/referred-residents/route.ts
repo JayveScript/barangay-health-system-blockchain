@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import { REFERRAL_RECEIVING_BARANGAY_NAMES } from "@/lib/barangay-options";
-import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
+import { anchorRecord } from "@/lib/blockchain";
 
 function createSlots(startTime: string, endTime: string, slotMinutes: number) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -592,15 +592,6 @@ export async function POST(req: Request) {
         personalSocialHistory,
       },
       "referral"
-    ).then(() =>
-      logAuditEvent(
-        AuditEventType.REFERRAL_CREATED,
-        user.id,
-        residentId,
-        sourceBarangayId,
-        null,
-        { role: user.role, targetBarangayId, referralId: referral.id }
-      )
     ).catch(err => console.error("[blockchain] referral anchor failed:", err));
 
     return NextResponse.json(

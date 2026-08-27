@@ -6,7 +6,6 @@ import { decryptQrToken, type QrPayload } from "@/lib/qr-encryption";
 import { signQrAccessToken, QR_ACCESS_SESSION_MINUTES } from "@/lib/qr-access";
 import { extractRequestMeta, logQrScanActivity } from "@/lib/qr-audit";
 import { transporter } from "@/lib/mail";
-import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 export async function POST(req: Request) {
   const meta = extractRequestMeta(req);
@@ -120,14 +119,6 @@ export async function POST(req: Request) {
         failureReason: "Invalid password",
         meta,
       });
-      logAuditEvent(
-        AuditEventType.QR_SCAN_DENIED,
-        user.id,
-        payload.residentId,
-        user.barangayId,
-        null,
-        { role: user.role, reason: "invalid_password" }
-      ).catch(err => console.error("[blockchain] QR deny log failed:", err));
       return NextResponse.json(
         { error: "Access denied. Incorrect password." },
         { status: 401 }
@@ -189,15 +180,6 @@ async function grantAccess(
     success: true,
     meta,
   });
-
-  logAuditEvent(
-    AuditEventType.QR_SCAN_GRANTED,
-    user.id,
-    residentId,
-    user.barangayId ?? "unknown",
-    null,
-    { role: user.role }
-  ).catch(err => console.error("[blockchain] QR grant log failed:", err));
 
   const res = NextResponse.json({
     success: true,

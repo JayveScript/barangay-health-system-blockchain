@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { DEFAULT_BARANGAY_CITY } from "@/lib/barangay-options";
-import { anchorRecord, logAuditEvent, AuditEventType } from "@/lib/blockchain";
+import { anchorRecord } from "@/lib/blockchain";
 import { sendRegistrationWelcomeEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
@@ -281,15 +281,6 @@ export async function POST(req: Request) {
             takesIllicitDrugs: pending.takesIllicitDrugs, illicitDrugsDetails: pending.illicitDrugsDetails,
           },
           "personal_social"
-        );
-
-        await logAuditEvent(
-          AuditEventType.RECORD_CREATED,
-          result.userId,
-          residentId,
-          barangayId,
-          null,
-          { event: "resident_registered" }
         );
       } catch (blockchainErr) {
         console.error("[blockchain] verify-code anchor failed:", blockchainErr);

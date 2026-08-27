@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
-import { logAuditEvent, AuditEventType } from "@/lib/blockchain";
 
 const ALLOWED_ROLES = ["BHW", "DOCTOR", "NURSE"];
 
@@ -60,19 +59,6 @@ export async function PATCH(
         },
       },
     });
-
-    logAuditEvent(
-      action === "accept"
-        ? AuditEventType.REFERRAL_ACCEPTED
-        : AuditEventType.REFERRAL_REJECTED,
-      user.id,
-      referral.residentId,
-      user.barangayId,
-      null,
-      { role: String(user.role), referralId: id, status: newStatus }
-    ).catch((err) =>
-      console.error("[blockchain] referral status audit failed:", err)
-    );
 
     return NextResponse.json({ success: true, referral: updated });
   } catch (error) {
