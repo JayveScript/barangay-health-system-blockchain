@@ -19,6 +19,7 @@ import {
   Loader2,
   LogOut,
   MapPin,
+  Megaphone,
   Menu,
   Search,
   ShieldCheck,
@@ -71,7 +72,7 @@ type Me = {
   isVerified: boolean;
 };
 
-type Tab = "overview" | "residents" | "staff" | "admins";
+type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements";
 
 export default function SuperAdminDashboard() {
   const [me, setMe] = useState<Me | null>(null);
@@ -106,7 +107,9 @@ export default function SuperAdminDashboard() {
     { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
     { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
     { id: "staff", label: "Staff", icon: <Stethoscope className="h-5 w-5" /> },
+    { id: "create-barangay", label: "Create Barangay", icon: <UserPlus className="h-5 w-5" /> },
     { id: "admins", label: "Barangay Admins", icon: <ShieldCheck className="h-5 w-5" /> },
+    { id: "announcements", label: "Announcements", icon: <Megaphone className="h-5 w-5" /> },
   ];
 
   return (
@@ -183,7 +186,9 @@ export default function SuperAdminDashboard() {
             {tab === "overview" && <OverviewTab />}
             {tab === "residents" && <ResidentsTab />}
             {tab === "staff" && <StaffTab />}
-            {tab === "admins" && <AdminsTab />}
+            {tab === "create-barangay" && <CreateBarangayTab />}
+            {tab === "admins" && <AdminsListTab />}
+            {tab === "announcements" && <AnnouncementsTab />}
           </section>
         </div>
       </div>
@@ -693,13 +698,10 @@ function StaffTab() {
   );
 }
 
-function AdminsTab() {
-  const [data, setData] = useState<Summary | null>(null);
-  const [loading, setLoading] = useState(true);
+function CreateBarangayTab() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [creating, setCreating] = useState(false);
-  const [resetFor, setResetFor] = useState<{ id: string; username: string } | null>(null);
 
   const [form, setForm] = useState({
     barangayName: "",
@@ -709,21 +711,6 @@ function AdminsTab() {
     fullName: "",
     email: "",
   });
-
-  const load = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/superadmin/summary");
-      const json = await res.json();
-      if (res.ok) setData(json);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -754,7 +741,6 @@ function AdminsTab() {
       }
       setMessage(`Created ${form.barangayName} with admin ${normalizeBarangayHcmsUsername(form.username)}.`);
       setForm({ barangayName: "", municipality: "Davao City", username: "", password: "", fullName: "", email: "" });
-      await load();
     } catch {
       setError("Unable to connect to the server.");
     } finally {
@@ -777,14 +763,20 @@ function AdminsTab() {
 
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Field label="Barangay Name" value={form.barangayName} onChange={(v) => setForm((p) => ({ ...p, barangayName: v }))} />
-            <Field label="Municipality" value={form.municipality} onChange={(v) => setForm((p) => ({ ...p, municipality: v }))} />
+            <Field
+              label="Barangay"
+              placeholder="Barangay this admin will manage"
+              value={form.barangayName}
+              onChange={(v) => setForm((p) => ({ ...p, barangayName: v }))}
+            />
+            <Field label="Municipality" value={form.municipality} onChange={() => {}} readOnly />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field
-              label={`Username (ends with ${BARANGAY_ADMIN_USERNAME_SUFFIX})`}
+              label="Username"
               value={form.username}
-              onChange={(v) => setForm((p) => ({ ...p, username: normalizeBarangayHcmsUsername(v) }))}
+              suffix={BARANGAY_ADMIN_USERNAME_SUFFIX}
+              onChange={(v) => setForm((p) => ({ ...p, username: v.replace(/[@\s]/g, "") }))}
             />
             <Field label="Password" type="password" value={form.password} onChange={(v) => setForm((p) => ({ ...p, password: v }))} />
           </div>
@@ -806,7 +798,32 @@ function AdminsTab() {
           </button>
         </form>
       </div>
+    </div>
+  );
+}
 
+function AdminsListTab() {
+  const [data, setData] = useState<Summary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [resetFor, setResetFor] = useState<{ id: string; username: string } | null>(null);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/superadmin/summary");
+      const json = await res.json();
+      if (res.ok) setData(json);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <div className="space-y-5 pb-4">
       <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-blue-700">
@@ -858,6 +875,92 @@ function AdminsTab() {
           onClose={() => setResetFor(null)}
         />
       )}
+    </div>
+  );
+}
+
+function AnnouncementsTab() {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [publishDate, setPublishDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    if (!title.trim() || !content.trim()) {
+      setError("Title and content are required.");
+      return;
+    }
+    try {
+      setPosting(true);
+      const res = await fetch("/api/superadmin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.trim(), content: content.trim(), publishDate }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Failed to post announcement.");
+        return;
+      }
+      setMessage(`Announcement broadcast to all ${json.count ?? ""} barangay${json.count === 1 ? "" : "s"}.`);
+      setTitle("");
+      setContent("");
+    } catch {
+      setError("Unable to connect to the server.");
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5 pb-4">
+      <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+            <Megaphone className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 sm:text-xl">System-wide Announcement</h3>
+            <p className="text-sm text-slate-500">
+              Posts to <span className="font-bold text-slate-700">every barangay</span> — all barangays&apos; residents and staff will see it.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={submit} className="space-y-4">
+          <Field label="Title" value={title} onChange={setTitle} placeholder="Announcement title" />
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Content</label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={5}
+              placeholder="Write the announcement all barangays will see…"
+              className="w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500"
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Field label="Publish Date" type="date" value={publishDate} onChange={setPublishDate} />
+          </div>
+
+          {error && <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>}
+          {message && <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{message}</div>}
+
+          <button
+            type="submit"
+            disabled={posting}
+            className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[#1D4ED8] to-[#4338CA] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition hover:opacity-95 disabled:opacity-60"
+          >
+            <Megaphone className="h-4 w-4" />
+            {posting ? "Broadcasting…" : "Announce to All Barangays"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -1070,21 +1173,43 @@ function Field({
   value,
   onChange,
   type = "text",
+  suffix,
+  readOnly = false,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  suffix?: string;
+  readOnly?: boolean;
+  placeholder?: string;
 }) {
+  const showSuffix = Boolean(suffix) && value.length > 0 && !value.includes("@");
   return (
     <div>
       <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
-      />
+      <div
+        className={`flex min-h-[48px] items-center rounded-2xl border px-4 transition ${
+          readOnly
+            ? "border-slate-200 bg-slate-100"
+            : "border-sky-200 bg-white focus-within:border-sky-500"
+        }`}
+      >
+        <input
+          type={type}
+          value={value}
+          readOnly={readOnly}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full bg-transparent text-sm font-semibold outline-none ${
+            readOnly ? "cursor-not-allowed text-slate-500" : "text-slate-900"
+          }`}
+        />
+        {showSuffix && (
+          <span className="ml-1 whitespace-nowrap text-sm font-bold text-slate-400">{suffix}</span>
+        )}
+      </div>
     </div>
   );
 }
