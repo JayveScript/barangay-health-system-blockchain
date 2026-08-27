@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Baby,
   CheckCircle2,
+  ClipboardList,
   HeartPulse,
   Save,
   Search,
@@ -112,34 +113,56 @@ export function MaternalRecordsTab() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setSelected(r)}
-                className="group flex items-center gap-3 rounded-2xl border border-[#BFDBFE] bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#2563EB] hover:shadow-md"
-              >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#DBEAFE] text-[#2563EB]">
-                  <UserRound className="h-6 w-6" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-black text-slate-900">{fullName(r)}</p>
-                  <p className="truncate text-xs font-semibold text-slate-500">
-                    {r.age} yrs{r.sitio ? ` · ${r.sitio}` : ""}
-                  </p>
-                  <span
-                    className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                      r.hasRecord
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {r.hasRecord ? "Has Record" : "No Record"}
-                  </span>
-                </div>
-              </button>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full w-full border-separate border-spacing-y-2">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                  <th className="px-3">Resident Name</th>
+                  <th className="px-3">Age</th>
+                  <th className="px-3">Sitio</th>
+                  <th className="px-3 text-center">Record</th>
+                  <th className="px-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => (
+                  <tr key={r.id} className="bg-[#EFF6FF] shadow-sm">
+                    <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-900">
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#2563EB]">
+                          <UserRound className="h-4 w-4" />
+                        </span>
+                        <span className="block truncate whitespace-nowrap">{fullName(r)}</span>
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{r.age}</td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{r.sitio || "—"}</td>
+                    <td className="px-3 py-3 text-center">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${
+                          r.hasRecord
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {r.hasRecord ? "Has Record" : "No Record"}
+                      </span>
+                    </td>
+                    <td className="rounded-r-2xl px-3 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setSelected(r)}
+                        title={r.hasRecord ? "View / update maternal records" : "Input maternal records"}
+                        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-[#2563EB] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                      >
+                        <ClipboardList className="h-3.5 w-3.5" />
+                        {r.hasRecord ? "View / Update" : "Input Records"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

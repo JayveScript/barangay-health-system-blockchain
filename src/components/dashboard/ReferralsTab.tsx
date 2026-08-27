@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import {
   AlertCircle,
   ArrowLeft,
+  CalendarDays,
   Check,
   CheckCircle2,
   ClipboardList,
@@ -162,6 +163,19 @@ type StaffReferralsResponse = {
   sentReferrals: ResidentReferral[];
 };
 
+function localDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function sameLocalDate(iso: string, dateStr: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return false;
+  return localDateStr(d) === dateStr;
+}
+
 export function ReferralsTab() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -177,6 +191,8 @@ export function ReferralsTab() {
     ResidentReferral[]
   >([]);
   const [sentReferrals, setSentReferrals] = useState<ResidentReferral[]>([]);
+  const [referralDate, setReferralDate] = useState<string>(() => localDateStr());
+  const [showAllDates, setShowAllDates] = useState(false);
   const [selectedResidentId, setSelectedResidentId] = useState("");
   const [selectedTargetBarangayId, setSelectedTargetBarangayId] = useState("");
   const [reason, setReason] = useState("");
@@ -446,16 +462,52 @@ export function ReferralsTab() {
         </form>
       </Panel>
 
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50/60 px-4 py-3">
+        <span className="inline-flex items-center gap-2 text-sm font-black text-slate-700">
+          <CalendarDays className="h-4 w-4 text-sky-600" />
+          {showAllDates ? "Showing all referrals" : "Referrals for"}
+        </span>
+        {!showAllDates && (
+          <>
+            <input
+              type="date"
+              value={referralDate}
+              max={localDateStr()}
+              onChange={(e) => setReferralDate(e.target.value)}
+              className="rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+            />
+            <button
+              type="button"
+              onClick={() => setReferralDate(localDateStr())}
+              className="rounded-xl border border-sky-200 bg-white px-3 py-2 text-xs font-bold text-sky-700 transition hover:bg-sky-100"
+            >
+              Today
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => setShowAllDates((v) => !v)}
+          className={`ml-auto rounded-xl px-3 py-2 text-xs font-bold transition ${
+            showAllDates
+              ? "bg-[#0EA5E9] text-white hover:bg-sky-600"
+              : "border border-sky-200 bg-white text-sky-700 hover:bg-sky-100"
+          }`}
+        >
+          {showAllDates ? "Back to daily view" : "Show all dates"}
+        </button>
+      </div>
+
       <div className="grid gap-5 xl:grid-cols-2">
         <Panel
           icon={<Inbox className="h-5 w-5" />}
           title="Received Referrals"
-          subtitle="Residents referred to this barangay."
+          subtitle={showAllDates ? "Residents referred to this barangay." : "Referred to this barangay on the selected date."}
         >
           <ReferralList
             loading={loading}
-            emptyText="No received referrals."
-            referrals={receivedReferrals}
+            emptyText={showAllDates ? "No received referrals." : "No received referrals on this date."}
+            referrals={showAllDates ? receivedReferrals : receivedReferrals.filter((r) => sameLocalDate(r.createdAt, referralDate))}
             direction="received"
             onView={setPendingReferral}
             onAct={actOnReferral}
@@ -466,12 +518,12 @@ export function ReferralsTab() {
         <Panel
           icon={<ClipboardList className="h-5 w-5" />}
           title="Sent Referrals"
-          subtitle="Residents sent to the other barangay."
+          subtitle={showAllDates ? "Residents sent to the other barangay." : "Sent to the other barangay on the selected date."}
         >
           <ReferralList
             loading={loading}
-            emptyText="No sent referrals."
-            referrals={sentReferrals}
+            emptyText={showAllDates ? "No sent referrals." : "No sent referrals on this date."}
+            referrals={showAllDates ? sentReferrals : sentReferrals.filter((r) => sameLocalDate(r.createdAt, referralDate))}
             direction="sent"
             onView={setPendingReferral}
           />
