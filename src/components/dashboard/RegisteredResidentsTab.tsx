@@ -33,6 +33,7 @@ import {
   InfoCard,
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
+import { BlockchainVerifyModal } from "@/components/dashboard/BlockchainVerifyModal";
 
 type History = Record<string, boolean | string | null> | null;
 
@@ -106,7 +107,13 @@ function IconActionButton({
   );
 }
 
-export function RegisteredResidentsTab() {
+export function RegisteredResidentsTab({
+  endpoint = "/api/staff/residents",
+  showBlockchainVerify = false,
+}: {
+  endpoint?: string;
+  showBlockchainVerify?: boolean;
+} = {}) {
   const [residents, setResidents] = useState<StaffResident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -121,12 +128,13 @@ export function RegisteredResidentsTab() {
   const [digitalIdResident, setDigitalIdResident] = useState<StaffResident | null>(null);
   const [editResident, setEditResident] = useState<StaffResident | null>(null);
   const [editPassword, setEditPassword] = useState("");
+  const [verifyResident, setVerifyResident] = useState<StaffResident | null>(null);
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch("/api/staff/residents", { cache: "no-store" });
+      const res = await fetch(endpoint, { cache: "no-store" });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error || "Failed to load residents.");
@@ -139,7 +147,7 @@ export function RegisteredResidentsTab() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [endpoint]);
 
   useEffect(() => {
     load();
@@ -220,6 +228,14 @@ export function RegisteredResidentsTab() {
         icon={<Edit className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
         onClick={() => openReAuth(r, "edit")}
       />
+      {showBlockchainVerify && (
+        <IconActionButton
+          label="Verify on Blockchain"
+          dense={dense}
+          icon={<ShieldCheck className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
+          onClick={() => setVerifyResident(r)}
+        />
+      )}
     </div>
   );
 
@@ -373,6 +389,12 @@ export function RegisteredResidentsTab() {
       {viewResident && (
         <Portal>
           <ViewModal resident={viewResident} onClose={() => setViewResident(null)} />
+        </Portal>
+      )}
+
+      {verifyResident && (
+        <Portal>
+          <BlockchainVerifyModal resident={verifyResident} onClose={() => setVerifyResident(null)} />
         </Portal>
       )}
 
