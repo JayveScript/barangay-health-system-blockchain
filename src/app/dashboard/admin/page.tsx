@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
+import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import * as htmlToImage from "html-to-image";
 import {
   Activity,
@@ -1110,16 +1111,19 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={async () => {
-                    await fetch("/api/logout", { method: "POST" });
-                    window.location.href = "/login";
-                  }}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log Out
-                </button>
+                <div className="flex items-center gap-2">
+                  <BlockchainStatusBadge />
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/logout", { method: "POST" });
+                      window.location.href = "/login";
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log Out
+                  </button>
+                </div>
               </div>
             </div>
 
