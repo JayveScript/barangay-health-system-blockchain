@@ -568,7 +568,7 @@ function BlockchainVerifyModal({
         )}
 
         <p className="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-[11px] font-semibold leading-relaxed text-slate-400">
-          Each record was sealed on the blockchain at registration. Verification re-hashes the current database record and compares it to the on-chain seal — if anyone altered the data, the hashes won&apos;t match.
+          Only medical records are sealed on the blockchain and kept tamper-proof — new findings can be added (each re-seals a new immutable version), but past records cannot be secretly edited. Identity like name and address is editable and is not sealed. Verification re-hashes the current record and compares it to the latest on-chain seal.
         </p>
       </div>
     </div>
