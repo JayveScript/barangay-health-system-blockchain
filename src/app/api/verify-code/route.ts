@@ -3,6 +3,11 @@ import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { DEFAULT_BARANGAY_CITY } from "@/lib/barangay-options";
 import { anchorRecord } from "@/lib/blockchain";
+import {
+  buildResidentRecords,
+  RESIDENT_RECORD_ORDER,
+  type ResidentWithHistories,
+} from "@/lib/resident-records";
 import { sendRegistrationWelcomeEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
@@ -226,62 +231,27 @@ export async function POST(req: Request) {
     ;(async () => {
       try {
         const residentId = result.residentId;
-        const barangayId = pending.barangayId;
 
-        await anchorRecord(
-          residentId,
-          {
-            lastName: pending.lastName, firstName: pending.firstName,
-            middleName: pending.middleName, age: pending.age,
-            sex: pending.sex, birthDate: pending.birthDate,
-            civilStatus: pending.civilStatus, completeAddress: pending.completeAddress,
-            barangayName: pending.barangayName, city: pending.city,
+        const full = await db.resident.findUnique({
+          where: { id: residentId },
+          include: {
+            medicalHistory: true,
+            familyHistory: true,
+            personalSocialHistory: true,
           },
-          "resident_profile"
+        });
+        if (!full) return;
+
+        const records = buildResidentRecords(
+          full as unknown as ResidentWithHistories
         );
 
-        await anchorRecord(
-          residentId,
-          {
-            hasHypertension: pending.hasHypertension, hasDiabetes: pending.hasDiabetes,
-            hasStiHiv: pending.hasStiHiv, hasHeartDisease: pending.hasHeartDisease,
-            hasKidneyFailure: pending.hasKidneyFailure, hasTuberculosis: pending.hasTuberculosis,
-            hasAllergies: pending.hasAllergies, allergiesDetails: pending.allergiesDetails,
-            hasCancer: pending.hasCancer, cancerDetails: pending.cancerDetails,
-            hasOtherConditions: pending.hasOtherConditions,
-            otherConditionsDetails: pending.otherConditionsDetails,
-            maintenanceMedications: pending.maintenanceMedications,
-            previousIllnessesSurgeries: pending.previousIllnessesSurgeries,
-          },
-          "medical_history"
-        );
-
-        await anchorRecord(
-          residentId,
-          {
-            asthmaAllergies: pending.familyAsthmaAllergies,
-            birthDefects: pending.familyBirthDefects,
-            cancer: pending.familyCancer, dementia: pending.familyDementia,
-            diabetes: pending.familyDiabetes, hypertension: pending.familyHypertension,
-            kidneyDisease: pending.familyKidneyDisease, mentalIllness: pending.familyMentalIllness,
-          },
-          "family_history"
-        );
-
-        await anchorRecord(
-          residentId,
-          {
-            eatsHealthyDiet: pending.eatsHealthyDiet,
-            adequatePhysicalActivity: pending.adequatePhysicalActivity,
-            sufficientRestSleep: pending.sufficientRestSleep,
-            normalGrowthDevelopment: pending.normalGrowthDevelopment,
-            multipleSexPartners: pending.multipleSexPartners,
-            smokesTobacco: pending.smokesTobacco, tobaccoPacksPerYear: pending.tobaccoPacksPerYear,
-            drinksAlcohol: pending.drinksAlcohol, alcoholBottlesPerDay: pending.alcoholBottlesPerDay,
-            takesIllicitDrugs: pending.takesIllicitDrugs, illicitDrugsDetails: pending.illicitDrugsDetails,
-          },
-          "personal_social"
-        );
+        for (const recordType of RESIDENT_RECORD_ORDER) {
+          const data = records[recordType];
+          if (data) {
+            await anchorRecord(residentId, data, recordType);
+          }
+        }
       } catch (blockchainErr) {
         console.error("[blockchain] verify-code anchor failed:", blockchainErr);
       }
