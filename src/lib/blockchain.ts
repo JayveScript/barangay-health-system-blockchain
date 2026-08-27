@@ -44,6 +44,16 @@ export type RecordType =
   | "referral";
 
 
+// Master kill-switch. Blockchain anchoring/audit is ON by default (so the
+// demo and production stay tamper-proof). To load-test without spending the
+// free chain's rate limit, set BLOCKCHAIN_ENABLED=false in the environment;
+// every write becomes an instant no-op and every read returns a safe default.
+// Remove the var (or set it to true) to turn anchoring back on for the demo.
+export function isBlockchainEnabled(): boolean {
+  const v = String(process.env.BLOCKCHAIN_ENABLED ?? "").trim().toLowerCase();
+  return !["false", "0", "off", "no", "disabled"].includes(v);
+}
+
 let _provider: ethers.JsonRpcProvider | null = null;
 let _wallet: ethers.Wallet | null = null;
 let _registry: ethers.Contract | null = null;
@@ -91,9 +101,13 @@ export async function anchorRecord(
   recordData: object,
   recordType: RecordType
 ): Promise<{ txHash: string; recordHash: string }> {
-  const { registry } = getBlockchainClient();
   const recordHash = hashRecord(recordData);
 
+  if (!isBlockchainEnabled()) {
+    return { txHash: "", recordHash };
+  }
+
+  const { registry } = getBlockchainClient();
   const tx = await registry.anchorRecord(residentId, recordHash, recordType);
   const receipt = await tx.wait();
 
@@ -105,9 +119,13 @@ export async function verifyRecord(
   recordData: object,
   recordType: RecordType
 ): Promise<{ verified: boolean; onChainHash: string; currentHash: string; timestamp: number }> {
-  const { registry } = getBlockchainClient();
   const currentHash = hashRecord(recordData);
 
+  if (!isBlockchainEnabled()) {
+    return { verified: false, onChainHash: "", currentHash, timestamp: 0 };
+  }
+
+  const { registry } = getBlockchainClient();
   const [onChainHash, timestampBig] = await registry.getLatestRecord(residentId, recordType);
   const onChainHashHex: string = onChainHash;
   const timestamp = Number(timestampBig);
@@ -124,6 +142,10 @@ export async function getRecordHistory(
   residentId: string,
   recordType: RecordType
 ): Promise<Array<{ hash: string; recordType: string; timestamp: number; anchoredBy: string; revoked: boolean }>> {
+  if (!isBlockchainEnabled()) {
+    return [];
+  }
+
   const { registry } = getBlockchainClient();
   const count = Number(await registry.getRecordCount(residentId));
   const history = [];
@@ -153,6 +175,10 @@ export async function logAuditEvent(
   dataHash?: string | null,
   meta?: Record<string, string> | null
 ): Promise<{ auditId: number; txHash: string }> {
+  if (!isBlockchainEnabled()) {
+    return { auditId: 0, txHash: "" };
+  }
+
   const { auditLog } = getBlockchainClient();
 
   const hashBytes32 = dataHash ?? ethers.ZeroHash;
@@ -193,6 +219,18 @@ export async function getAuditEntry(id: number): Promise<{
   metadata: string;
   timestamp: number;
 }> {
+  if (!isBlockchainEnabled()) {
+    return {
+      eventType: 0,
+      actorId: "",
+      targetId: "",
+      barangayId: "",
+      dataHash: ethers.ZeroHash,
+      metadata: "",
+      timestamp: 0,
+    };
+  }
+
   const { auditLog } = getBlockchainClient();
   const [eventType, actorId, targetId, barangayId, dataHash, metadata, timestamp] =
     await auditLog.getEntry(id);
@@ -209,6 +247,9 @@ export async function getAuditEntry(id: number): Promise<{
 }
 
 export async function isBlockchainReachable(): Promise<boolean> {
+  if (!isBlockchainEnabled()) {
+    return false;
+  }
   try {
     const { provider } = getBlockchainClient();
     await provider.getBlockNumber();
