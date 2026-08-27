@@ -4,7 +4,7 @@ import { getCurrentApiUser, canManageBarangay, isSuperAdmin } from "@/lib/tenant
 import { verifyRecord, isBlockchainEnabled, RecordType } from "@/lib/blockchain";
 import {
   buildResidentRecords,
-  RESIDENT_RECORD_ORDER,
+  MEDICAL_RECORD_ORDER,
   RESIDENT_RECORD_LABELS,
   type ResidentWithHistories,
 } from "@/lib/resident-records";
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         residentId,
         residentName,
         enabled: false,
-        results: RESIDENT_RECORD_ORDER.map((recordType) => ({
+        results: MEDICAL_RECORD_ORDER.map((recordType) => ({
           recordType,
           label: RESIDENT_RECORD_LABELS[recordType],
           status: "disabled" as const,
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     const records = buildResidentRecords(resident as unknown as ResidentWithHistories);
 
     const results = [];
-    for (const recordType of RESIDENT_RECORD_ORDER) {
+    for (const recordType of MEDICAL_RECORD_ORDER) {
       const data = records[recordType];
       if (!data) continue;
 

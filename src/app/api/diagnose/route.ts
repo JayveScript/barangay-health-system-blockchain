@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { anchorRecord } from "@/lib/blockchain";
+import {
+  buildResidentRecords,
+  type ResidentWithHistories,
+} from "@/lib/resident-records";
 
 const ALLOWED_ROLES = [
   "DOCTOR",
@@ -191,6 +196,23 @@ export async function POST(req: Request) {
           ...updateData,
         },
       });
+
+      // Medical records are append-only and tamper-proof: a new authorised
+      // finding re-seals the updated medical record as a fresh immutable
+      // version on-chain (older versions are kept). Fire-and-forget so the
+      // response is not blocked; a no-op when the blockchain is disabled.
+      const updatedFull = await db.resident.findUnique({
+        where: { id: effectiveResidentId },
+        include: { medicalHistory: true },
+      });
+      const medicalRecord = buildResidentRecords(
+        updatedFull as unknown as ResidentWithHistories
+      ).medical_history;
+      if (medicalRecord) {
+        anchorRecord(effectiveResidentId, medicalRecord, "medical_history").catch(
+          (err) => console.error("[blockchain] medical re-anchor failed:", err)
+        );
+      }
     }
 
     return NextResponse.json(

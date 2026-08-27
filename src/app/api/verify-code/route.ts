@@ -5,7 +5,7 @@ import { DEFAULT_BARANGAY_CITY } from "@/lib/barangay-options";
 import { anchorRecord } from "@/lib/blockchain";
 import {
   buildResidentRecords,
-  RESIDENT_RECORD_ORDER,
+  MEDICAL_RECORD_ORDER,
   type ResidentWithHistories,
 } from "@/lib/resident-records";
 import { sendRegistrationWelcomeEmail } from "@/lib/mail";
@@ -246,7 +246,7 @@ export async function POST(req: Request) {
           full as unknown as ResidentWithHistories
         );
 
-        for (const recordType of RESIDENT_RECORD_ORDER) {
+        for (const recordType of MEDICAL_RECORD_ORDER) {
           const data = records[recordType];
           if (data) {
             await anchorRecord(residentId, data, recordType);
