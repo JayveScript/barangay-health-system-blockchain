@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
+import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   normalizeBarangayHcmsUsername,
@@ -166,13 +167,16 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25 md:self-center"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log Out
-                </button>
+                <div className="flex items-center gap-2 self-start md:self-center">
+                  <BlockchainStatusBadge />
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log Out
+                  </button>
+                </div>
               </div>
             </div>
 
