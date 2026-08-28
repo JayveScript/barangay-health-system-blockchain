@@ -1278,7 +1278,7 @@ export default function AdminDashboardPage() {
           onChange={(e) => setSitioFilter(e.target.value)}
           className="min-h-[52px] w-full appearance-none rounded-2xl border border-sky-200 bg-sky-50 pl-12 pr-8 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
         >
-          <option value="all">All Sitios</option>
+          <option value="all">All Barangays</option>
           {centerSitios.map((sitio) => (
             <option key={sitio} value={sitio}>
               {sitio}

@@ -559,7 +559,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
                   </QrInfoGroup>
 
                   <QrInfoGroup title="Address" icon={<MapPin className="h-4 w-4" />}>
-                    <QrInfoRow label="Sitio" value={resident.barangayName} />
+                    <QrInfoRow label="Barangay" value={resident.barangayName} />
                     <QrInfoRow label="City" value={resident.city} />
                     <QrInfoRow label="Complete Address" value={resident.completeAddress} />
                   </QrInfoGroup>
