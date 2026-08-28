@@ -9,6 +9,10 @@ export const HEALTH_CENTERS = [
     name: "COLOSAS PROPER",
     sitios: ["Colosas Proper"],
   },
+  {
+    name: "TOMAS CLAUDIO HEALTH CENTER",
+    sitios: ["1-A", "2-A", "3-A", "4-A", "5-A", "6-A", "7-A", "8-A", "9-A", "10-A"],
+  },
 ] as const;
 
 export const HEALTH_CENTER_NAMES: string[] = HEALTH_CENTERS.map((h) => h.name);

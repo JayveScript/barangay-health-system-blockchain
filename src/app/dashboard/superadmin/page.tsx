@@ -10,6 +10,7 @@ import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   normalizeBarangayHcmsUsername,
 } from "@/lib/username-validation";
+import { HEALTH_CENTER_NAMES } from "@/lib/barangay-options";
 import {
   Activity,
   Building2,
@@ -489,12 +490,23 @@ function CreateBarangayTab() {
 
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Field
-              label="Barangay"
-              placeholder="Barangay this admin will manage"
-              value={form.barangayName}
-              onChange={(v) => setForm((p) => ({ ...p, barangayName: v }))}
-            />
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Barangay (Health Center)
+              </label>
+              <select
+                value={form.barangayName}
+                onChange={(e) => setForm((p) => ({ ...p, barangayName: e.target.value }))}
+                className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+              >
+                <option value="">— Select health center —</option>
+                {HEALTH_CENTER_NAMES.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Field label="Municipality" value={form.municipality} onChange={() => {}} readOnly />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
