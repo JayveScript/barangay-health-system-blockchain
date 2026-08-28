@@ -11,7 +11,18 @@ export const HEALTH_CENTERS = [
   },
   {
     name: "TOMAS CLAUDIO HEALTH CENTER",
-    sitios: ["1-A", "2-A", "3-A", "4-A", "5-A", "6-A", "7-A", "8-A", "9-A", "10-A"],
+    sitios: [
+      "Barangay 1-A",
+      "Barangay 2-A",
+      "Barangay 3-A",
+      "Barangay 4-A",
+      "Barangay 5-A",
+      "Barangay 6-A",
+      "Barangay 7-A",
+      "Barangay 8-A",
+      "Barangay 9-A",
+      "Barangay 10-A",
+    ],
   },
 ] as const;
 
