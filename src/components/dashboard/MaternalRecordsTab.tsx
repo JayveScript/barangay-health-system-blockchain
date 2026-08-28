@@ -151,7 +151,7 @@ export function MaternalRecordsTab() {
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
                   <th className="px-3">Resident Name</th>
                   <th className="px-3">Age</th>
-                  <th className="px-3">Sitio</th>
+                  <th className="px-3">Barangay</th>
                   <th className="px-3 text-center">Record</th>
                   <th className="px-3 text-center">Actions</th>
                 </tr>
