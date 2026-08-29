@@ -3,6 +3,7 @@ import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import { REFERRAL_RECEIVING_BARANGAY_NAMES } from "@/lib/barangay-options";
 import { anchorRecord } from "@/lib/blockchain";
+import { sendReferralReceivedEmail } from "@/lib/mail";
 
 function createSlots(startTime: string, endTime: string, slotMinutes: number) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -507,31 +508,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const [sourceAvailability, targetAvailability] = await Promise.all([
-      getBarangayAvailabilitySummary(sourceBarangayId),
-      getBarangayAvailabilitySummary(targetBarangayId),
-    ]);
-
-    if (sourceAvailability.hasAvailableDoctor) {
-      return NextResponse.json(
-        {
-          error:
-            "Referral is only allowed when your barangay has no open doctor slots.",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!targetAvailability.hasAvailableDoctor) {
-      return NextResponse.json(
-        {
-          error:
-            "Referral cannot be sent because the receiving barangay has no open doctor slots.",
-        },
-        { status: 400 }
-      );
-    }
-
     const existingReferral = await db.residentReferral.findFirst({
       where: {
         residentId,
@@ -593,6 +569,38 @@ export async function POST(req: Request) {
       },
       "referral"
     ).catch(err => console.error("[blockchain] referral anchor failed:", err));
+
+    // Email the receiving barangay's clinical staff (fire-and-forget).
+    (async () => {
+      try {
+        const recipients = await db.user.findMany({
+          where: {
+            barangayId: targetBarangayId,
+            role: { in: ["DOCTOR", "NURSE", "BHW", "MIDWIFE"] },
+            email: { not: null },
+          },
+          select: { email: true },
+        });
+        const residentName = `${resident.firstName} ${resident.middleName ?? ""} ${resident.lastName}`
+          .replace(/\s+/g, " ")
+          .trim();
+        await Promise.all(
+          recipients
+            .filter((r) => r.email)
+            .map((r) =>
+              sendReferralReceivedEmail(
+                r.email as string,
+                referral.sourceBarangay.name,
+                referral.targetBarangay.name,
+                residentName,
+                reason
+              ).catch((e) => console.error("[mail] referral received email failed:", e))
+            )
+        );
+      } catch (e) {
+        console.error("[mail] referral notify failed:", e);
+      }
+    })();
 
     return NextResponse.json(
       {

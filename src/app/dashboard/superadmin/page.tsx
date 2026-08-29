@@ -447,6 +447,10 @@ function CreateBarangayTab() {
       setError("Barangay name, username, and an 8+ character password are required.");
       return;
     }
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError("A valid email is required (used for referral notifications).");
+      return;
+    }
     try {
       setCreating(true);
       const res = await fetch("/api/admin/barangay-admins", {
@@ -520,7 +524,7 @@ function CreateBarangayTab() {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Full Name (optional)" value={form.fullName} onChange={(v) => setForm((p) => ({ ...p, fullName: v }))} />
-            <Field label="Email (optional)" type="email" value={form.email} onChange={(v) => setForm((p) => ({ ...p, email: v }))} />
+            <Field label="Email" type="email" value={form.email} onChange={(v) => setForm((p) => ({ ...p, email: v }))} placeholder="For referral notifications" />
           </div>
 
           {error && <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>}

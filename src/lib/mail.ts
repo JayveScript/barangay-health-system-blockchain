@@ -199,3 +199,64 @@ export async function sendOtpEmail(to: string, otp: string) {
     `,
   });
 }
+export async function sendReferralReceivedEmail(
+  to: string,
+  sourceBarangayName: string,
+  targetBarangayName: string,
+  residentName: string,
+  reason: string
+) {
+  await transporter.sendMail({
+    from: `"${targetBarangayName}" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `[Referral] New referred patient from ${sourceBarangayName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a;">
+        <div style="background: #0EA5E9; padding: 16px 24px; border-radius: 8px 8px 0 0;">
+          <h2 style="color: #ffffff; margin: 0;">🏥 Referred Patient</h2>
+          <p style="color: #e0f2fe; margin: 4px 0 0;">${targetBarangayName}</p>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
+          <p style="margin-top: 0;"><strong>${sourceBarangayName}</strong> has referred a patient to your barangay.</p>
+          <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-top: 12px;">
+            <p style="margin: 0 0 6px;"><strong>Patient:</strong> ${residentName}</p>
+            <p style="margin: 0;"><strong>Reason:</strong> ${reason}</p>
+          </div>
+          <p style="margin-top: 20px;">Please open the Kalyo app and go to <strong>Referrals → Received Referrals</strong> to review and accept this patient.</p>
+          <p style="margin-top: 24px; font-size: 12px; color: #94a3b8;">
+            This is an automated notification. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendReferralAcceptedEmail(
+  to: string,
+  targetBarangayName: string,
+  residentName: string
+) {
+  await transporter.sendMail({
+    from: `"${targetBarangayName}" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `[Referral Accepted] ${residentName} was accepted by ${targetBarangayName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a;">
+        <div style="background: #10b981; padding: 16px 24px; border-radius: 8px 8px 0 0;">
+          <h2 style="color: #ffffff; margin: 0;">✓ Referral Accepted</h2>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
+          <p style="margin-top: 0;"><strong>${targetBarangayName}</strong> has <strong>accepted</strong> the patient you referred:</p>
+          <div style="background: #f0fdf4; padding: 16px; border-radius: 6px; margin-top: 12px;">
+            <p style="margin: 0;"><strong>Patient:</strong> ${residentName}</p>
+          </div>
+          <p style="margin-top: 20px;">You can view the status in the Kalyo app under <strong>Referrals → Sent Referrals</strong>.</p>
+          <p style="margin-top: 24px; font-size: 12px; color: #94a3b8;">
+            This is an automated notification. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}

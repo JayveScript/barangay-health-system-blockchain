@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
+import { sendReferralAcceptedEmail } from "@/lib/mail";
 
-const ALLOWED_ROLES = ["BHW", "DOCTOR", "NURSE"];
+const ALLOWED_ROLES = ["BHW", "DOCTOR", "NURSE", "MIDWIFE"];
 
 export async function PATCH(
   req: Request,
@@ -55,10 +56,27 @@ export async function PATCH(
         sourceBarangay: true,
         targetBarangay: true,
         referredByStaff: {
-          select: { id: true, fullName: true, username: true },
+          select: { id: true, fullName: true, username: true, email: true },
         },
       },
     });
+
+    // On accept, email the referring staff that their patient was accepted.
+    if (newStatus === "ACCEPTED" && updated.referredByStaff?.email) {
+      const idata = (updated.identifyingData || {}) as Record<string, unknown>;
+      const residentName =
+        String(
+          idata.fullName ||
+            `${idata.firstName || ""} ${idata.lastName || ""}`
+        )
+          .replace(/\s+/g, " ")
+          .trim() || "the referred patient";
+      sendReferralAcceptedEmail(
+        updated.referredByStaff.email,
+        updated.targetBarangay.name,
+        residentName
+      ).catch((e) => console.error("[mail] referral accepted email failed:", e));
+    }
 
     return NextResponse.json({ success: true, referral: updated });
   } catch (error) {
