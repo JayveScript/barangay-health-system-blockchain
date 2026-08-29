@@ -493,6 +493,11 @@ export default function AdminDashboardPage() {
       return;
     }
 
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError("A valid email is required (used for referral notifications).");
+      return;
+    }
+
     try {
       setFormLoading(true);
 

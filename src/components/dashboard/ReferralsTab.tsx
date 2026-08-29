@@ -207,15 +207,8 @@ export function ReferralsTab() {
     (barangay) => barangay.id === selectedTargetBarangayId
   );
   const localHasSlots = Boolean(localAvailability?.hasAvailableDoctor);
-  const receivingHasSlots = Boolean(
-    selectedTargetBarangay?.availability.hasAvailableDoctor
-  );
   const canSubmit = Boolean(
-    selectedResidentId &&
-      selectedTargetBarangayId &&
-      reason.trim() &&
-      !localHasSlots &&
-      receivingHasSlots
+    selectedResidentId && selectedTargetBarangayId && reason.trim()
   );
 
   const loadReferrals = async () => {
@@ -286,7 +279,7 @@ export function ReferralsTab() {
     setMessage("");
 
     if (!canSubmit) {
-      setError("Please complete the referral fields and check doctor slots.");
+      setError("Please select a resident, receiving barangay, and reason.");
       return;
     }
 
