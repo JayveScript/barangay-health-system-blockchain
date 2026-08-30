@@ -22,10 +22,12 @@ X,
   UserRound,
   ScanLine,
   ChevronRight,
+  KeyRound,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
 import { Baby } from "lucide-react";
@@ -555,7 +557,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "announcements" | "digital"
+  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "announcements" | "digital" | "change-password"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -797,6 +799,21 @@ export default function ResidentDashboard() {
                 <IdCardIcon className="h-5 w-5 shrink-0" />
                 Digital ID
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarTab("change-password");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "change-password"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <KeyRound className="h-5 w-5 shrink-0" />
+                Change Password
+              </button>
             </div>
           </aside>
 
@@ -920,6 +937,18 @@ export default function ResidentDashboard() {
                 >
                   <IdCardIcon className="h-5 w-5 shrink-0" />
                   Digital ID
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("change-password")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "change-password"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <KeyRound className="h-5 w-5 shrink-0" />
+                  Change Password
                 </button>
               </div>
             </div>
@@ -1197,6 +1226,8 @@ export default function ResidentDashboard() {
     </Section>
   </div>
 )}
+
+            {sidebarTab === "change-password" && <ChangePasswordTab />}
           </section>
         </div>
       </div>
