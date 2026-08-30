@@ -35,9 +35,11 @@ type PharmacistUser = {
 
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { KeyRound } from "lucide-react";
 
 export default function PharmacistDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "scan-qr">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "scan-qr" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<PharmacistUser | null>(null);
@@ -126,6 +128,7 @@ export default function PharmacistDashboardPage() {
             <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => { setActiveTab("change-password"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
 
@@ -146,6 +149,7 @@ export default function PharmacistDashboardPage() {
               <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
+              <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => setActiveTab("change-password")} />
             </div>
           </div>
         </aside>
@@ -200,6 +204,7 @@ export default function PharmacistDashboardPage() {
             {activeTab === "overview" && <OverviewTab />}
 
             {activeTab === "residents" && <RegisteredResidentsTab />}
+            {activeTab === "change-password" && <ChangePasswordTab />}
 
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5">

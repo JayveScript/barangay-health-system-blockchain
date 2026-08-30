@@ -52,6 +52,8 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { KeyRound } from "lucide-react";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
@@ -70,6 +72,7 @@ export default function BHWDashboardPage() {
     | "logbook"
     | "bmi"
     | "diagnose"
+    | "change-password"
   >("overview");
   const [user, setUser] = useState<BHWUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -254,6 +257,15 @@ export default function BHWDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "change-password"}
+              icon={<KeyRound className="h-5 w-5" />}
+              label="Change Password"
+              onClick={() => {
+                setActiveTab("change-password");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -335,6 +347,12 @@ export default function BHWDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5" />}
                 label="Diagnose Patient"
                 onClick={() => setActiveTab("diagnose")}
+              />
+              <SidebarButton
+                active={activeTab === "change-password"}
+                icon={<KeyRound className="h-5 w-5" />}
+                label="Change Password"
+                onClick={() => setActiveTab("change-password")}
               />
             </div>
           </div>
@@ -424,6 +442,7 @@ export default function BHWDashboardPage() {
             {activeTab === "bmi" && <BMITab />}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+            {activeTab === "change-password" && <ChangePasswordTab />}
           </div>
         </section>
       </div>

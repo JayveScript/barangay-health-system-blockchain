@@ -38,9 +38,11 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { KeyRound } from "lucide-react";
 
 export default function MidwifeDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr" | "diagnose" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<MidwifeUser | null>(null);
@@ -179,6 +181,15 @@ export default function MidwifeDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "change-password"}
+              icon={<KeyRound className="h-5 w-5" />}
+              label="Change Password"
+              onClick={() => {
+                setActiveTab("change-password");
+                setMobileSidebarOpen(false);
+              }}
+            />
           </div>
         </aside>
 
@@ -230,6 +241,12 @@ export default function MidwifeDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5" />}
                 label="Diagnose Patient"
                 onClick={() => setActiveTab("diagnose")}
+              />
+              <SidebarButton
+                active={activeTab === "change-password"}
+                icon={<KeyRound className="h-5 w-5" />}
+                label="Change Password"
+                onClick={() => setActiveTab("change-password")}
               />
             </div>
           </div>
@@ -298,6 +315,7 @@ export default function MidwifeDashboardPage() {
             )}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+            {activeTab === "change-password" && <ChangePasswordTab />}
 
             {activeTab === "personal" && (
               <PersonalInfoTab user={user} initials={initials} />

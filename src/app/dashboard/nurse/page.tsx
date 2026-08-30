@@ -41,12 +41,14 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { KeyRound } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -206,6 +208,15 @@ export default function NurseDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "change-password"}
+              icon={<KeyRound className="h-5 w-5" />}
+              label="Change Password"
+              onClick={() => {
+                setActiveTab("change-password");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "maternal"}
               icon={<Baby className="h-5 w-5" />}
               label="Maternal Records"
@@ -277,6 +288,12 @@ export default function NurseDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5" />}
                 label="Diagnose Patient"
                 onClick={() => setActiveTab("diagnose")}
+              />
+              <SidebarButton
+                active={activeTab === "change-password"}
+                icon={<KeyRound className="h-5 w-5" />}
+                label="Change Password"
+                onClick={() => setActiveTab("change-password")}
               />
               <SidebarButton
                 active={activeTab === "maternal"}
@@ -364,6 +381,7 @@ export default function NurseDashboardPage() {
             {activeTab === "bmi" && <BMITab />}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+            {activeTab === "change-password" && <ChangePasswordTab />}
 
             {activeTab === "residents" && <RegisteredResidentsTab />}
 
