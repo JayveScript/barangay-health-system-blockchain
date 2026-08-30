@@ -6,6 +6,7 @@ import { PortalLoader } from "@/components/PortalLoader";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   normalizeBarangayHcmsUsername,
@@ -72,7 +73,7 @@ type Me = {
   isVerified: boolean;
 };
 
-type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements";
+type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements" | "change-password";
 
 export default function SuperAdminDashboard() {
   const [me, setMe] = useState<Me | null>(null);
@@ -110,6 +111,7 @@ export default function SuperAdminDashboard() {
     { id: "create-barangay", label: "Create Barangay", icon: <UserPlus className="h-5 w-5" /> },
     { id: "admins", label: "Barangay Admins", icon: <ShieldCheck className="h-5 w-5" /> },
     { id: "announcements", label: "Announcements", icon: <Megaphone className="h-5 w-5" /> },
+    { id: "change-password", label: "Change Password", icon: <KeyRound className="h-5 w-5" /> },
   ];
 
   return (
@@ -189,6 +191,7 @@ export default function SuperAdminDashboard() {
             {tab === "create-barangay" && <CreateBarangayTab />}
             {tab === "admins" && <AdminsListTab />}
             {tab === "announcements" && <AnnouncementsTab />}
+            {tab === "change-password" && <ChangePasswordTab />}
           </section>
         </div>
       </div>

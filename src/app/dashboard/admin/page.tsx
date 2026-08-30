@@ -59,6 +59,7 @@ import {
 import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { PortalLoader } from "@/components/PortalLoader";
 import { HEALTH_CENTERS } from "@/lib/barangay-options";
 import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
@@ -216,6 +217,7 @@ export default function AdminDashboardPage() {
   | "activity-logs"
   | "announcements"
   | "scan-qr"
+  | "change-password"
 >("overview");
 
   const [data, setData] = useState<DashboardData | null>(null);
@@ -1054,6 +1056,12 @@ export default function AdminDashboardPage() {
                 label="Scan QR"
                 onClick={() => setTab("scan-qr")}
               />
+              <SidebarButton
+                active={tab === "change-password"}
+                icon={<KeyRound className="h-5 w-5 shrink-0" />}
+                label="Change Password"
+                onClick={() => setTab("change-password")}
+              />
 
             </div>
           </div>
@@ -1727,6 +1735,7 @@ export default function AdminDashboardPage() {
                 )}
 
 {tab === "announcements" && <AdminAnnouncementsTab barangayId={selectedBarangayId} />}
+                {tab === "change-password" && <ChangePasswordTab />}
 
 
               </>
