@@ -151,12 +151,14 @@ type DoctorAvailability = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
+import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { KeyRound } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "residents" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr"
+  "overview" | "personal" | "residents" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr" | "change-password"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -284,6 +286,15 @@ export default function DoctorDashboardPage() {
                 setMobileSidebarOpen(false);
               }}
             />
+            <SidebarButton
+              active={activeTab === "change-password"}
+              icon={<KeyRound className="h-5 w-5" />}
+              label="Change Password"
+              onClick={() => {
+                setActiveTab("change-password");
+                setMobileSidebarOpen(false);
+              }}
+            />
 
             <SidebarButton
               active={activeTab === "announcements"}
@@ -367,6 +378,12 @@ export default function DoctorDashboardPage() {
                 icon={<Stethoscope className="h-5 w-5" />}
                 label="Diagnose Patient"
                 onClick={() => setActiveTab("diagnose")}
+              />
+              <SidebarButton
+                active={activeTab === "change-password"}
+                icon={<KeyRound className="h-5 w-5" />}
+                label="Change Password"
+                onClick={() => setActiveTab("change-password")}
               />
 
               <SidebarButton
@@ -469,6 +486,7 @@ export default function DoctorDashboardPage() {
             )}
 
             {activeTab === "diagnose" && <DiagnoseTab />}
+            {activeTab === "change-password" && <ChangePasswordTab />}
 
             {activeTab === "announcements" && (
               <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
