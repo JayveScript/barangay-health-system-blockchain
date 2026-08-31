@@ -227,6 +227,10 @@ export default function AdminDashboardPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [emailOtp, setEmailOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpInfo, setOtpInfo] = useState("");
 
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(
     null
@@ -485,6 +489,35 @@ export default function AdminDashboardPage() {
     });
   }, [data, staffSearch]);
 
+  const sendEmailOtp = async () => {
+    setError("");
+    setOtpInfo("");
+    const email = form.email.trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Enter a valid email before sending the code.");
+      return;
+    }
+    try {
+      setOtpSending(true);
+      const res = await fetch("/api/admin/create-user/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Unable to send the verification code.");
+        return;
+      }
+      setOtpSent(true);
+      setOtpInfo(`Verification code sent to ${email}. Enter it below.`);
+    } catch {
+      setError("Unable to connect to the server.");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
@@ -497,6 +530,11 @@ export default function AdminDashboardPage() {
 
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       setError("A valid email is required (used for referral notifications).");
+      return;
+    }
+
+    if (!otpSent || !emailOtp.trim()) {
+      setError("Please verify the email: send the code and enter it below.");
       return;
     }
 
@@ -515,6 +553,7 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({
           fullName,
           email: form.email,
+          otp: emailOtp.trim(),
           phoneNumber: form.phoneNumber,
           username: normalizeBarangayHcmsUsername(form.username),
           password: form.password,
@@ -542,6 +581,9 @@ export default function AdminDashboardPage() {
         password: "",
         role: "BHW",
       });
+      setEmailOtp("");
+      setOtpSent(false);
+      setOtpInfo("");
 
       fetchDashboard();
     } catch (err) {
@@ -1520,14 +1562,30 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <Input
-                            label="Email"
-                            type="email"
-                            value={form.email}
-                            onChange={(v) =>
-                              setForm((p) => ({ ...p, email: v }))
-                            }
-                          />
+                          <div>
+                            <Input
+                              label="Email"
+                              type="email"
+                              value={form.email}
+                              onChange={(v) => {
+                                setForm((p) => ({ ...p, email: v }));
+                                setOtpSent(false);
+                                setEmailOtp("");
+                                setOtpInfo("");
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={sendEmailOtp}
+                              disabled={otpSending}
+                              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-xs font-bold text-sky-700 transition hover:bg-sky-100 disabled:opacity-60"
+                            >
+                              {otpSending ? "Sending..." : otpSent ? "Resend Code" : "Send Verification Code"}
+                            </button>
+                            {otpInfo && (
+                              <p className="mt-1.5 text-xs font-semibold text-emerald-600">{otpInfo}</p>
+                            )}
+                          </div>
 
                           <Input
                             label="Phone Number"
@@ -1537,6 +1595,16 @@ export default function AdminDashboardPage() {
                             }
                           />
                         </div>
+
+                        {otpSent && (
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <Input
+                              label="Email Verification Code"
+                              value={emailOtp}
+                              onChange={setEmailOtp}
+                            />
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <Input
