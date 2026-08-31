@@ -231,6 +231,7 @@ export default function AdminDashboardPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpSending, setOtpSending] = useState(false);
   const [otpInfo, setOtpInfo] = useState("");
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
 
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(
     null
@@ -489,6 +490,28 @@ export default function AdminDashboardPage() {
     });
   }, [data, staffSearch]);
 
+  const goToGmailStep = () => {
+    setError("");
+    setMessage("");
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError("First name and last name are required.");
+      return;
+    }
+    if (!form.username.trim()) {
+      setError("Username is required.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (!form.role) {
+      setError("Please select a role.");
+      return;
+    }
+    setCreateStep(2);
+  };
+
   const sendEmailOtp = async () => {
     setError("");
     setOtpInfo("");
@@ -584,6 +607,7 @@ export default function AdminDashboardPage() {
       setEmailOtp("");
       setOtpSent(false);
       setOtpInfo("");
+      setCreateStep(1);
 
       fetchDashboard();
     } catch (err) {
@@ -1532,116 +1556,119 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <form onSubmit={handleCreateUser} className="space-y-5">
-                        <div>
-                          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                            Full Name
-                          </p>
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <Input
-                              label="First Name"
-                              value={form.firstName}
-                              onChange={(v) =>
-                                setForm((p) => ({ ...p, firstName: v }))
-                              }
-                            />
-                            <Input
-                              label="Middle Name (Optional)"
-                              value={form.middleName}
-                              onChange={(v) =>
-                                setForm((p) => ({ ...p, middleName: v }))
-                              }
-                            />
-                            <Input
-                              label="Last Name"
-                              value={form.lastName}
-                              onChange={(v) =>
-                                setForm((p) => ({ ...p, lastName: v }))
-                              }
-                            />
-                          </div>
+                        <div className="flex items-center gap-2 rounded-2xl bg-sky-50 p-1.5 text-center text-xs font-black">
+                          <span className={`flex-1 rounded-xl px-3 py-2 ${createStep === 1 ? "bg-[#0EA5E9] text-white shadow-sm" : "text-slate-500"}`}>
+                            1 · Account Details
+                          </span>
+                          <span className={`flex-1 rounded-xl px-3 py-2 ${createStep === 2 ? "bg-[#0EA5E9] text-white shadow-sm" : "text-slate-500"}`}>
+                            2 · Gmail Verification
+                          </span>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <div>
-                            <Input
-                              label="Email"
-                              type="email"
-                              value={form.email}
-                              onChange={(v) => {
-                                setForm((p) => ({ ...p, email: v }));
-                                setOtpSent(false);
-                                setEmailOtp("");
-                                setOtpInfo("");
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={sendEmailOtp}
-                              disabled={otpSending}
-                              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-xs font-bold text-sky-700 transition hover:bg-sky-100 disabled:opacity-60"
-                            >
-                              {otpSending ? "Sending..." : otpSent ? "Resend Code" : "Send Verification Code"}
-                            </button>
-                            {otpInfo && (
-                              <p className="mt-1.5 text-xs font-semibold text-emerald-600">{otpInfo}</p>
-                            )}
-                          </div>
+                        {createStep === 1 && (
+                          <>
+                            <div>
+                              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Full Name
+                              </p>
+                              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <Input
+                                  label="First Name"
+                                  value={form.firstName}
+                                  onChange={(v) => setForm((p) => ({ ...p, firstName: v }))}
+                                />
+                                <Input
+                                  label="Middle Name (Optional)"
+                                  value={form.middleName}
+                                  onChange={(v) => setForm((p) => ({ ...p, middleName: v }))}
+                                />
+                                <Input
+                                  label="Last Name"
+                                  value={form.lastName}
+                                  onChange={(v) => setForm((p) => ({ ...p, lastName: v }))}
+                                />
+                              </div>
+                            </div>
 
-                          <Input
-                            label="Phone Number"
-                            value={form.phoneNumber}
-                            onChange={(v) =>
-                              setForm((p) => ({ ...p, phoneNumber: v }))
-                            }
-                          />
-                        </div>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <Input
+                                label="Username"
+                                value={form.username}
+                                onChange={(v) =>
+                                  setForm((p) => ({
+                                    ...p,
+                                    username: normalizeBarangayHcmsUsername(v),
+                                  }))
+                                }
+                                fixedSuffix={BARANGAY_ADMIN_USERNAME_SUFFIX}
+                              />
+                              <Input
+                                label="Password"
+                                type="password"
+                                value={form.password}
+                                onChange={(v) => setForm((p) => ({ ...p, password: v }))}
+                              />
+                            </div>
 
-                        {otpSent && (
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Input
-                              label="Email Verification Code"
-                              value={emailOtp}
-                              onChange={setEmailOtp}
-                            />
-                          </div>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <Select
+                                label="Role"
+                                value={form.role}
+                                onChange={(v) => setForm((p) => ({ ...p, role: v }))}
+                                options={["DOCTOR", "BHW", "NURSE", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"]}
+                              />
+                              <ReadonlyBadgeInput
+                                label="Barangay"
+                                value={currentBarangayName}
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <Input
+                                label="Phone Number (Optional)"
+                                value={form.phoneNumber}
+                                onChange={(v) => setForm((p) => ({ ...p, phoneNumber: v }))}
+                              />
+                            </div>
+                          </>
                         )}
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <Input
-                            label="Username"
-                            value={form.username}
-                            onChange={(v) =>
-                              setForm((p) => ({
-                                ...p,
-                                username: normalizeBarangayHcmsUsername(v),
-                              }))
-                            }
-                            fixedSuffix={BARANGAY_ADMIN_USERNAME_SUFFIX}
-                          />
+                        {createStep === 2 && (
+                          <>
+                            <div>
+                              <Input
+                                label="Gmail"
+                                type="email"
+                                value={form.email}
+                                onChange={(v) => {
+                                  setForm((p) => ({ ...p, email: v }));
+                                  setOtpSent(false);
+                                  setEmailOtp("");
+                                  setOtpInfo("");
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={sendEmailOtp}
+                                disabled={otpSending}
+                                className="mt-2 inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-xs font-bold text-sky-700 transition hover:bg-sky-100 disabled:opacity-60"
+                              >
+                                {otpSending ? "Sending..." : otpSent ? "Resend Code" : "Send Verification Code"}
+                              </button>
+                              {otpInfo && (
+                                <p className="mt-1.5 text-xs font-semibold text-emerald-600">{otpInfo}</p>
+                              )}
+                            </div>
 
-                          <Input
-                            label="Password"
-                            type="password"
-                            value={form.password}
-                            onChange={(v) =>
-                              setForm((p) => ({ ...p, password: v }))
-                            }
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <Select
-                            label="Role"
-                            value={form.role}
-                            onChange={(v) => setForm((p) => ({ ...p, role: v }))}
-                            options={["DOCTOR", "BHW", "NURSE", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"]}
-                          />
-
-                          <ReadonlyBadgeInput
-                            label="Barangay"
-                            value={currentBarangayName}
-                          />
-                        </div>
+                            {otpSent && (
+                              <Input
+                                label="Gmail Verification Code"
+                                value={emailOtp}
+                                onChange={setEmailOtp}
+                              />
+                            )}
+                          </>
+                        )}
 
                         {error && (
                           <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -1655,13 +1682,35 @@ export default function AdminDashboardPage() {
                           </div>
                         )}
 
-                        <button
-                          type="submit"
-                          disabled={formLoading}
-                          className="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-[#0EA5E9] px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60"
-                        >
-                          {formLoading ? "Creating..." : "Create User"}
-                        </button>
+                        {createStep === 1 ? (
+                          <button
+                            type="button"
+                            onClick={goToGmailStep}
+                            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
+                          >
+                            Next: Gmail Verification
+                          </button>
+                        ) : (
+                          <div className="flex flex-col gap-3 sm:flex-row">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCreateStep(1);
+                                setError("");
+                              }}
+                              className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-sky-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-sky-50"
+                            >
+                              Back
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={formLoading}
+                              className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-2xl bg-[#0EA5E9] px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60"
+                            >
+                              {formLoading ? "Creating..." : "Create User"}
+                            </button>
+                          </div>
+                        )}
                       </form>
                     </div>
                   </div>
