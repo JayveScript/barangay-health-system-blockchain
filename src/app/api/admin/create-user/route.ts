@@ -37,17 +37,18 @@ export async function POST(req: Request) {
     const barangayId = resolveScopeBarangayId(admin, body.barangayId);
 
     const fullName = String(body.fullName || "").trim();
-    const email = String(body.email || "").trim().toLowerCase() || null;
+    const email = String(body.email || "").trim().toLowerCase();
     const phoneNumber = String(body.phoneNumber || "").trim() || null;
+    const otp = String(body.otp || "").trim();
     const username = normalizeBarangayHcmsUsername(
       String(body.username || "")
     );
     const password = String(body.password || "").trim();
     const role = String(body.role || "").trim().toUpperCase() as StaffRole;
 
-    if (!fullName || !username || !password || !role) {
+    if (!fullName || !username || !password || !role || !email) {
       return NextResponse.json(
-        { error: "Please fill in all required fields." },
+        { error: "Please fill in all required fields, including a valid email." },
         { status: 400 }
       );
     }
@@ -75,9 +76,33 @@ export async function POST(req: Request) {
       );
     }
 
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
         { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    if (!otp) {
+      return NextResponse.json(
+        { error: "Please verify the email with the code sent to it." },
+        { status: 400 }
+      );
+    }
+    const otpToken = await db.passwordResetToken.findFirst({
+      where: { email },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!otpToken || otpToken.code !== otp) {
+      return NextResponse.json(
+        { error: "Invalid email verification code." },
+        { status: 400 }
+      );
+    }
+    if (new Date() > otpToken.expiresAt) {
+      await db.passwordResetToken.deleteMany({ where: { email } });
+      return NextResponse.json(
+        { error: "Verification code has expired. Please resend it." },
         { status: 400 }
       );
     }
@@ -153,6 +178,8 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    await db.passwordResetToken.deleteMany({ where: { email } });
 
     return NextResponse.json(
       {
