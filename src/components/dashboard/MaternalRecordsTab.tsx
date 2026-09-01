@@ -217,6 +217,53 @@ const PRENATAL_MONTH_FIELDS: [string, string][] = [
   ["remarks", "Findings / Remarks"],
 ];
 
+const POSTNATAL_DAYS = [0, 3, 7, 42];
+const MATERNAL_TEST_KEYS = ["bloodtype", "fbs", "hbsag", "hemoglobin", "hiv", "syphilis", "tuberculosis", "urinalysis"];
+
+// Field lists reused by the read-only Summary views for OB-Gyne and Postnatal.
+const OBGYNE_SUMMARY_FIELDS: [string, string][] = [
+  ["ob_g", "G"], ["ob_p", "P"], ["ob_fullterm", "Full Term"], ["ob_preterm", "Preterm"],
+  ["ob_abortion", "Abortion"], ["ob_living", "Living"], ["menarche_age", "Menarche Age"],
+  ["menstrual_cycle", "Menstrual Cycle"], ["menstrual_flow", "Menstrual Flow (days)"],
+  ["coitarche_age", "Coitarche Age"], ["fp_method", "Current FP Method"],
+];
+const OBGYNE_TEST_KEYS: [string, string][] = [
+  ["pap_smear", "Pap Smear"], ["via", "VIA"], ["sti", "History of STI"],
+];
+const PREGHIST_SUMMARY_FIELDS: [string, string][] = [
+  ["ph_dentist", "Seen by Dentist"], ["ph_dentist_visits", "Dentist Visits"],
+  ["ph_physician", "Seen by Physician"], ["ph_physician_visits", "Physician Visits"],
+  ["ph_trimester_1", "1st Trimester Visits"], ["ph_trimester_2", "2nd Trimester Visits"],
+  ["ph_trimester_3", "3rd Trimester Visits"], ["ph_other_tests", "Other Tests"],
+];
+const POSTNATAL_DELIVERY_FIELDS: [string, string][] = [
+  ["post_delivery_date", "Date of Delivery"], ["post_place", "Place of Delivery"],
+  ["post_type", "Type of Delivery"], ["post_outcome", "Outcome of Pregnancy"],
+  ["post_attended", "Attended By"], ["post_complications", "Complications"],
+  ["post_newborn_sex", "Sex of Newborn"], ["post_birthweight", "Birthweight"],
+  ["post_hemoglobin", "Hemoglobin"], ["post_hemoglobin_date", "Hemoglobin Date"],
+  ["post_vitamin_a", "Vitamin A"], ["post_vitamin_a_date", "Vitamin A Date"],
+];
+const POSTNATAL_DAY_FIELDS: [string, string][] = [
+  ["date", "Date of Visit"], ["bp", "Blood Pressure"], ["temp", "Temperature"],
+  ["breastfeeding", "Breastfeeding"], ["counseling", "Counseling"], ["remarks", "Findings / Remarks"],
+];
+
+function hasObgyneData(d: FormData): boolean {
+  return (
+    OBGYNE_SUMMARY_FIELDS.some(([k]) => (d[k] ?? "").trim()) ||
+    PREGHIST_SUMMARY_FIELDS.some(([k]) => (d[k] ?? "").trim()) ||
+    OBGYNE_TEST_KEYS.some(([k]) => (d[`${k}_result`] ?? "").trim() || (d[`${k}_date`] ?? "").trim()) ||
+    MATERNAL_TEST_KEYS.some((k) => (d[`ph_${k}_result`] ?? "").trim() || (d[`ph_${k}_date`] ?? "").trim())
+  );
+}
+function hasPostnatalData(d: FormData): boolean {
+  return (
+    POSTNATAL_DELIVERY_FIELDS.some(([k]) => (d[k] ?? "").trim()) ||
+    POSTNATAL_DAYS.some((day) => POSTNATAL_DAY_FIELDS.some(([s]) => (d[`postd${day}_${s}`] ?? "").trim()))
+  );
+}
+
 export function MaternalRecordsTab() {
   const [residents, setResidents] = useState<PregnantResident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -417,10 +464,12 @@ function MaternalFormModal({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [formTab, setFormTab] = useState<"obgyne" | "prenatal" | "postnatal">("obgyne");
-  // Prenatal is a summary-first view: when records already exist we show the
-  // read-only summary and reveal the editable form via the Edit button; when
-  // it is empty we open straight into editing.
+  // Each tab is summary-first: when records already exist we show the read-only
+  // summary and reveal the editable form via the Edit button; when a tab is
+  // empty we open straight into editing.
+  const [obgyneEditing, setObgyneEditing] = useState(true);
   const [prenatalEditing, setPrenatalEditing] = useState(true);
+  const [postnatalEditing, setPostnatalEditing] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -435,7 +484,9 @@ function MaternalFormModal({
           [1, 2, 3, 4, 5, 6, 7, 8, 9].some((n) =>
             PRENATAL_MONTH_FIELDS.some(([s]) => (data[`pn${n}_${s}`] ?? "").trim())
           );
+        setObgyneEditing(!hasObgyneData(data));
         setPrenatalEditing(!hasPrenatal);
+        setPostnatalEditing(!hasPostnatalData(data));
       } catch (err) {
         console.error("MATERNAL_RECORD_LOAD_ERROR", err);
       } finally {
@@ -443,9 +494,6 @@ function MaternalFormModal({
       }
     })();
   }, [resident.id]);
-
-  // Postnatal visit days, gated one-by-one (see the cards below).
-  const POSTNATAL_DAYS = [0, 3, 7, 42];
 
   // Whether any prenatal record has been encoded (controls the empty state in
   // the summary view).
@@ -484,7 +532,9 @@ function MaternalFormModal({
         return;
       }
       // Drop the prenatal editor back to the read-only summary after save.
+      setObgyneEditing(false);
       setPrenatalEditing(false);
+      setPostnatalEditing(false);
       setMessage("Maternal record saved.");
       setTimeout(() => onSaved(), 700);
     } catch (err) {
@@ -565,52 +615,119 @@ function MaternalFormModal({
               </div>
 
               {formTab === "obgyne" && (
-                <div className="space-y-6">
-                  <Section title="For Women — OB-Gyne History">
-                    <Row label="OB Score">
-                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                        {[
-                          ["G", "ob_g"], ["P", "ob_p"], ["Full Term", "ob_fullterm"],
-                          ["Preterm", "ob_preterm"], ["Abortion", "ob_abortion"], ["Living", "ob_living"],
-                        ].map(([lbl, k]) => (
-                          <div key={k}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{lbl}</p>
-                            <Text k={k} />
-                          </div>
-                        ))}
-                      </div>
-                    </Row>
-                    <Row label="Menarche Age"><NumI k="menarche_age" /></Row>
-                    <Row label="Menstrual Cycle"><Select k="menstrual_cycle" options={["Regular", "Irregular"]} /></Row>
-                    <Row label="Menstrual Flow (days)"><NumI k="menstrual_flow" /></Row>
-                    <Row label="Coitarche Age"><NumI k="coitarche_age" /></Row>
-                    <Row label="Current FP Method"><Text k="fp_method" /></Row>
-                    <TestRow label="Pap Smear" k="pap_smear" />
-                    <TestRow label="VIA" k="via" />
-                    <TestRow label="History of STI" k="sti" />
-                  </Section>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-slate-500">
+                      {obgyneEditing
+                        ? "Encode OB-Gyne history below, then Save."
+                        : "Summary of encoded OB-Gyne history."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setObgyneEditing((v) => !v)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                    >
+                      {obgyneEditing ? (
+                        <><Eye className="h-3.5 w-3.5" /> View Summary</>
+                      ) : (
+                        <><Pencil className="h-3.5 w-3.5" /> Edit</>
+                      )}
+                    </button>
+                  </div>
 
-                  <Section title="Pregnancy History">
-                    <Row label="Seen by Dentist">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_dentist" /><Text k="ph_dentist_visits" ph="No. of visits" /></div>
-                    </Row>
-                    <Row label="Seen by Physician">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_physician" /><Text k="ph_physician_visits" ph="No. of visits" /></div>
-                    </Row>
-                    <Row label="Visits per Trimester">
-                      <div className="grid grid-cols-3 gap-2">
-                        {["1st", "2nd", "3rd"].map((t, i) => (
-                          <div key={t}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{t} Trimester</p>
-                            <Text k={`ph_trimester_${i + 1}`} />
+                  {obgyneEditing ? (
+                    <div className="space-y-6">
+                      <Section title="For Women — OB-Gyne History">
+                        <Row label="OB Score">
+                          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                            {[
+                              ["G", "ob_g"], ["P", "ob_p"], ["Full Term", "ob_fullterm"],
+                              ["Preterm", "ob_preterm"], ["Abortion", "ob_abortion"], ["Living", "ob_living"],
+                            ].map(([lbl, k]) => (
+                              <div key={k}>
+                                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{lbl}</p>
+                                <Text k={k} />
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </Row>
+                        <Row label="Menarche Age"><NumI k="menarche_age" /></Row>
+                        <Row label="Menstrual Cycle"><Select k="menstrual_cycle" options={["Regular", "Irregular"]} /></Row>
+                        <Row label="Menstrual Flow (days)"><NumI k="menstrual_flow" /></Row>
+                        <Row label="Coitarche Age"><NumI k="coitarche_age" /></Row>
+                        <Row label="Current FP Method"><Text k="fp_method" /></Row>
+                        <TestRow label="Pap Smear" k="pap_smear" />
+                        <TestRow label="VIA" k="via" />
+                        <TestRow label="History of STI" k="sti" />
+                      </Section>
+
+                      <Section title="Pregnancy History">
+                        <Row label="Seen by Dentist">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_dentist" /><Text k="ph_dentist_visits" ph="No. of visits" /></div>
+                        </Row>
+                        <Row label="Seen by Physician">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_physician" /><Text k="ph_physician_visits" ph="No. of visits" /></div>
+                        </Row>
+                        <Row label="Visits per Trimester">
+                          <div className="grid grid-cols-3 gap-2">
+                            {["1st", "2nd", "3rd"].map((t, i) => (
+                              <div key={t}>
+                                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{t} Trimester</p>
+                                <Text k={`ph_trimester_${i + 1}`} />
+                              </div>
+                            ))}
+                          </div>
+                        </Row>
+                        <SubTitle title="Tests (Result / Date)" />
+                        {TESTS.map((t) => <TestRow key={`ph_${t.k}`} label={t.label} k={`ph_${t.k}`} />)}
+                        <Row label="Other Tests, Specify"><Text k="ph_other_tests" /></Row>
+                      </Section>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-4 shadow-sm">
+                        <h4 className="mb-3 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                          For Women — OB-Gyne History
+                        </h4>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {OBGYNE_SUMMARY_FIELDS.map(([k, label]) => (
+                            <SumChip key={k} label={label} value={form[k]} />
+                          ))}
+                          {OBGYNE_TEST_KEYS.map(([k, label]) => {
+                            const r = (form[`${k}_result`] ?? "").trim();
+                            const dt = (form[`${k}_date`] ?? "").trim();
+                            return (
+                              <SumChip key={k} label={label} value={[r, dt ? `(${dt})` : ""].filter(Boolean).join(" ")} />
+                            );
+                          })}
+                        </div>
                       </div>
-                    </Row>
-                    <SubTitle title="Tests (Result / Date)" />
-                    {TESTS.map((t) => <TestRow key={`ph_${t.k}`} label={t.label} k={`ph_${t.k}`} />)}
-                    <Row label="Other Tests, Specify"><Text k="ph_other_tests" /></Row>
-                  </Section>
+
+                      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-4 shadow-sm">
+                        <h4 className="mb-3 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                          Pregnancy History
+                        </h4>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {PREGHIST_SUMMARY_FIELDS.map(([k, label]) => (
+                            <SumChip key={k} label={label} value={form[k]} />
+                          ))}
+                          {TESTS.map((t) => {
+                            const r = (form[`ph_${t.k}_result`] ?? "").trim();
+                            const dt = (form[`ph_${t.k}_date`] ?? "").trim();
+                            return (
+                              <SumChip key={t.k} label={t.label} value={[r, dt ? `(${dt})` : ""].filter(Boolean).join(" ")} />
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {!hasObgyneData(form) && (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm font-semibold text-slate-400">
+                          No OB-Gyne history yet. Tap Edit to start encoding.
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
@@ -780,54 +897,111 @@ function MaternalFormModal({
 
               {formTab === "postnatal" && (
                 <div className="space-y-4">
-                  <Section title="Delivery Details">
-                    <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
-                    <Row label="Place of Delivery"><Text k="post_place" /></Row>
-                    <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
-                    <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
-                    <Row label="Attended By"><Text k="post_attended" /></Row>
-                    <Row label="Complications"><Text k="post_complications" /></Row>
-                    <Row label="Sex of Newborn"><Select k="post_newborn_sex" options={["Female", "Male"]} /></Row>
-                    <Row label="Birthweight"><Text k="post_birthweight" /></Row>
-                    <Row label="Hemoglobin">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
-                    </Row>
-                    <Row label="Vitamin A">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_vitamin_a" /><DateI k="post_vitamin_a_date" /></div>
-                    </Row>
-                  </Section>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-slate-500">
+                      {postnatalEditing
+                        ? "Encode postnatal records below, then Save."
+                        : "Summary of encoded postnatal records."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setPostnatalEditing((v) => !v)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                    >
+                      {postnatalEditing ? (
+                        <><Eye className="h-3.5 w-3.5" /> View Summary</>
+                      ) : (
+                        <><Pencil className="h-3.5 w-3.5" /> Edit</>
+                      )}
+                    </button>
+                  </div>
 
-                  <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
-                    Postnatal visits (Day 0, 3, 7, 42). Each visit opens only after
-                    the previous visit&apos;s Date of Visit is filled in.
-                  </p>
+                  {postnatalEditing ? (
+                    <>
+                      <Section title="Delivery Details">
+                        <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
+                        <Row label="Place of Delivery"><Text k="post_place" /></Row>
+                        <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
+                        <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
+                        <Row label="Attended By"><Text k="post_attended" /></Row>
+                        <Row label="Complications"><Text k="post_complications" /></Row>
+                        <Row label="Sex of Newborn"><Select k="post_newborn_sex" options={["Female", "Male"]} /></Row>
+                        <Row label="Birthweight"><Text k="post_birthweight" /></Row>
+                        <Row label="Hemoglobin">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
+                        </Row>
+                        <Row label="Vitamin A">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_vitamin_a" /><DateI k="post_vitamin_a_date" /></div>
+                        </Row>
+                      </Section>
 
-                  {POSTNATAL_DAYS.map((day, idx) => {
-                    // A visit opens only when every earlier day has a Date of
-                    // Visit — you can't skip ahead.
-                    const unlocked = POSTNATAL_DAYS.slice(0, idx).every(
-                      (d) => (form[`postd${d}_date`] ?? "").trim()
-                    );
-                    return (
-                      <div key={day} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <h4 className="mb-3 text-sm font-black text-slate-800">Postnatal Visit — Day {day}</h4>
-                        {!unlocked ? (
-                          <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                            <Lock className="h-3.5 w-3.5" /> Fill in the Day {POSTNATAL_DAYS[idx - 1]} visit&apos;s Date of Visit first.
-                          </p>
-                        ) : (
-                          <div className="space-y-3">
-                            <Row label="Date of Visit"><DateI k={`postd${day}_date`} /></Row>
-                            <Row label="Blood Pressure"><Text k={`postd${day}_bp`} /></Row>
-                            <Row label="Temperature"><Text k={`postd${day}_temp`} /></Row>
-                            <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} /></Row>
-                            <Row label="Counseling"><YesNo k={`postd${day}_counseling`} /></Row>
-                            <Row label="Findings / Remarks"><Text k={`postd${day}_remarks`} /></Row>
+                      <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
+                        Postnatal visits (Day 0, 3, 7, 42). Each visit opens only after
+                        the previous visit&apos;s Date of Visit is filled in.
+                      </p>
+
+                      {POSTNATAL_DAYS.map((day, idx) => {
+                        // A visit opens only when every earlier day has a Date of
+                        // Visit — you can't skip ahead.
+                        const unlocked = POSTNATAL_DAYS.slice(0, idx).every(
+                          (d) => (form[`postd${d}_date`] ?? "").trim()
+                        );
+                        return (
+                          <div key={day} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                            <h4 className="mb-3 text-sm font-black text-slate-800">Postnatal Visit — Day {day}</h4>
+                            {!unlocked ? (
+                              <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                                <Lock className="h-3.5 w-3.5" /> Fill in the Day {POSTNATAL_DAYS[idx - 1]} visit&apos;s Date of Visit first.
+                              </p>
+                            ) : (
+                              <div className="space-y-3">
+                                <Row label="Date of Visit"><DateI k={`postd${day}_date`} /></Row>
+                                <Row label="Blood Pressure"><Text k={`postd${day}_bp`} /></Row>
+                                <Row label="Temperature"><Text k={`postd${day}_temp`} /></Row>
+                                <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} /></Row>
+                                <Row label="Counseling"><YesNo k={`postd${day}_counseling`} /></Row>
+                                <Row label="Findings / Remarks"><Text k={`postd${day}_remarks`} /></Row>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-4 shadow-sm">
+                        <h4 className="mb-3 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                          Delivery Details
+                        </h4>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {POSTNATAL_DELIVERY_FIELDS.map(([k, label]) => (
+                            <SumChip key={k} label={label} value={form[k]} />
+                          ))}
+                        </div>
                       </div>
-                    );
-                  })}
+
+                      {POSTNATAL_DAYS.filter((day) =>
+                        POSTNATAL_DAY_FIELDS.some(([s]) => (form[`postd${day}_${s}`] ?? "").trim())
+                      ).map((day) => (
+                        <div key={day} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                          <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                            Postnatal Visit — Day {day}
+                          </h4>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {POSTNATAL_DAY_FIELDS.map(([s, label]) => (
+                              <SumChip key={s} label={label} value={form[`postd${day}_${s}`]} />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
+                      {!hasPostnatalData(form) && (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm font-semibold text-slate-400">
+                          No postnatal records yet. Tap Edit to start encoding.
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
