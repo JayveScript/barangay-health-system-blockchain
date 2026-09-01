@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
   Baby,
   CheckCircle2,
@@ -61,6 +61,124 @@ function prettyDate(dateStr: string): string {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+// Field components are defined at MODULE level (not inside the modal) so their
+// identity stays stable across renders. Defining them inline caused React to
+// remount every input on each keystroke, which dropped focus and scrolled the
+// page back to the top on mobile while typing. They read form state from context.
+const MaternalFormCtx = createContext<{
+  form: FormData;
+  set: (k: string, v: string) => void;
+}>({ form: {}, set: () => {} });
+
+const fieldCls =
+  "min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
+function Text({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <input
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value)}
+      placeholder={ph}
+      disabled={disabled}
+      className={fieldCls}
+    />
+  );
+}
+function DateI({ k, disabled }: { k: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <input
+      type="date"
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value)}
+      disabled={disabled}
+      className={fieldCls}
+    />
+  );
+}
+function NumI({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <input
+      type="number"
+      inputMode="numeric"
+      min={0}
+      step={1}
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value.replace(/[^0-9]/g, ""))}
+      placeholder={ph}
+      disabled={disabled}
+      className={fieldCls}
+    />
+  );
+}
+function ReadOnly({ value, note }: { value: string; note?: string }) {
+  return (
+    <div>
+      <div className="flex min-h-[42px] items-center rounded-xl border border-[#BFDBFE] bg-slate-50 px-3 text-sm font-bold text-slate-700">
+        {value || "—"}
+      </div>
+      {note && <p className="mt-1 text-[11px] font-semibold text-slate-400">{note}</p>}
+    </div>
+  );
+}
+function YesNo({ k, disabled }: { k: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <div className="flex gap-2">
+      {["Yes", "No"].map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          disabled={disabled}
+          onClick={() => set(k, form[k] === opt ? "" : opt)}
+          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+            form[k] === opt
+              ? "border-[#2563EB] bg-[#2563EB] text-white"
+              : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#EFF6FF]"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+function Select({ k, options, disabled }: { k: string; options: string[]; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <select
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value)}
+      disabled={disabled}
+      className={fieldCls}
+    >
+      <option value="">Select</option>
+      {options.map((o) => (
+        <option key={o} value={o}>{o}</option>
+      ))}
+    </select>
+  );
+}
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[220px_1fr] sm:items-center sm:gap-2">
+      <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
+      <div>{children}</div>
+    </div>
+  );
+}
+function TestRow({ label, k }: { label: string; k: string }) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[160px_1fr_150px] sm:items-center sm:gap-2">
+      <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
+      <Text k={`${k}_result`} ph="Result" />
+      <DateI k={`${k}_date`} />
+    </div>
+  );
 }
 
 export function MaternalRecordsTab() {
@@ -299,7 +417,7 @@ function MaternalFormModal({
     return POSTNATAL_DAYS.length; // all completed
   })();
 
-  const set = (k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v }));
+  const set = useCallback((k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v })), []);
 
   // Keep Expected Date of Delivery in sync with LMP (LMP + 280 days).
   useEffect(() => {
@@ -340,92 +458,6 @@ function MaternalFormModal({
     }
   };
 
-  const lockCls = "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
-  const Text = ({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) => (
-    <input
-      value={form[k] ?? ""}
-      onChange={(e) => set(k, e.target.value)}
-      placeholder={ph}
-      disabled={disabled}
-      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
-    />
-  );
-  const DateI = ({ k, disabled }: { k: string; disabled?: boolean }) => (
-    <input
-      type="date"
-      value={form[k] ?? ""}
-      onChange={(e) => set(k, e.target.value)}
-      disabled={disabled}
-      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
-    />
-  );
-  const NumI = ({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) => (
-    <input
-      type="number"
-      inputMode="numeric"
-      min={0}
-      step={1}
-      value={form[k] ?? ""}
-      onChange={(e) => set(k, e.target.value.replace(/[^0-9]/g, ""))}
-      placeholder={ph}
-      disabled={disabled}
-      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
-    />
-  );
-  const ReadOnly = ({ value, note }: { value: string; note?: string }) => (
-    <div>
-      <div className="flex min-h-[42px] items-center rounded-xl border border-[#BFDBFE] bg-slate-50 px-3 text-sm font-bold text-slate-700">
-        {value || "—"}
-      </div>
-      {note && <p className="mt-1 text-[11px] font-semibold text-slate-400">{note}</p>}
-    </div>
-  );
-  const YesNo = ({ k, disabled }: { k: string; disabled?: boolean }) => (
-    <div className="flex gap-2">
-      {["Yes", "No"].map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          disabled={disabled}
-          onClick={() => set(k, form[k] === opt ? "" : opt)}
-          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-            form[k] === opt
-              ? "border-[#2563EB] bg-[#2563EB] text-white"
-              : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#EFF6FF]"
-          }`}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-  const Select = ({ k, options, disabled }: { k: string; options: string[]; disabled?: boolean }) => (
-    <select
-      value={form[k] ?? ""}
-      onChange={(e) => set(k, e.target.value)}
-      disabled={disabled}
-      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
-    >
-      <option value="">Select</option>
-      {options.map((o) => (
-        <option key={o} value={o}>{o}</option>
-      ))}
-    </select>
-  );
-  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="grid gap-2 sm:grid-cols-[220px_1fr] sm:items-center">
-      <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
-      <div>{children}</div>
-    </div>
-  );
-  const TestRow = ({ label, k }: { label: string; k: string }) => (
-    <div className="grid gap-2 sm:grid-cols-[160px_1fr_150px] sm:items-center">
-      <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
-      <Text k={`${k}_result`} ph="Result" />
-      <DateI k={`${k}_date`} />
-    </div>
-  );
-
   const TESTS: { label: string; k: string }[] = [
     { label: "Bloodtype", k: "bloodtype" },
     { label: "FBS / HBA1C / RBS", k: "fbs" },
@@ -438,9 +470,10 @@ function MaternalFormModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-[#BFDBFE] bg-white shadow-2xl">
-        <div className="flex items-center justify-between gap-3 border-b border-[#BFDBFE] bg-gradient-to-r from-[#0F172A] to-[#1E3A8A] p-5 text-white">
+    <MaternalFormCtx.Provider value={{ form, set }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
+      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden border border-[#BFDBFE] bg-white shadow-2xl sm:h-[92vh] sm:rounded-[28px]">
+        <div className="flex items-center justify-between gap-3 border-b border-[#BFDBFE] bg-gradient-to-r from-[#0F172A] to-[#1E3A8A] p-4 text-white sm:p-5">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
               <HeartPulse className="h-5 w-5" />
@@ -464,7 +497,7 @@ function MaternalFormModal({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8FAFC] p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-5">
           {loading ? (
             <div className="flex min-h-[200px] items-center justify-center gap-3 text-sm font-semibold text-[#2563EB]">
               <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#DBEAFE] border-t-[#2563EB]" />
@@ -742,6 +775,7 @@ function MaternalFormModal({
         </div>
       </div>
     </div>
+    </MaternalFormCtx.Provider>
   );
 }
 

@@ -285,9 +285,9 @@ function RegistrationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-sky-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-5">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
+      <div className="flex h-full w-full max-w-6xl flex-col overflow-hidden border border-sky-200 bg-white shadow-2xl sm:h-[92vh] sm:rounded-[30px]">
+        <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-4 sm:p-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-sky-600">
               Resident Registration
@@ -334,7 +334,7 @@ function RegistrationModal({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
           {step === 1 && (
             <div className="grid gap-4 md:grid-cols-2">
               <ModalInput label="Last Name *" value={form.lastName} onChange={(v) => updateField("lastName", v)} />
@@ -546,7 +546,7 @@ function RegistrationModal({
           )}
         </div>
 
-        <div className="border-t border-slate-200 p-5">
+        <div className="border-t border-slate-200 p-4 sm:p-5">
           {error && <p className="mb-3 text-sm font-semibold text-red-600">{error}</p>}
           {message && (
             <p className="mb-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">

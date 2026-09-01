@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   CheckCircle2,
@@ -135,24 +135,27 @@ export function RegisteredResidentsTab({
   const [verifyResident, setVerifyResident] = useState<StaffResident | null>(null);
   const [deleteResident, setDeleteResident] = useState<StaffResident | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const res = await fetch(endpoint, { cache: "no-store" });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error || "Failed to load residents.");
-        return;
+  const load = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      try {
+        if (!opts?.silent) setLoading(true);
+        setError("");
+        const res = await fetch(endpoint, { cache: "no-store" });
+        const json = await res.json();
+        if (!res.ok) {
+          setError(json.error || "Failed to load residents.");
+          return;
+        }
+        setResidents(Array.isArray(json) ? json : []);
+      } catch (err) {
+        console.error("STAFF_RESIDENTS_LOAD_ERROR", err);
+        setError("Unable to connect to the server.");
+      } finally {
+        if (!opts?.silent) setLoading(false);
       }
-      setResidents(Array.isArray(json) ? json : []);
-    } catch (err) {
-      console.error("STAFF_RESIDENTS_LOAD_ERROR", err);
-      setError("Unable to connect to the server.");
-    } finally {
-      setLoading(false);
-    }
-  }, [endpoint]);
+    },
+    [endpoint]
+  );
 
   useEffect(() => {
     load();
@@ -461,7 +464,11 @@ export function RegisteredResidentsTab({
             onSaved={() => {
               setEditResident(null);
               setEditPassword("");
-              load();
+              // Clear any active search so the just-edited resident (whose name
+              // may no longer match the filter) stays visible, and refresh the
+              // list in place without blanking it.
+              setSearch("");
+              load({ silent: true });
             }}
           />
         </Portal>
@@ -728,6 +735,28 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
 }
 
 
+// Field context + component are MODULE level so their identity is stable across
+// renders. Defining the field inside EditModal remounted every input on each
+// keystroke, dropping focus and scrolling the modal back to the top on mobile.
+const EditFormCtx = createContext<{
+  form: Record<string, string>;
+  set: (k: string, v: string) => void;
+}>({ form: {}, set: () => {} });
+
+function F({ label, k }: { label: string; k: string }) {
+  const { form, set } = useContext(EditFormCtx);
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">{label}</label>
+      <input
+        value={form[k] ?? ""}
+        onChange={(e) => set(k, e.target.value)}
+        className="min-h-[46px] w-full rounded-2xl border border-sky-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+      />
+    </div>
+  );
+}
+
 function EditModal({
   resident,
   password,
@@ -762,7 +791,10 @@ function EditModal({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const set = useCallback(
+    (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }) as typeof p),
+    []
+  );
 
   const save = async () => {
     try {
@@ -789,21 +821,11 @@ function EditModal({
     }
   };
 
-  const F = ({ label, k }: { label: string; k: keyof typeof form }) => (
-    <div>
-      <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">{label}</label>
-      <input
-        value={form[k]}
-        onChange={(e) => set(k, e.target.value)}
-        className="min-h-[46px] w-full rounded-2xl border border-sky-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
-      />
-    </div>
-  );
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-sky-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-5">
+    <EditFormCtx.Provider value={{ form, set }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
+      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden border border-sky-200 bg-white shadow-2xl sm:h-[90vh] sm:rounded-[28px]">
+        <div className="flex items-center justify-between border-b border-sky-200 bg-sky-50/60 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-white">
               <Edit className="h-5 w-5" />
@@ -818,7 +840,7 @@ function EditModal({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
           <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified — you may edit this resident's identifying data
@@ -909,6 +931,7 @@ function EditModal({
         </div>
       </div>
     </div>
+    </EditFormCtx.Provider>
   );
 }
 
