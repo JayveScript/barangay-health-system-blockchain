@@ -26,7 +26,7 @@ export const HEALTH_CENTERS = [
   },
   {
     name: "PAQUIBATO HEALTH CENTER",
-    sitios: ["Paquibato Proper"],
+    sitios: ["Paquibato Proper", "Paquibato"],
   },
 ] as const;
 
