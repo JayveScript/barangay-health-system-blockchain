@@ -16,6 +16,7 @@ import {
   Search,
   ShieldCheck,
   Stethoscope,
+  Trash2,
   UserRound,
   Users,
   X,
@@ -34,6 +35,7 @@ import {
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
 import { BlockchainVerifyModal } from "@/components/dashboard/BlockchainVerifyModal";
+import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
 
 type History = Record<string, boolean | string | null> | null;
 
@@ -110,9 +112,11 @@ function IconActionButton({
 export function RegisteredResidentsTab({
   endpoint = "/api/staff/residents",
   showBlockchainVerify = false,
+  showDelete = false,
 }: {
   endpoint?: string;
   showBlockchainVerify?: boolean;
+  showDelete?: boolean;
 } = {}) {
   const [residents, setResidents] = useState<StaffResident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +133,7 @@ export function RegisteredResidentsTab({
   const [editResident, setEditResident] = useState<StaffResident | null>(null);
   const [editPassword, setEditPassword] = useState("");
   const [verifyResident, setVerifyResident] = useState<StaffResident | null>(null);
+  const [deleteResident, setDeleteResident] = useState<StaffResident | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -234,6 +239,15 @@ export function RegisteredResidentsTab({
           dense={dense}
           icon={<ShieldCheck className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
           onClick={() => setVerifyResident(r)}
+        />
+      )}
+      {showDelete && (
+        <IconActionButton
+          label="Delete Resident"
+          dense={dense}
+          variant="danger"
+          icon={<Trash2 className={dense ? "h-3.5 w-3.5" : "h-4 w-4"} />}
+          onClick={() => setDeleteResident(r)}
         />
       )}
     </div>
@@ -395,6 +409,20 @@ export function RegisteredResidentsTab({
       {verifyResident && (
         <Portal>
           <BlockchainVerifyModal resident={verifyResident} onClose={() => setVerifyResident(null)} />
+        </Portal>
+      )}
+
+      {deleteResident && (
+        <Portal>
+          <DeleteAccountModal
+            name={fullName(deleteResident)}
+            residentId={deleteResident.id}
+            onClose={() => setDeleteResident(null)}
+            onDeleted={() => {
+              setDeleteResident(null);
+              load();
+            }}
+          />
         </Portal>
       )}
 
