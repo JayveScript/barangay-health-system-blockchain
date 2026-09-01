@@ -412,7 +412,6 @@ function MaternalFormModal({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<FormData>({});
-  const [loadedData, setLoadedData] = useState<FormData>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -431,7 +430,6 @@ function MaternalFormModal({
         const json = await res.json();
         const data: FormData = res.ok && json.record?.data ? (json.record.data as FormData) : {};
         setForm(data);
-        setLoadedData(data);
         const hasPrenatal =
           Boolean((data.lmp ?? "").trim()) ||
           [1, 2, 3, 4, 5, 6, 7, 8, 9].some((n) =>
@@ -446,15 +444,8 @@ function MaternalFormModal({
     })();
   }, [resident.id]);
 
-  // Postnatal keeps its sequential unlock: a visit locks once saved (its date
-  // was set on load); the next visit opens, later ones stay locked.
+  // Postnatal visit days, gated one-by-one (see the cards below).
   const POSTNATAL_DAYS = [0, 3, 7, 42];
-  const postnatalActive = (() => {
-    for (let idx = 0; idx < POSTNATAL_DAYS.length; idx++) {
-      if (!(loadedData[`postd${POSTNATAL_DAYS[idx]}_date`] ?? "").trim()) return idx;
-    }
-    return POSTNATAL_DAYS.length; // all completed
-  })();
 
   // Whether any prenatal record has been encoded (controls the empty state in
   // the summary view).
@@ -492,9 +483,7 @@ function MaternalFormModal({
         setError(json.error || "Failed to save maternal record.");
         return;
       }
-      // Advance the postnatal sequential unlock immediately, and drop the
-      // prenatal editor back to the read-only summary after a successful save.
-      setLoadedData(payload);
+      // Drop the prenatal editor back to the read-only summary after save.
       setPrenatalEditing(false);
       setMessage("Maternal record saved.");
       setTimeout(() => onSaved(), 700);
@@ -684,12 +673,24 @@ function MaternalFormModal({
                       </Section>
 
                       <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
-                        Monthly prenatal visits (9 months). Fill in any month, then use View Summary to review.
+                        Monthly prenatal visits (9 months). Each month opens only
+                        after the previous month&apos;s Date of Visit is filled in.
                       </p>
 
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+                        // A month opens only when every earlier month has a
+                        // Date of Visit — you can't skip ahead.
+                        const unlocked = [...Array(n - 1)].every(
+                          (_, i) => (form[`pn${i + 1}_date`] ?? "").trim()
+                        );
+                        return (
                         <div key={n} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                           <h4 className="mb-3 text-sm font-black text-slate-800">Prenatal Visit {n} — Month {n}</h4>
+                          {!unlocked ? (
+                            <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                              <Lock className="h-3.5 w-3.5" /> Fill in Month {n - 1}&apos;s Date of Visit first.
+                            </p>
+                          ) : (
                           <div className="space-y-3">
                             <Row label="Date of Visit"><DateI k={`pn${n}_date`} /></Row>
                             <Row label="Age of Gestation">
@@ -704,8 +705,10 @@ function MaternalFormModal({
                             <Row label="Fetal Heart Tone"><Text k={`pn${n}_fht`} /></Row>
                             <Row label="Findings / Remarks"><Text k={`pn${n}_remarks`} /></Row>
                           </div>
+                          )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </>
                   ) : (
                     <>
@@ -795,50 +798,31 @@ function MaternalFormModal({
                   </Section>
 
                   <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
-                    Postnatal visits (Day 0, 3, 7, 42). Fill in a visit and save to unlock the next.
+                    Postnatal visits (Day 0, 3, 7, 42). Each visit opens only after
+                    the previous visit&apos;s Date of Visit is filled in.
                   </p>
 
                   {POSTNATAL_DAYS.map((day, idx) => {
-                    const completed = idx < postnatalActive;
-                    const isActive = idx === postnatalActive;
-                    const dis = !isActive;
+                    // A visit opens only when every earlier day has a Date of
+                    // Visit — you can't skip ahead.
+                    const unlocked = POSTNATAL_DAYS.slice(0, idx).every(
+                      (d) => (form[`postd${d}_date`] ?? "").trim()
+                    );
                     return (
-                      <div
-                        key={day}
-                        className={`rounded-2xl border p-4 ${
-                          isActive
-                            ? "border-[#2563EB] bg-white shadow-sm"
-                            : completed
-                            ? "border-emerald-200 bg-emerald-50/40"
-                            : "border-slate-200 bg-slate-50"
-                        }`}
-                      >
-                        <div className="mb-3 flex items-center justify-between gap-2">
-                          <h4 className="text-sm font-black text-slate-800">Postnatal Visit — Day {day}</h4>
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
-                              completed
-                                ? "bg-emerald-100 text-emerald-700"
-                                : isActive
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-slate-200 text-slate-500"
-                            }`}
-                          >
-                            {completed ? "Completed" : isActive ? "Current" : "Locked"}
-                          </span>
-                        </div>
-                        {idx > postnatalActive ? (
+                      <div key={day} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <h4 className="mb-3 text-sm font-black text-slate-800">Postnatal Visit — Day {day}</h4>
+                        {!unlocked ? (
                           <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                            <Lock className="h-3.5 w-3.5" /> Complete the Day {POSTNATAL_DAYS[idx - 1]} visit first.
+                            <Lock className="h-3.5 w-3.5" /> Fill in the Day {POSTNATAL_DAYS[idx - 1]} visit&apos;s Date of Visit first.
                           </p>
                         ) : (
                           <div className="space-y-3">
-                            <Row label="Date of Visit"><DateI k={`postd${day}_date`} disabled={dis} /></Row>
-                            <Row label="Blood Pressure"><Text k={`postd${day}_bp`} disabled={dis} /></Row>
-                            <Row label="Temperature"><Text k={`postd${day}_temp`} disabled={dis} /></Row>
-                            <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} disabled={dis} /></Row>
-                            <Row label="Counseling"><YesNo k={`postd${day}_counseling`} disabled={dis} /></Row>
-                            <Row label="Findings / Remarks"><Text k={`postd${day}_remarks`} disabled={dis} /></Row>
+                            <Row label="Date of Visit"><DateI k={`postd${day}_date`} /></Row>
+                            <Row label="Blood Pressure"><Text k={`postd${day}_bp`} /></Row>
+                            <Row label="Temperature"><Text k={`postd${day}_temp`} /></Row>
+                            <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} /></Row>
+                            <Row label="Counseling"><YesNo k={`postd${day}_counseling`} /></Row>
+                            <Row label="Findings / Remarks"><Text k={`postd${day}_remarks`} /></Row>
                           </div>
                         )}
                       </div>
