@@ -58,6 +58,20 @@ function computeGestation(lmp: string): string {
   return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
 }
 
+// Age of Gestation at a specific visit = (Date of Visit - LMP) in weeks + days.
+function gestationBetween(lmp: string | undefined, visitDate: string | undefined): string {
+  if (!lmp || !visitDate) return "";
+  const start = new Date(lmp);
+  const visit = new Date(visitDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(visit.getTime())) return "";
+  const diffMs = visit.getTime() - start.getTime();
+  if (diffMs < 0) return "";
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(totalDays / 7);
+  const days = totalDays % 7;
+  return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
+}
+
 function prettyDate(dateStr: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -678,6 +692,12 @@ function MaternalFormModal({
                           <h4 className="mb-3 text-sm font-black text-slate-800">Prenatal Visit {n} — Month {n}</h4>
                           <div className="space-y-3">
                             <Row label="Date of Visit"><DateI k={`pn${n}_date`} /></Row>
+                            <Row label="Age of Gestation">
+                              <ReadOnly
+                                value={gestationBetween(form.lmp, form[`pn${n}_date`])}
+                                note="Auto: Date of Visit − LMP"
+                              />
+                            </Row>
                             <Row label="Weight (kg)"><Text k={`pn${n}_weight`} /></Row>
                             <Row label="Blood Pressure"><Text k={`pn${n}_bp`} /></Row>
                             <Row label="Fundal Height (cm)"><Text k={`pn${n}_fundal`} /></Row>
@@ -733,7 +753,12 @@ function MaternalFormModal({
                               Prenatal Visit {n} — Month {n}
                             </h4>
                             <div className="grid gap-2 sm:grid-cols-2">
-                              {PRENATAL_MONTH_FIELDS.map(([s, label]) => (
+                              <SumChip label="Date of Visit" value={form[`pn${n}_date`]} />
+                              <SumChip
+                                label="Age of Gestation"
+                                value={gestationBetween(form.lmp, form[`pn${n}_date`])}
+                              />
+                              {PRENATAL_MONTH_FIELDS.filter(([s]) => s !== "date").map(([s, label]) => (
                                 <SumChip key={s} label={label} value={form[`pn${n}_${s}`]} />
                               ))}
                             </div>
