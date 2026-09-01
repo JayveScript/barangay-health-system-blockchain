@@ -330,6 +330,27 @@ export default function AdminDashboardPage() {
     if (selectedBarangayId) fetchDashboard();
   }, [selectedBarangayId]);
 
+  // Clear the Create User form whenever the admin leaves that tab, so it opens
+  // blank next time instead of keeping stale half-filled data and OTP state.
+  useEffect(() => {
+    if (tab === "create-user") return;
+    setForm({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      username: "",
+      password: "",
+      role: "BHW",
+    });
+    setEmailOtp("");
+    setOtpSent(false);
+    setOtpSending(false);
+    setOtpInfo("");
+    setCreateStep(1);
+  }, [tab]);
+
   const adminInitials = useMemo(() => {
     if (!adminUser?.fullName) return "AD";
 
