@@ -5,8 +5,10 @@ import {
   Baby,
   CheckCircle2,
   ClipboardList,
+  Eye,
   HeartPulse,
   Lock,
+  Pencil,
   Save,
   Search,
   UserRound,
@@ -180,6 +182,26 @@ function TestRow({ label, k, disabled }: { label: string; k: string; disabled?: 
     </div>
   );
 }
+
+// Read-only chip for the prenatal Summary view (renders nothing when empty).
+function SumChip({ label, value }: { label: string; value?: string }) {
+  if (!value || !value.trim()) return null;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+const PRENATAL_MONTH_FIELDS: [string, string][] = [
+  ["date", "Date of Visit"],
+  ["weight", "Weight (kg)"],
+  ["bp", "Blood Pressure"],
+  ["fundal", "Fundal Height (cm)"],
+  ["fht", "Fetal Heart Tone"],
+  ["remarks", "Findings / Remarks"],
+];
 
 export function MaternalRecordsTab() {
   const [residents, setResidents] = useState<PregnantResident[]>([]);
@@ -382,6 +404,10 @@ function MaternalFormModal({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [formTab, setFormTab] = useState<"obgyne" | "prenatal" | "postnatal">("obgyne");
+  // Prenatal is a summary-first view: when records already exist we show the
+  // read-only summary and reveal the editable form via the Edit button; when
+  // it is empty we open straight into editing.
+  const [prenatalEditing, setPrenatalEditing] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -389,10 +415,15 @@ function MaternalFormModal({
         setLoading(true);
         const res = await fetch(`/api/maternal/${resident.id}`, { cache: "no-store" });
         const json = await res.json();
-        if (res.ok && json.record?.data) {
-          setForm(json.record.data as FormData);
-          setLoadedData(json.record.data as FormData);
-        }
+        const data: FormData = res.ok && json.record?.data ? (json.record.data as FormData) : {};
+        setForm(data);
+        setLoadedData(data);
+        const hasPrenatal =
+          Boolean((data.lmp ?? "").trim()) ||
+          [1, 2, 3, 4, 5, 6, 7, 8, 9].some((n) =>
+            PRENATAL_MONTH_FIELDS.some(([s]) => (data[`pn${n}_${s}`] ?? "").trim())
+          );
+        setPrenatalEditing(!hasPrenatal);
       } catch (err) {
         console.error("MATERNAL_RECORD_LOAD_ERROR", err);
       } finally {
@@ -401,15 +432,9 @@ function MaternalFormModal({
     })();
   }, [resident.id]);
 
-  // Sequential unlock: a visit is "locked/complete" once it was saved (its date
-  // was set on load). The next visit becomes editable; later ones stay locked.
+  // Postnatal keeps its sequential unlock: a visit locks once saved (its date
+  // was set on load); the next visit opens, later ones stay locked.
   const POSTNATAL_DAYS = [0, 3, 7, 42];
-  const prenatalActive = (() => {
-    for (let i = 1; i <= 9; i++) {
-      if (!(loadedData[`pn${i}_date`] ?? "").trim()) return i;
-    }
-    return 10; // all 9 completed
-  })();
   const postnatalActive = (() => {
     for (let idx = 0; idx < POSTNATAL_DAYS.length; idx++) {
       if (!(loadedData[`postd${POSTNATAL_DAYS[idx]}_date`] ?? "").trim()) return idx;
@@ -417,10 +442,13 @@ function MaternalFormModal({
     return POSTNATAL_DAYS.length; // all completed
   })();
 
-  // The Present Pregnancy baseline is entered once and then frozen — LMP is the
-  // anchor, so once it has been saved the whole baseline becomes read-only.
-  // (Age of Gestation still updates live from LMP each day.)
-  const baselineLocked = Boolean((loadedData.lmp ?? "").trim());
+  // Whether any prenatal record has been encoded (controls the empty state in
+  // the summary view).
+  const hasPrenatalData =
+    Boolean((form.lmp ?? "").trim()) ||
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].some((n) =>
+      PRENATAL_MONTH_FIELDS.some(([s]) => (form[`pn${n}_${s}`] ?? "").trim())
+    );
 
   const set = useCallback((k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v })), []);
 
@@ -450,9 +478,10 @@ function MaternalFormModal({
         setError(json.error || "Failed to save maternal record.");
         return;
       }
-      // Advance the sequential unlock immediately (a filled visit becomes locked,
-      // the next one opens) without waiting for a reload.
+      // Advance the postnatal sequential unlock immediately, and drop the
+      // prenatal editor back to the read-only summary after a successful save.
       setLoadedData(payload);
+      setPrenatalEditing(false);
       setMessage("Maternal record saved.");
       setTimeout(() => onSaved(), 700);
     } catch (err) {
@@ -584,103 +613,140 @@ function MaternalFormModal({
 
               {formTab === "prenatal" && (
                 <div className="space-y-4">
-                  <Section title="Present Pregnancy — Baseline">
-                    {baselineLocked ? (
-                      <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-                        <Lock className="h-3.5 w-3.5" />
-                        Baseline locked — set once at the first visit. Age of Gestation still updates daily.
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-slate-500">
+                      {prenatalEditing
+                        ? "Encode prenatal records below, then Save."
+                        : "Summary of encoded prenatal records."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setPrenatalEditing((v) => !v)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                    >
+                      {prenatalEditing ? (
+                        <><Eye className="h-3.5 w-3.5" /> View Summary</>
+                      ) : (
+                        <><Pencil className="h-3.5 w-3.5" /> Edit</>
+                      )}
+                    </button>
+                  </div>
+
+                  {prenatalEditing ? (
+                    <>
+                      <Section title="Present Pregnancy — Baseline">
+                        <Row label="Last Menstrual Period"><DateI k="lmp" /></Row>
+                        <Row label="Expected Date of Delivery">
+                          <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
+                        </Row>
+                        <Row label="Age of Gestation">
+                          <ReadOnly value={aog} note="Auto from LMP, updates daily" />
+                        </Row>
+                        <Row label="Risk Code"><Text k="risk_code" /></Row>
+                        <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
+                        <Row label="Tetanus Toxoid (TT1–TT5)">
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                            {["1", "2", "3", "4", "5"].map((n) => (
+                              <div key={n}>
+                                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
+                                <DateI k={`tt${n}`} />
+                              </div>
+                            ))}
+                          </div>
+                        </Row>
+                        <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
+                        <Row label="Accompanying Person"><Text k="accompanying" /></Row>
+                        <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
+                        <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
+                        <Row label="Seen by Dentist">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
+                        </Row>
+                        <Row label="Seen by Physician">
+                          <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" /><DateI k="pre_physician_date" /></div>
+                        </Row>
+                        <SubTitle title="Tests (Result / Date)" />
+                        {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
+                        <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
+                      </Section>
+
+                      <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
+                        Monthly prenatal visits (9 months). Fill in any month, then use View Summary to review.
+                      </p>
+
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                        <div key={n} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                          <h4 className="mb-3 text-sm font-black text-slate-800">Prenatal Visit {n} — Month {n}</h4>
+                          <div className="space-y-3">
+                            <Row label="Date of Visit"><DateI k={`pn${n}_date`} /></Row>
+                            <Row label="Weight (kg)"><Text k={`pn${n}_weight`} /></Row>
+                            <Row label="Blood Pressure"><Text k={`pn${n}_bp`} /></Row>
+                            <Row label="Fundal Height (cm)"><Text k={`pn${n}_fundal`} /></Row>
+                            <Row label="Fetal Heart Tone"><Text k={`pn${n}_fht`} /></Row>
+                            <Row label="Findings / Remarks"><Text k={`pn${n}_remarks`} /></Row>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-4 shadow-sm">
+                        <h4 className="mb-3 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                          Present Pregnancy — Baseline
+                        </h4>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <SumChip label="Last Menstrual Period" value={prettyDate(form.lmp ?? "")} />
+                          <SumChip label="Expected Date of Delivery" value={prettyDate(form.edd ?? "")} />
+                          <SumChip label="Age of Gestation" value={aog} />
+                          <SumChip label="Risk Code" value={form.risk_code} />
+                          <SumChip label="Mother-Baby Book" value={form.mother_baby_book} />
+                          {["1", "2", "3", "4", "5"].map((n) => (
+                            <SumChip key={n} label={`TT${n}`} value={form[`tt${n}`]} />
+                          ))}
+                          <SumChip label="Plan to Deliver At" value={form.plan_deliver} />
+                          <SumChip label="Accompanying Person" value={form.accompanying} />
+                          <SumChip label="Iodized Salt" value={form.iodized_salt} />
+                          <SumChip label="Iron Supplement" value={form.iron_supplement} />
+                          <SumChip label="Seen by Dentist" value={form.pre_dentist} />
+                          <SumChip label="Dentist Date" value={form.pre_dentist_date} />
+                          <SumChip label="Seen by Physician" value={form.pre_physician} />
+                          <SumChip label="Physician Date" value={form.pre_physician_date} />
+                          {TESTS.map((t) => {
+                            const r = (form[`pre_${t.k}_result`] ?? "").trim();
+                            const d = (form[`pre_${t.k}_date`] ?? "").trim();
+                            return (
+                              <SumChip
+                                key={t.k}
+                                label={t.label}
+                                value={[r, d ? `(${d})` : ""].filter(Boolean).join(" ")}
+                              />
+                            );
+                          })}
+                          <SumChip label="Other Tests" value={form.pre_other_tests} />
+                        </div>
                       </div>
-                    ) : (
-                      <div className="mb-4 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">
-                        Fill this once. After saving, the baseline is locked and cannot be changed.
-                      </div>
-                    )}
-                    <Row label="Last Menstrual Period"><DateI k="lmp" disabled={baselineLocked} /></Row>
-                    <Row label="Expected Date of Delivery">
-                      <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
-                    </Row>
-                    <Row label="Age of Gestation">
-                      <ReadOnly value={aog} note="Auto from LMP, updates daily" />
-                    </Row>
-                    <Row label="Risk Code"><Text k="risk_code" disabled={baselineLocked} /></Row>
-                    <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" disabled={baselineLocked} /></Row>
-                    <Row label="Tetanus Toxoid (TT1–TT5)">
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                        {["1", "2", "3", "4", "5"].map((n) => (
-                          <div key={n}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
-                            <DateI k={`tt${n}`} disabled={baselineLocked} />
+
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9]
+                        .filter((n) => PRENATAL_MONTH_FIELDS.some(([s]) => (form[`pn${n}_${s}`] ?? "").trim()))
+                        .map((n) => (
+                          <div key={n} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                            <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
+                              Prenatal Visit {n} — Month {n}
+                            </h4>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              {PRENATAL_MONTH_FIELDS.map(([s, label]) => (
+                                <SumChip key={s} label={label} value={form[`pn${n}_${s}`]} />
+                              ))}
+                            </div>
                           </div>
                         ))}
-                      </div>
-                    </Row>
-                    <Row label="Plan to Deliver At"><Text k="plan_deliver" disabled={baselineLocked} /></Row>
-                    <Row label="Accompanying Person"><Text k="accompanying" disabled={baselineLocked} /></Row>
-                    <Row label="Iodized Salt"><YesNo k="iodized_salt" disabled={baselineLocked} /></Row>
-                    <Row label="Iron Supplement"><YesNo k="iron_supplement" disabled={baselineLocked} /></Row>
-                    <Row label="Seen by Dentist">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" disabled={baselineLocked} /><DateI k="pre_dentist_date" disabled={baselineLocked} /></div>
-                    </Row>
-                    <Row label="Seen by Physician">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" disabled={baselineLocked} /><DateI k="pre_physician_date" disabled={baselineLocked} /></div>
-                    </Row>
-                    <SubTitle title="Tests (Result / Date)" />
-                    {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} disabled={baselineLocked} />)}
-                    <Row label="Other Tests, Specify"><Text k="pre_other_tests" disabled={baselineLocked} /></Row>
-                  </Section>
 
-                  <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
-                    Monthly prenatal visits (9 months). Fill in a visit and save to unlock the next month.
-                  </p>
-
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
-                    const completed = n < prenatalActive;
-                    const isActive = n === prenatalActive;
-                    const dis = !isActive;
-                    return (
-                      <div
-                        key={n}
-                        className={`rounded-2xl border p-4 ${
-                          isActive
-                            ? "border-[#2563EB] bg-white shadow-sm"
-                            : completed
-                            ? "border-emerald-200 bg-emerald-50/40"
-                            : "border-slate-200 bg-slate-50"
-                        }`}
-                      >
-                        <div className="mb-3 flex items-center justify-between gap-2">
-                          <h4 className="text-sm font-black text-slate-800">
-                            Prenatal Visit {n} — Month {n}
-                          </h4>
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
-                              completed
-                                ? "bg-emerald-100 text-emerald-700"
-                                : isActive
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-slate-200 text-slate-500"
-                            }`}
-                          >
-                            {completed ? "Completed" : isActive ? "Current" : "Locked"}
-                          </span>
+                      {!hasPrenatalData && (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm font-semibold text-slate-400">
+                          No prenatal records yet. Tap Edit to start encoding.
                         </div>
-                        {n > prenatalActive ? (
-                          <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                            <Lock className="h-3.5 w-3.5" /> Complete visit {n - 1} first to open this month.
-                          </p>
-                        ) : (
-                          <div className="space-y-3">
-                            <Row label="Date of Visit"><DateI k={`pn${n}_date`} disabled={dis} /></Row>
-                            <Row label="Weight (kg)"><Text k={`pn${n}_weight`} disabled={dis} /></Row>
-                            <Row label="Blood Pressure"><Text k={`pn${n}_bp`} disabled={dis} /></Row>
-                            <Row label="Fundal Height (cm)"><Text k={`pn${n}_fundal`} disabled={dis} /></Row>
-                            <Row label="Fetal Heart Tone"><Text k={`pn${n}_fht`} disabled={dis} /></Row>
-                            <Row label="Findings / Remarks"><Text k={`pn${n}_remarks`} disabled={dis} /></Row>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
