@@ -337,8 +337,8 @@ function ReferralModal({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-sky-200 bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
+      <div className="flex h-full w-full max-w-6xl flex-col overflow-hidden border border-sky-200 bg-white shadow-2xl sm:h-auto sm:max-h-[92vh] sm:rounded-[30px]">
         <div className="border-b border-slate-200 bg-gradient-to-r from-[#F8FBFF] via-white to-[#F8FBFF] px-4 py-4 sm:px-7 sm:py-5">
           <div className="flex items-center gap-3">
             <button

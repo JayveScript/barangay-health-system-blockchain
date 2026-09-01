@@ -518,9 +518,9 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-sky-200 bg-white shadow-2xl">
-        <div className="border-b border-sky-200 bg-sky-50/60 p-5">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
+      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden border border-sky-200 bg-white shadow-2xl sm:h-[90vh] sm:rounded-[28px]">
+        <div className="border-b border-sky-200 bg-sky-50/60 p-4 sm:p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white">
@@ -557,7 +557,7 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
           {tab === "identifying" && (
             <div>
               <SectionTitle title="Identifying Data" />
