@@ -617,7 +617,7 @@ function MaternalFormModal({
               {formTab === "obgyne" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p className="min-w-0 text-xs font-semibold text-slate-500">
                       {obgyneEditing
                         ? "Encode OB-Gyne history below, then Save."
                         : "Summary of encoded OB-Gyne history."}
@@ -625,7 +625,7 @@ function MaternalFormModal({
                     <button
                       type="button"
                       onClick={() => setObgyneEditing((v) => !v)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
                     >
                       {obgyneEditing ? (
                         <><Eye className="h-3.5 w-3.5" /> View Summary</>
@@ -734,7 +734,7 @@ function MaternalFormModal({
               {formTab === "prenatal" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p className="min-w-0 text-xs font-semibold text-slate-500">
                       {prenatalEditing
                         ? "Encode prenatal records below, then Save."
                         : "Summary of encoded prenatal records."}
@@ -742,7 +742,7 @@ function MaternalFormModal({
                     <button
                       type="button"
                       onClick={() => setPrenatalEditing((v) => !v)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
                     >
                       {prenatalEditing ? (
                         <><Eye className="h-3.5 w-3.5" /> View Summary</>
@@ -898,7 +898,7 @@ function MaternalFormModal({
               {formTab === "postnatal" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p className="min-w-0 text-xs font-semibold text-slate-500">
                       {postnatalEditing
                         ? "Encode postnatal records below, then Save."
                         : "Summary of encoded postnatal records."}
@@ -906,7 +906,7 @@ function MaternalFormModal({
                     <button
                       type="button"
                       onClick={() => setPostnatalEditing((v) => !v)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-xs font-black text-[#2563EB] transition hover:bg-[#EFF6FF]"
                     >
                       {postnatalEditing ? (
                         <><Eye className="h-3.5 w-3.5" /> View Summary</>
