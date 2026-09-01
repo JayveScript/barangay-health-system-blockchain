@@ -24,6 +24,10 @@ export const HEALTH_CENTERS = [
       "Barangay 10-A",
     ],
   },
+  {
+    name: "PAQUIBATO HEALTH CENTER",
+    sitios: ["Paquibato Proper"],
+  },
 ] as const;
 
 export const HEALTH_CENTER_NAMES: string[] = HEALTH_CENTERS.map((h) => h.name);
