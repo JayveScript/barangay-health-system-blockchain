@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -191,9 +191,17 @@ export default function RegisterPage() {
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [serverError, setServerError] = useState("");
   const [serverMessage, setServerMessage] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
+
+  // Countdown that gates the "Resend Code" button after each send.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showPregnancyModal, setShowPregnancyModal] = useState(false);
 
@@ -385,6 +393,7 @@ export default function RegisterPage() {
       }
 
       setOtpSent(true);
+      setCooldown(45);
       setServerMessage("Verification code sent to your Gmail.");
     } catch (error) {
       console.error("REGISTER_SUBMIT_ERROR", error);
@@ -994,6 +1003,24 @@ export default function RegisterPage() {
               ? "Verified"
               : "Verify and Create Account"}
           </button>
+
+          {!verified && (
+            <div className="flex items-center justify-center gap-1.5 text-sm">
+              <span className="text-emerald-700/80">Didn&apos;t get the code?</span>
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={loading || cooldown > 0}
+                className="font-black text-emerald-700 underline underline-offset-2 transition hover:text-emerald-800 disabled:cursor-not-allowed disabled:text-emerald-700/50 disabled:no-underline"
+              >
+                {loading
+                  ? "Resending..."
+                  : cooldown > 0
+                  ? `Resend in ${cooldown}s`
+                  : "Resend Code"}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </FormSection>
