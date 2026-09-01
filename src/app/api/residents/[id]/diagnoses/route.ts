@@ -20,12 +20,35 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // A staff member always sees their own barangay's assessments for this
+    // resident (any authoring role — doctor, nurse, midwife, BHW all share
+    // them). When the resident is tied to this barangay through a referral, we
+    // also include the barangay on the other side of that referral, so both the
+    // sending and receiving teams can read each other's previous assessments.
+    const barangayIds = new Set<string>([currentUser.barangayId]);
+    if (!isSuperAdmin(currentUser)) {
+      const referrals = await prisma.residentReferral.findMany({
+        where: {
+          residentId: id,
+          OR: [
+            { sourceBarangayId: currentUser.barangayId },
+            { targetBarangayId: currentUser.barangayId },
+          ],
+        },
+        select: { sourceBarangayId: true, targetBarangayId: true },
+      });
+      for (const r of referrals) {
+        barangayIds.add(r.sourceBarangayId);
+        barangayIds.add(r.targetBarangayId);
+      }
+    }
+
     const diagnoses = await prisma.diagnosis.findMany({
       where: {
         residentId: id,
         ...(isSuperAdmin(currentUser)
           ? {}
-          : { barangayId: currentUser.barangayId }),
+          : { barangayId: { in: [...barangayIds] } }),
       },
       select: {
         id: true,
