@@ -29,6 +29,39 @@ type FormData = Record<string, string>;
 const fullName = (r: { firstName: string; middleName: string | null; lastName: string }) =>
   `${r.firstName} ${r.middleName ?? ""} ${r.lastName}`.replace(/\s+/g, " ").trim();
 
+// Expected Date of Delivery = LMP + 280 days
+function computeEdd(lmp: string): string {
+  if (!lmp) return "";
+  const d = new Date(lmp);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + 280);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// Age of Gestation = (today - LMP) in weeks + days; live, based on current date
+function computeGestation(lmp: string): string {
+  if (!lmp) return "";
+  const start = new Date(lmp);
+  if (Number.isNaN(start.getTime())) return "";
+  const today = new Date();
+  const diffMs = today.getTime() - start.getTime();
+  if (diffMs < 0) return "";
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(totalDays / 7);
+  const days = totalDays % 7;
+  return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
+}
+
+function prettyDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
 export function MaternalRecordsTab() {
   const [residents, setResidents] = useState<PregnantResident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -248,6 +281,16 @@ function MaternalFormModal({
 
   const set = (k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v }));
 
+  // Keep Expected Date of Delivery in sync with LMP (LMP + 280 days).
+  useEffect(() => {
+    if (!form.lmp) return;
+    const edd = computeEdd(form.lmp);
+    setForm((prev) => (prev.edd === edd ? prev : { ...prev, edd }));
+  }, [form.lmp]);
+
+  // Age of Gestation is derived live from LMP + today's date.
+  const aog = computeGestation(form.lmp);
+
   const save = async () => {
     try {
       setSaving(true);
@@ -256,7 +299,9 @@ function MaternalFormModal({
       const res = await fetch(`/api/maternal/${resident.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: form }),
+        body: JSON.stringify({
+          data: { ...form, edd: computeEdd(form.lmp ?? ""), gestation_age: aog },
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -288,6 +333,26 @@ function MaternalFormModal({
       onChange={(e) => set(k, e.target.value)}
       className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
     />
+  );
+  const NumI = ({ k, ph }: { k: string; ph?: string }) => (
+    <input
+      type="number"
+      inputMode="numeric"
+      min={0}
+      step={1}
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value.replace(/[^0-9]/g, ""))}
+      placeholder={ph}
+      className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
+    />
+  );
+  const ReadOnly = ({ value, note }: { value: string; note?: string }) => (
+    <div>
+      <div className="flex min-h-[42px] items-center rounded-xl border border-[#BFDBFE] bg-slate-50 px-3 text-sm font-bold text-slate-700">
+        {value || "—"}
+      </div>
+      {note && <p className="mt-1 text-[11px] font-semibold text-slate-400">{note}</p>}
+    </div>
   );
   const YesNo = ({ k }: { k: string }) => (
     <div className="flex gap-2">
@@ -393,10 +458,10 @@ function MaternalFormModal({
                     ))}
                   </div>
                 </Row>
-                <Row label="Menarche Age"><Text k="menarche_age" /></Row>
+                <Row label="Menarche Age"><NumI k="menarche_age" /></Row>
                 <Row label="Menstrual Cycle"><Select k="menstrual_cycle" options={["Regular", "Irregular"]} /></Row>
-                <Row label="Menstrual Flow (days)"><Text k="menstrual_flow" /></Row>
-                <Row label="Coitarche Age"><Text k="coitarche_age" /></Row>
+                <Row label="Menstrual Flow (days)"><NumI k="menstrual_flow" /></Row>
+                <Row label="Coitarche Age"><NumI k="coitarche_age" /></Row>
                 <Row label="Current FP Method"><Text k="fp_method" /></Row>
                 <TestRow label="Pap Smear" k="pap_smear" />
                 <TestRow label="VIA" k="via" />
@@ -417,9 +482,13 @@ function MaternalFormModal({
                   </div>
                 </Row>
                 <Row label="Last Menstrual Period"><DateI k="lmp" /></Row>
-                <Row label="Expected Date of Delivery"><DateI k="edd" /></Row>
+                <Row label="Expected Date of Delivery">
+                  <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
+                </Row>
                 <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
-                <Row label="Age of Gestation"><Text k="gestation_age" /></Row>
+                <Row label="Age of Gestation">
+                  <ReadOnly value={aog} note="Auto from LMP, updates daily" />
+                </Row>
                 <Row label="Accompanying Person"><Text k="accompanying" /></Row>
                 <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
                 <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
