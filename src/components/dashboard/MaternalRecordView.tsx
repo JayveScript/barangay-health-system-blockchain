@@ -2,6 +2,19 @@ import { formatRoleLabel } from "@/lib/role-labels";
 
 type MaternalData = Record<string, string> | null | undefined;
 
+// Age of Gestation is derived live from LMP + today's date.
+function liveGestation(lmp: string | undefined): string {
+  if (!lmp) return "";
+  const start = new Date(lmp);
+  if (Number.isNaN(start.getTime())) return "";
+  const diffMs = Date.now() - start.getTime();
+  if (diffMs < 0) return "";
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(totalDays / 7);
+  const days = totalDays % 7;
+  return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
+}
+
 const SECTIONS: { title: string; fields: [string, string][]; tests?: [string, string][] }[] = [
   {
     title: "OB-Gyne History",
@@ -108,7 +121,9 @@ export function MaternalRecordView({
               {rows.map(([k, label]) => (
                 <div key={k} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                   <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-900">{d[k]}</p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-900">
+                    {k === "gestation_age" ? liveGestation(d.lmp) || d[k] : d[k]}
+                  </p>
                 </div>
               ))}
               {testRows.map(([k, label]) => {
