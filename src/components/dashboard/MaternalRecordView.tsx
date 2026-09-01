@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { formatRoleLabel } from "@/lib/role-labels";
 
 type MaternalData = Record<string, string> | null | undefined;
@@ -11,6 +11,20 @@ function liveGestation(lmp: string | undefined): string {
   const start = new Date(lmp);
   if (Number.isNaN(start.getTime())) return "";
   const diffMs = Date.now() - start.getTime();
+  if (diffMs < 0) return "";
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(totalDays / 7);
+  const days = totalDays % 7;
+  return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
+}
+
+// Age of Gestation at a specific prenatal visit = (Date of Visit - LMP).
+function gestationBetween(lmp: string | undefined, visitDate: string | undefined): string {
+  if (!lmp || !visitDate) return "";
+  const start = new Date(lmp);
+  const visit = new Date(visitDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(visit.getTime())) return "";
+  const diffMs = visit.getTime() - start.getTime();
   if (diffMs < 0) return "";
   const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const weeks = Math.floor(totalDays / 7);
@@ -148,28 +162,51 @@ export function MaternalRecordView({
   };
 
   // Read-only card for one repeating visit (prenatal month / postnatal day).
-  const renderVisit = (title: string, prefix: string, fields: [string, string][]) => {
+  // `aog`, when given, is rendered right after the Date of Visit chip.
+  const renderVisit = (
+    title: string,
+    prefix: string,
+    fields: [string, string][],
+    aog?: string
+  ) => {
     const rows = fields.filter(([suffix]) => has(`${prefix}_${suffix}`));
     if (rows.length === 0) return null;
+    const chips: ReactNode[] = [];
+    rows.forEach(([suffix, label]) => {
+      chips.push(
+        <div key={suffix} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
+          <p className="mt-0.5 text-sm font-semibold text-slate-900">{d[`${prefix}_${suffix}`]}</p>
+        </div>
+      );
+      if (suffix === "date" && aog) {
+        chips.push(
+          <div key="aog" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Age of Gestation</p>
+            <p className="mt-0.5 text-sm font-semibold text-slate-900">{aog}</p>
+          </div>
+        );
+      }
+    });
     return (
       <div key={prefix} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
         <h4 className="mb-3 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
           {title}
         </h4>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {rows.map(([suffix, label]) => (
-            <div key={suffix} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-              <p className="mt-0.5 text-sm font-semibold text-slate-900">{d[`${prefix}_${suffix}`]}</p>
-            </div>
-          ))}
-        </div>
+        <div className="grid gap-2 sm:grid-cols-2">{chips}</div>
       </div>
     );
   };
 
   const prenatalVisits = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    .map((n) => renderVisit(`Prenatal Visit ${n} — Month ${n}`, `pn${n}`, PRENATAL_VISIT_FIELDS))
+    .map((n) =>
+      renderVisit(
+        `Prenatal Visit ${n} — Month ${n}`,
+        `pn${n}`,
+        PRENATAL_VISIT_FIELDS,
+        gestationBetween(d.lmp, d[`pn${n}_date`])
+      )
+    )
     .filter(Boolean);
   const postnatalVisits = POSTNATAL_DAYS
     .map((day) => renderVisit(`Postnatal Visit — Day ${day}`, `postd${day}`, POSTNATAL_VISIT_FIELDS))
