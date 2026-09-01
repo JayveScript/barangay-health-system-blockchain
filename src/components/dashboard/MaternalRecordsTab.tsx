@@ -171,12 +171,12 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     </div>
   );
 }
-function TestRow({ label, k }: { label: string; k: string }) {
+function TestRow({ label, k, disabled }: { label: string; k: string; disabled?: boolean }) {
   return (
     <div className="grid gap-1.5 sm:grid-cols-[160px_1fr_150px] sm:items-center sm:gap-2">
       <label className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</label>
-      <Text k={`${k}_result`} ph="Result" />
-      <DateI k={`${k}_date`} />
+      <Text k={`${k}_result`} ph="Result" disabled={disabled} />
+      <DateI k={`${k}_date`} disabled={disabled} />
     </div>
   );
 }
@@ -417,6 +417,11 @@ function MaternalFormModal({
     return POSTNATAL_DAYS.length; // all completed
   })();
 
+  // The Present Pregnancy baseline is entered once and then frozen — LMP is the
+  // anchor, so once it has been saved the whole baseline becomes read-only.
+  // (Age of Gestation still updates live from LMP each day.)
+  const baselineLocked = Boolean((loadedData.lmp ?? "").trim());
+
   const set = useCallback((k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v })), []);
 
   // Keep Expected Date of Delivery in sync with LMP (LMP + 280 days).
@@ -580,38 +585,48 @@ function MaternalFormModal({
               {formTab === "prenatal" && (
                 <div className="space-y-4">
                   <Section title="Present Pregnancy — Baseline">
-                    <Row label="Last Menstrual Period"><DateI k="lmp" /></Row>
+                    {baselineLocked ? (
+                      <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                        <Lock className="h-3.5 w-3.5" />
+                        Baseline locked — set once at the first visit. Age of Gestation still updates daily.
+                      </div>
+                    ) : (
+                      <div className="mb-4 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">
+                        Fill this once. After saving, the baseline is locked and cannot be changed.
+                      </div>
+                    )}
+                    <Row label="Last Menstrual Period"><DateI k="lmp" disabled={baselineLocked} /></Row>
                     <Row label="Expected Date of Delivery">
                       <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
                     </Row>
                     <Row label="Age of Gestation">
                       <ReadOnly value={aog} note="Auto from LMP, updates daily" />
                     </Row>
-                    <Row label="Risk Code"><Text k="risk_code" /></Row>
-                    <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
+                    <Row label="Risk Code"><Text k="risk_code" disabled={baselineLocked} /></Row>
+                    <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" disabled={baselineLocked} /></Row>
                     <Row label="Tetanus Toxoid (TT1–TT5)">
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                         {["1", "2", "3", "4", "5"].map((n) => (
                           <div key={n}>
                             <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
-                            <DateI k={`tt${n}`} />
+                            <DateI k={`tt${n}`} disabled={baselineLocked} />
                           </div>
                         ))}
                       </div>
                     </Row>
-                    <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
-                    <Row label="Accompanying Person"><Text k="accompanying" /></Row>
-                    <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
-                    <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
+                    <Row label="Plan to Deliver At"><Text k="plan_deliver" disabled={baselineLocked} /></Row>
+                    <Row label="Accompanying Person"><Text k="accompanying" disabled={baselineLocked} /></Row>
+                    <Row label="Iodized Salt"><YesNo k="iodized_salt" disabled={baselineLocked} /></Row>
+                    <Row label="Iron Supplement"><YesNo k="iron_supplement" disabled={baselineLocked} /></Row>
                     <Row label="Seen by Dentist">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" disabled={baselineLocked} /><DateI k="pre_dentist_date" disabled={baselineLocked} /></div>
                     </Row>
                     <Row label="Seen by Physician">
-                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" /><DateI k="pre_physician_date" /></div>
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" disabled={baselineLocked} /><DateI k="pre_physician_date" disabled={baselineLocked} /></div>
                     </Row>
                     <SubTitle title="Tests (Result / Date)" />
-                    {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
-                    <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
+                    {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} disabled={baselineLocked} />)}
+                    <Row label="Other Tests, Specify"><Text k="pre_other_tests" disabled={baselineLocked} /></Row>
                   </Section>
 
                   <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
