@@ -282,6 +282,7 @@ function formatResidentOption(resident: ReferralResident) {
 
 function formatReferral(referral: {
   id: string;
+  residentId: string;
   status: string;
   reason: string | null;
   notes: string | null;
@@ -297,6 +298,8 @@ function formatReferral(referral: {
 }) {
   return {
     id: referral.id,
+    // Needed by the view modal to load this resident's assessments.
+    residentId: referral.residentId,
     status: referral.status,
     reason: referral.reason,
     notes: referral.notes,
