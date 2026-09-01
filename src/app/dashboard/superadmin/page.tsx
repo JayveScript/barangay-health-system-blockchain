@@ -7,6 +7,7 @@ import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
   normalizeBarangayHcmsUsername,
@@ -343,6 +344,7 @@ function ResidentsTab() {
     <RegisteredResidentsTab
       endpoint="/api/staff/residents"
       showBlockchainVerify
+      showDelete
     />
   );
 }
@@ -352,17 +354,21 @@ function StaffTab() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [barangay, setBarangay] = useState("ALL");
+  const [deleteStaff, setDeleteStaff] = useState<SuperStaff | null>(null);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/superadmin/staff");
+      const json = await res.json();
+      if (res.ok) setRows(json.staff || []);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/superadmin/staff");
-        const json = await res.json();
-        if (res.ok) setRows(json.staff || []);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    load();
   }, []);
 
   const barangayOptions = useMemo(
@@ -410,6 +416,7 @@ function StaffTab() {
               <th className="px-3 py-2">Username</th>
               <th className="px-3 py-2">Role</th>
               <th className="px-3 py-2">Barangay</th>
+              <th className="px-3 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -423,10 +430,32 @@ function StaffTab() {
                 <td className="px-3 py-3">
                   <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">{s.barangay?.name || "—"}</span>
                 </td>
+                <td className="px-3 py-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteStaff(s)}
+                    title="Delete staff account"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {deleteStaff && (
+        <DeleteAccountModal
+          name={deleteStaff.fullName || deleteStaff.username}
+          userId={deleteStaff.id}
+          onClose={() => setDeleteStaff(null)}
+          onDeleted={() => {
+            setDeleteStaff(null);
+            load();
+          }}
+        />
       )}
     </TableCard>
   );
@@ -454,8 +483,8 @@ function CreateBarangayTab() {
       setError("Barangay name, username, and an 8+ character password are required.");
       return;
     }
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      setError("A valid email is required (used for referral notifications).");
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError("Please enter a valid email, or leave it blank.");
       return;
     }
     try {
@@ -531,7 +560,7 @@ function CreateBarangayTab() {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Full Name (optional)" value={form.fullName} onChange={(v) => setForm((p) => ({ ...p, fullName: v }))} />
-            <Field label="Email" type="email" value={form.email} onChange={(v) => setForm((p) => ({ ...p, email: v }))} placeholder="For referral notifications" />
+            <Field label="Email (optional)" type="email" value={form.email} onChange={(v) => setForm((p) => ({ ...p, email: v }))} />
           </div>
 
           {error && <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>}
