@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ClipboardList,
   HeartPulse,
+  Lock,
   Save,
   Search,
   UserRound,
@@ -257,10 +258,12 @@ function MaternalFormModal({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<FormData>({});
+  const [loadedData, setLoadedData] = useState<FormData>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [formTab, setFormTab] = useState<"obgyne" | "prenatal" | "postnatal">("obgyne");
 
   useEffect(() => {
     (async () => {
@@ -270,6 +273,7 @@ function MaternalFormModal({
         const json = await res.json();
         if (res.ok && json.record?.data) {
           setForm(json.record.data as FormData);
+          setLoadedData(json.record.data as FormData);
         }
       } catch (err) {
         console.error("MATERNAL_RECORD_LOAD_ERROR", err);
@@ -278,6 +282,22 @@ function MaternalFormModal({
       }
     })();
   }, [resident.id]);
+
+  // Sequential unlock: a visit is "locked/complete" once it was saved (its date
+  // was set on load). The next visit becomes editable; later ones stay locked.
+  const POSTNATAL_DAYS = [0, 3, 7, 42];
+  const prenatalActive = (() => {
+    for (let i = 1; i <= 9; i++) {
+      if (!(loadedData[`pn${i}_date`] ?? "").trim()) return i;
+    }
+    return 10; // all 9 completed
+  })();
+  const postnatalActive = (() => {
+    for (let idx = 0; idx < POSTNATAL_DAYS.length; idx++) {
+      if (!(loadedData[`postd${POSTNATAL_DAYS[idx]}_date`] ?? "").trim()) return idx;
+    }
+    return POSTNATAL_DAYS.length; // all completed
+  })();
 
   const set = (k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v }));
 
@@ -296,18 +316,20 @@ function MaternalFormModal({
       setSaving(true);
       setError("");
       setMessage("");
+      const payload = { ...form, edd: computeEdd(form.lmp ?? ""), gestation_age: aog };
       const res = await fetch(`/api/maternal/${resident.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: { ...form, edd: computeEdd(form.lmp ?? ""), gestation_age: aog },
-        }),
+        body: JSON.stringify({ data: payload }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error || "Failed to save maternal record.");
         return;
       }
+      // Advance the sequential unlock immediately (a filled visit becomes locked,
+      // the next one opens) without waiting for a reload.
+      setLoadedData(payload);
       setMessage("Maternal record saved.");
       setTimeout(() => onSaved(), 700);
     } catch (err) {
@@ -318,23 +340,26 @@ function MaternalFormModal({
     }
   };
 
-  const Text = ({ k, ph }: { k: string; ph?: string }) => (
+  const lockCls = "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+  const Text = ({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) => (
     <input
       value={form[k] ?? ""}
       onChange={(e) => set(k, e.target.value)}
       placeholder={ph}
-      className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
+      disabled={disabled}
+      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
     />
   );
-  const DateI = ({ k }: { k: string }) => (
+  const DateI = ({ k, disabled }: { k: string; disabled?: boolean }) => (
     <input
       type="date"
       value={form[k] ?? ""}
       onChange={(e) => set(k, e.target.value)}
-      className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
+      disabled={disabled}
+      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
     />
   );
-  const NumI = ({ k, ph }: { k: string; ph?: string }) => (
+  const NumI = ({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) => (
     <input
       type="number"
       inputMode="numeric"
@@ -343,7 +368,8 @@ function MaternalFormModal({
       value={form[k] ?? ""}
       onChange={(e) => set(k, e.target.value.replace(/[^0-9]/g, ""))}
       placeholder={ph}
-      className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
+      disabled={disabled}
+      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
     />
   );
   const ReadOnly = ({ value, note }: { value: string; note?: string }) => (
@@ -354,14 +380,15 @@ function MaternalFormModal({
       {note && <p className="mt-1 text-[11px] font-semibold text-slate-400">{note}</p>}
     </div>
   );
-  const YesNo = ({ k }: { k: string }) => (
+  const YesNo = ({ k, disabled }: { k: string; disabled?: boolean }) => (
     <div className="flex gap-2">
       {["Yes", "No"].map((opt) => (
         <button
           key={opt}
           type="button"
+          disabled={disabled}
           onClick={() => set(k, form[k] === opt ? "" : opt)}
-          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition ${
+          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
             form[k] === opt
               ? "border-[#2563EB] bg-[#2563EB] text-white"
               : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#EFF6FF]"
@@ -372,11 +399,12 @@ function MaternalFormModal({
       ))}
     </div>
   );
-  const Select = ({ k, options }: { k: string; options: string[] }) => (
+  const Select = ({ k, options, disabled }: { k: string; options: string[]; disabled?: boolean }) => (
     <select
       value={form[k] ?? ""}
       onChange={(e) => set(k, e.target.value)}
-      className="min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]"
+      disabled={disabled}
+      className={`min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] ${lockCls}`}
     >
       <option value="">Select</option>
       {options.map((o) => (
@@ -443,110 +471,242 @@ function MaternalFormModal({
               Loading record...
             </div>
           ) : (
-            <div className="space-y-6">
-              <Section title="For Women — OB-Gyne History">
-                <Row label="OB Score">
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                    {[
-                      ["G", "ob_g"], ["P", "ob_p"], ["Full Term", "ob_fullterm"],
-                      ["Preterm", "ob_preterm"], ["Abortion", "ob_abortion"], ["Living", "ob_living"],
-                    ].map(([lbl, k]) => (
-                      <div key={k}>
-                        <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{lbl}</p>
-                        <Text k={k} />
-                      </div>
-                    ))}
-                  </div>
-                </Row>
-                <Row label="Menarche Age"><NumI k="menarche_age" /></Row>
-                <Row label="Menstrual Cycle"><Select k="menstrual_cycle" options={["Regular", "Irregular"]} /></Row>
-                <Row label="Menstrual Flow (days)"><NumI k="menstrual_flow" /></Row>
-                <Row label="Coitarche Age"><NumI k="coitarche_age" /></Row>
-                <Row label="Current FP Method"><Text k="fp_method" /></Row>
-                <TestRow label="Pap Smear" k="pap_smear" />
-                <TestRow label="VIA" k="via" />
-                <TestRow label="History of STI" k="sti" />
-              </Section>
+            <div className="space-y-5">
+              {/* Sub-tabs: OB-Gyne History · Prenatal Care · Postnatal Care */}
+              <div className="flex gap-1 rounded-2xl bg-[#EFF6FF] p-1.5">
+                {([
+                  ["obgyne", "OB-Gyne History"],
+                  ["prenatal", "Prenatal Care"],
+                  ["postnatal", "Postnatal Care"],
+                ] as const).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setFormTab(id)}
+                    className={`flex-1 rounded-xl px-2 py-2.5 text-[11px] font-black uppercase tracking-wide transition sm:text-xs ${
+                      formTab === id
+                        ? "bg-[#2563EB] text-white shadow-sm"
+                        : "text-slate-500 hover:bg-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
 
-              <Section title="Prenatal Care — Present Pregnancy">
-                <Row label="Risk Code"><Text k="risk_code" /></Row>
-                <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
-                <Row label="Tetanus Toxoid (TT1–TT5)">
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                    {["1", "2", "3", "4", "5"].map((n) => (
-                      <div key={n}>
-                        <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
-                        <DateI k={`tt${n}`} />
+              {formTab === "obgyne" && (
+                <div className="space-y-6">
+                  <Section title="For Women — OB-Gyne History">
+                    <Row label="OB Score">
+                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                        {[
+                          ["G", "ob_g"], ["P", "ob_p"], ["Full Term", "ob_fullterm"],
+                          ["Preterm", "ob_preterm"], ["Abortion", "ob_abortion"], ["Living", "ob_living"],
+                        ].map(([lbl, k]) => (
+                          <div key={k}>
+                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{lbl}</p>
+                            <Text k={k} />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </Row>
-                <Row label="Last Menstrual Period"><DateI k="lmp" /></Row>
-                <Row label="Expected Date of Delivery">
-                  <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
-                </Row>
-                <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
-                <Row label="Age of Gestation">
-                  <ReadOnly value={aog} note="Auto from LMP, updates daily" />
-                </Row>
-                <Row label="Accompanying Person"><Text k="accompanying" /></Row>
-                <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
-                <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
-                <Row label="Seen by Dentist">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
-                </Row>
-                <Row label="Seen by Physician">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" /><DateI k="pre_physician_date" /></div>
-                </Row>
-                <SubTitle title="Tests (Result / Date)" />
-                {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
-                <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
-              </Section>
+                    </Row>
+                    <Row label="Menarche Age"><NumI k="menarche_age" /></Row>
+                    <Row label="Menstrual Cycle"><Select k="menstrual_cycle" options={["Regular", "Irregular"]} /></Row>
+                    <Row label="Menstrual Flow (days)"><NumI k="menstrual_flow" /></Row>
+                    <Row label="Coitarche Age"><NumI k="coitarche_age" /></Row>
+                    <Row label="Current FP Method"><Text k="fp_method" /></Row>
+                    <TestRow label="Pap Smear" k="pap_smear" />
+                    <TestRow label="VIA" k="via" />
+                    <TestRow label="History of STI" k="sti" />
+                  </Section>
 
-              <Section title="Postnatal Care">
-                <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
-                <Row label="Place of Delivery"><Text k="post_place" /></Row>
-                <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
-                <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
-                <Row label="Attended By"><Text k="post_attended" /></Row>
-                <Row label="Complications"><Text k="post_complications" /></Row>
-                <Row label="Sex of Newborn"><Select k="post_newborn_sex" options={["Female", "Male"]} /></Row>
-                <Row label="Birthweight"><Text k="post_birthweight" /></Row>
-                <Row label="Hemoglobin">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
-                </Row>
-                <Row label="Vitamin A">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_vitamin_a" /><DateI k="post_vitamin_a_date" /></div>
-                </Row>
-                <Row label="Breastfeeding">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_breastfeeding" /><DateI k="post_breastfeeding_date" /></div>
-                </Row>
-                <Row label="Counseling">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_counseling" /><DateI k="post_counseling_date" /></div>
-                </Row>
-              </Section>
-
-              <Section title="Pregnancy History">
-                <Row label="Seen by Dentist">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_dentist" /><Text k="ph_dentist_visits" ph="No. of visits" /></div>
-                </Row>
-                <Row label="Seen by Physician">
-                  <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_physician" /><Text k="ph_physician_visits" ph="No. of visits" /></div>
-                </Row>
-                <Row label="Visits per Trimester">
-                  <div className="grid grid-cols-3 gap-2">
-                    {["1st", "2nd", "3rd"].map((t, i) => (
-                      <div key={t}>
-                        <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{t} Trimester</p>
-                        <Text k={`ph_trimester_${i + 1}`} />
+                  <Section title="Pregnancy History">
+                    <Row label="Seen by Dentist">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_dentist" /><Text k="ph_dentist_visits" ph="No. of visits" /></div>
+                    </Row>
+                    <Row label="Seen by Physician">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="ph_physician" /><Text k="ph_physician_visits" ph="No. of visits" /></div>
+                    </Row>
+                    <Row label="Visits per Trimester">
+                      <div className="grid grid-cols-3 gap-2">
+                        {["1st", "2nd", "3rd"].map((t, i) => (
+                          <div key={t}>
+                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{t} Trimester</p>
+                            <Text k={`ph_trimester_${i + 1}`} />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </Row>
-                <SubTitle title="Tests (Result / Date)" />
-                {TESTS.map((t) => <TestRow key={`ph_${t.k}`} label={t.label} k={`ph_${t.k}`} />)}
-                <Row label="Other Tests, Specify"><Text k="ph_other_tests" /></Row>
-              </Section>
+                    </Row>
+                    <SubTitle title="Tests (Result / Date)" />
+                    {TESTS.map((t) => <TestRow key={`ph_${t.k}`} label={t.label} k={`ph_${t.k}`} />)}
+                    <Row label="Other Tests, Specify"><Text k="ph_other_tests" /></Row>
+                  </Section>
+                </div>
+              )}
+
+              {formTab === "prenatal" && (
+                <div className="space-y-4">
+                  <Section title="Present Pregnancy — Baseline">
+                    <Row label="Last Menstrual Period"><DateI k="lmp" /></Row>
+                    <Row label="Expected Date of Delivery">
+                      <ReadOnly value={prettyDate(form.edd ?? "")} note="Auto: LMP + 280 days" />
+                    </Row>
+                    <Row label="Age of Gestation">
+                      <ReadOnly value={aog} note="Auto from LMP, updates daily" />
+                    </Row>
+                    <Row label="Risk Code"><Text k="risk_code" /></Row>
+                    <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
+                    <Row label="Tetanus Toxoid (TT1–TT5)">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                        {["1", "2", "3", "4", "5"].map((n) => (
+                          <div key={n}>
+                            <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
+                            <DateI k={`tt${n}`} />
+                          </div>
+                        ))}
+                      </div>
+                    </Row>
+                    <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
+                    <Row label="Accompanying Person"><Text k="accompanying" /></Row>
+                    <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
+                    <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
+                    <Row label="Seen by Dentist">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
+                    </Row>
+                    <Row label="Seen by Physician">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_physician" /><DateI k="pre_physician_date" /></div>
+                    </Row>
+                    <SubTitle title="Tests (Result / Date)" />
+                    {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
+                    <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
+                  </Section>
+
+                  <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
+                    Monthly prenatal visits (9 months). Fill in a visit and save to unlock the next month.
+                  </p>
+
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+                    const completed = n < prenatalActive;
+                    const isActive = n === prenatalActive;
+                    const dis = !isActive;
+                    return (
+                      <div
+                        key={n}
+                        className={`rounded-2xl border p-4 ${
+                          isActive
+                            ? "border-[#2563EB] bg-white shadow-sm"
+                            : completed
+                            ? "border-emerald-200 bg-emerald-50/40"
+                            : "border-slate-200 bg-slate-50"
+                        }`}
+                      >
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-black text-slate-800">
+                            Prenatal Visit {n} — Month {n}
+                          </h4>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+                              completed
+                                ? "bg-emerald-100 text-emerald-700"
+                                : isActive
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-slate-200 text-slate-500"
+                            }`}
+                          >
+                            {completed ? "Completed" : isActive ? "Current" : "Locked"}
+                          </span>
+                        </div>
+                        {n > prenatalActive ? (
+                          <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                            <Lock className="h-3.5 w-3.5" /> Complete visit {n - 1} first to open this month.
+                          </p>
+                        ) : (
+                          <div className="space-y-3">
+                            <Row label="Date of Visit"><DateI k={`pn${n}_date`} disabled={dis} /></Row>
+                            <Row label="Weight (kg)"><Text k={`pn${n}_weight`} disabled={dis} /></Row>
+                            <Row label="Blood Pressure"><Text k={`pn${n}_bp`} disabled={dis} /></Row>
+                            <Row label="Fundal Height (cm)"><Text k={`pn${n}_fundal`} disabled={dis} /></Row>
+                            <Row label="Fetal Heart Tone"><Text k={`pn${n}_fht`} disabled={dis} /></Row>
+                            <Row label="Findings / Remarks"><Text k={`pn${n}_remarks`} disabled={dis} /></Row>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {formTab === "postnatal" && (
+                <div className="space-y-4">
+                  <Section title="Delivery Details">
+                    <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
+                    <Row label="Place of Delivery"><Text k="post_place" /></Row>
+                    <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
+                    <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
+                    <Row label="Attended By"><Text k="post_attended" /></Row>
+                    <Row label="Complications"><Text k="post_complications" /></Row>
+                    <Row label="Sex of Newborn"><Select k="post_newborn_sex" options={["Female", "Male"]} /></Row>
+                    <Row label="Birthweight"><Text k="post_birthweight" /></Row>
+                    <Row label="Hemoglobin">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
+                    </Row>
+                    <Row label="Vitamin A">
+                      <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_vitamin_a" /><DateI k="post_vitamin_a_date" /></div>
+                    </Row>
+                  </Section>
+
+                  <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
+                    Postnatal visits (Day 0, 3, 7, 42). Fill in a visit and save to unlock the next.
+                  </p>
+
+                  {POSTNATAL_DAYS.map((day, idx) => {
+                    const completed = idx < postnatalActive;
+                    const isActive = idx === postnatalActive;
+                    const dis = !isActive;
+                    return (
+                      <div
+                        key={day}
+                        className={`rounded-2xl border p-4 ${
+                          isActive
+                            ? "border-[#2563EB] bg-white shadow-sm"
+                            : completed
+                            ? "border-emerald-200 bg-emerald-50/40"
+                            : "border-slate-200 bg-slate-50"
+                        }`}
+                      >
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-black text-slate-800">Postnatal Visit — Day {day}</h4>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+                              completed
+                                ? "bg-emerald-100 text-emerald-700"
+                                : isActive
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-slate-200 text-slate-500"
+                            }`}
+                          >
+                            {completed ? "Completed" : isActive ? "Current" : "Locked"}
+                          </span>
+                        </div>
+                        {idx > postnatalActive ? (
+                          <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                            <Lock className="h-3.5 w-3.5" /> Complete the Day {POSTNATAL_DAYS[idx - 1]} visit first.
+                          </p>
+                        ) : (
+                          <div className="space-y-3">
+                            <Row label="Date of Visit"><DateI k={`postd${day}_date`} disabled={dis} /></Row>
+                            <Row label="Blood Pressure"><Text k={`postd${day}_bp`} disabled={dis} /></Row>
+                            <Row label="Temperature"><Text k={`postd${day}_temp`} disabled={dis} /></Row>
+                            <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} disabled={dis} /></Row>
+                            <Row label="Counseling"><YesNo k={`postd${day}_counseling`} disabled={dis} /></Row>
+                            <Row label="Findings / Remarks"><Text k={`postd${day}_remarks`} disabled={dis} /></Row>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
