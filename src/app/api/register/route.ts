@@ -184,7 +184,7 @@ export async function POST(req: Request) {
         },
       }));
 
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(password, 12);
     const otp = generateOtp();
     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
 

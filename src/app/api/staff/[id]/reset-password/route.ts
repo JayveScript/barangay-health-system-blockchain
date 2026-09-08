@@ -69,7 +69,7 @@ export async function POST(
       return NextResponse.json({ error: "Staff user not found." }, { status: 404 });
     }
 
-    const passwordHash = await bcrypt.hash(nextPassword, 10);
+    const passwordHash = await bcrypt.hash(nextPassword, 12);
 
     await prisma.user.update({
       where: { id },
