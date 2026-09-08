@@ -80,7 +80,7 @@ export async function createBarangayAdmin(
       },
     });
 
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(password, 12);
 
     const admin = await tx.user.create({
       data: {

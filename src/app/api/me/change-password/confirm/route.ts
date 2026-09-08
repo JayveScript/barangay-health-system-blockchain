@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({
       where: { id: authed.id },
       data: { password: hashed, tokenVersion: { increment: 1 } },

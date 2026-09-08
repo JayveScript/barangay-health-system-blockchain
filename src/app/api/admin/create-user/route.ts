@@ -149,7 +149,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(password, 12);
 
     const user = await db.user.create({
       data: {
