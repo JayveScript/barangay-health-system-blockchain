@@ -5,6 +5,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
+import { BlockchainBalanceWarning } from "@/components/dashboard/BlockchainBalanceWarning";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
@@ -184,6 +185,10 @@ export default function SuperAdminDashboard() {
                   </button>
                 </div>
               </div>
+            </div>
+
+            <div className="mb-4">
+              <BlockchainBalanceWarning />
             </div>
 
             {tab === "overview" && <OverviewTab />}

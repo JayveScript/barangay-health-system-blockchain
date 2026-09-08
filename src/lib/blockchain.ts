@@ -258,3 +258,50 @@ export async function isBlockchainReachable(): Promise<boolean> {
     return false;
   }
 }
+
+// Rough gas used by one anchorRecord call (string + bytes32 + string, array
+// push, event). Used only to estimate how many anchors the balance covers.
+const GAS_PER_ANCHOR = BigInt(150000);
+// Warn once the wallet can afford fewer than this many more anchors.
+const LOW_TX_THRESHOLD = 25;
+
+export type WalletBalance = {
+  configured: boolean;
+  address?: string;
+  balanceEth?: number;
+  gasPriceGwei?: number;
+  estTxLeft?: number;
+  low?: boolean;
+};
+
+// Reads the anchoring wallet's balance and estimates how many more anchoring
+// transactions it can afford. Works even when anchoring is disabled, so the
+// super admin can keep an eye on the testnet balance during testing.
+export async function getWalletBalance(): Promise<WalletBalance> {
+  const rpcUrl = process.env.BLOCKCHAIN_RPC_URL;
+  const privateKey = process.env.BLOCKCHAIN_PRIVATE_KEY;
+  if (!rpcUrl || !privateKey) return { configured: false };
+
+  try {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const wallet = new ethers.Wallet(privateKey, provider);
+    const [balance, feeData] = await Promise.all([
+      provider.getBalance(wallet.address),
+      provider.getFeeData(),
+    ]);
+    const gasPrice = feeData.gasPrice ?? BigInt(1000000000); // 1 gwei fallback
+    const costPerTx = gasPrice * GAS_PER_ANCHOR;
+    const estTxLeft = costPerTx > BigInt(0) ? Number(balance / costPerTx) : 0;
+
+    return {
+      configured: true,
+      address: wallet.address,
+      balanceEth: Number(ethers.formatEther(balance)),
+      gasPriceGwei: Number(ethers.formatUnits(gasPrice, "gwei")),
+      estTxLeft,
+      low: estTxLeft < LOW_TX_THRESHOLD,
+    };
+  } catch {
+    return { configured: false };
+  }
+}
