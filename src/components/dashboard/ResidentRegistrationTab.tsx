@@ -231,8 +231,15 @@ function RegistrationModal({
 
   const validateStep = () => {
     if (step !== 1) return true;
-    if (!form.lastName || !form.firstName || !form.birthDate || !form.sex || !form.civilStatus) {
-      setError("Please complete required fields in Step 1.");
+    if (
+      !form.lastName ||
+      !form.firstName ||
+      !form.birthDate ||
+      !form.sex ||
+      !form.civilStatus ||
+      !form.contactNumber.trim()
+    ) {
+      setError("Please complete required fields in Step 1, including contact number.");
       return false;
     }
     return true;
@@ -400,7 +407,7 @@ function RegistrationModal({
                 </select>
               </div>
               <ModalInput label="House / Street" value={form.houseStreet} onChange={(v) => updateField("houseStreet", v)} />
-              <ModalInput label="Contact Number" value={form.contactNumber} onChange={(v) => updateField("contactNumber", v)} />
+              <ModalInput label="Contact Number *" value={form.contactNumber} onChange={(v) => updateField("contactNumber", v)} />
               <ModalInput label="Religion" value={form.religion} onChange={(v) => updateField("religion", v)} />
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Educational Attainment</label>

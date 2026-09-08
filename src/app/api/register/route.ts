@@ -101,6 +101,7 @@ export async function POST(req: Request) {
       !sex ||
       !civilStatus ||
       !resolvedAddress ||
+      !normalizedPhone ||
       !birthDate
     ) {
       return NextResponse.json(
