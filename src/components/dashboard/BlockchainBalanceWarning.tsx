@@ -47,7 +47,7 @@ export function BlockchainBalanceWarning({ className = "" }: { className?: strin
           <p className="font-black text-amber-800">Low blockchain balance</p>
           <p className="mt-0.5 font-semibold text-amber-700">
             The anchoring wallet has <strong>{eth} ETH</strong> — about{" "}
-            <strong>{txLeft} more anchor{txLeft === 1 ? "" : "s"}</strong> left. Top it up
+            <strong>{txLeft} transaction{txLeft === 1 ? "" : "s"} left</strong>. Top it up
             from a Sepolia faucet before it runs out, or new medical records / referrals
             won&apos;t be sealed on-chain.
           </p>
@@ -58,11 +58,14 @@ export function BlockchainBalanceWarning({ className = "" }: { className?: strin
 
   return (
     <span
-      title="Anchoring wallet balance (Sepolia)"
+      title="Anchoring wallet balance and estimated transactions left (Sepolia)"
       className={`inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 ring-1 ring-slate-200 ${className}`}
     >
       <Coins className="h-3.5 w-3.5 text-slate-500" />
-      {eth} ETH · ~{txLeft} anchors left
+      {eth} ETH
+      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+        ~{txLeft} transactions left
+      </span>
     </span>
   );
 }
