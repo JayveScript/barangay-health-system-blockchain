@@ -95,12 +95,13 @@ export async function POST(req: Request) {
       !body.sex ||
       !body.civilStatus ||
       !body.completeAddress ||
+      !String(body.contactNumber || "").trim() ||
       Number.isNaN(age) ||
       age <= 0 ||
       Number.isNaN(birthDate.getTime())
     ) {
       return NextResponse.json(
-        { error: "Please complete all required fields." },
+        { error: "Please complete all required fields, including contact number." },
         { status: 400 }
       );
     }

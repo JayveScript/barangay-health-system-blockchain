@@ -297,7 +297,9 @@ export default function RegisterPage() {
       if (!form.civilStatus) {
         nextErrors.civilStatus = "Please select civil status.";
       }
-      if (form.contactNumber.trim() && !validatePhone(form.contactNumber)) {
+      if (!form.contactNumber.trim()) {
+        nextErrors.contactNumber = "Contact number is required.";
+      } else if (!validatePhone(form.contactNumber)) {
         nextErrors.contactNumber = "Enter a valid phone number.";
       }
     }
@@ -724,7 +726,7 @@ export default function RegisterPage() {
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       <InputField
-                        label="Contact Number"
+                        label="Contact Number *"
                         placeholder="09XXXXXXXXX"
                         icon={<Phone className="h-4 w-4" />}
                         value={form.contactNumber}
