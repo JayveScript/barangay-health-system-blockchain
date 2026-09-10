@@ -172,7 +172,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (syncHistory && finalConditions.length > 0) {
+    if (syncHistory && (finalConditions.length > 0 || notes || medicalAdvice || isHealthy)) {
       const history = historyMedical;
       const updateData: Record<string, boolean | string | null> = {};
 
@@ -186,6 +186,23 @@ export async function POST(req: Request) {
           );
         }
       }
+
+      // Append this assessment (findings, notes, medical advice) to the medical
+      // history so it becomes part of the resident's permanent medical record —
+      // shown in the Medical tab and carried in referral snapshots, so a
+      // receiving barangay can read the recent findings after a referral.
+      const findingLabels = finalConditions.map((k) => CONDITION_FIELDS[k]?.label ?? k);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const entryLines: string[] = [`── Assessment (${dateStr}) ──`];
+      entryLines.push(
+        `Findings: ${findingLabels.length ? findingLabels.join(", ") : "Healthy / No findings"}`
+      );
+      if (notes) entryLines.push(`Notes: ${notes}`);
+      if (medicalAdvice) entryLines.push(`Advice: ${medicalAdvice}`);
+      const prevLog =
+        (history?.previousIllnessesSurgeries as string | null | undefined) ?? "";
+      updateData.previousIllnessesSurgeries =
+        entryLines.join("\n") + (prevLog ? `\n\n${prevLog}` : "");
 
       await db.residentMedicalHistory.upsert({
         where: { residentId: effectiveResidentId },
