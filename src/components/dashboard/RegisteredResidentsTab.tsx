@@ -3,7 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  CalendarDays,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   Edit,
   Eye,
@@ -484,12 +486,46 @@ type ViewDiagnosis = {
   notes?: string | null;
   medicalAdvice?: string | null;
   createdAt: string;
-  diagnosedBy?: { fullName?: string | null; barangay?: { name?: string | null } | null } | null;
+  diagnosedBy?: {
+    fullName?: string | null;
+    role?: string | null;
+    barangay?: { name?: string | null } | null;
+  } | null;
 };
+
+// Medical-history condition flags, in display order, with their diagnosis keys.
+const MEDICAL_CONDITIONS: { key: string; label: string }[] = [
+  { key: "hasHypertension", label: "Hypertension" },
+  { key: "hasDiabetes", label: "Diabetes" },
+  { key: "hasStiHiv", label: "STI / HIV" },
+  { key: "hasHeartDisease", label: "Heart Disease" },
+  { key: "hasKidneyFailure", label: "Kidney Failure" },
+  { key: "hasTuberculosis", label: "Tuberculosis" },
+  { key: "hasAllergies", label: "Allergies" },
+  { key: "hasCancer", label: "Cancer" },
+  { key: "hasOtherConditions", label: "Other Conditions" },
+];
+const CONDITION_LABEL: Record<string, string> = Object.fromEntries(
+  MEDICAL_CONDITIONS.map((c) => [c.key, c.label])
+);
+
+function authorName(d: ViewDiagnosis): string {
+  return d.diagnosedBy?.fullName?.trim() || "Health Worker";
+}
+function authorCenter(d: ViewDiagnosis): string {
+  return d.diagnosedBy?.barangay?.name?.trim() || "";
+}
+function shortDate(iso: string): string {
+  const dt = new Date(iso);
+  return Number.isNaN(dt.getTime())
+    ? ""
+    : dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
 
 function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
   const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
+  const [expandedCond, setExpandedCond] = useState<string | null>(null);
 
   const loadDiagnoses = useCallback(async () => {
     try {
@@ -508,6 +544,21 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
   const mh = resident.medicalHistory;
   const fh = resident.familyHistory;
   const ph = resident.personalSocialHistory;
+
+  // Most-recent diagnosis that flagged each condition (diagnoses are newest-first).
+  const conditionAuthors: Record<string, ViewDiagnosis> = {};
+  for (const d of diagnoses) {
+    for (const c of d.conditions ?? []) {
+      if (!conditionAuthors[c]) conditionAuthors[c] = d;
+    }
+  }
+  // Resident-declared previous illnesses, with the auto-appended assessment log
+  // blocks stripped out (those are shown as cards in the Assessment History).
+  const declaredPrevIllness = String(mh?.previousIllnessesSurgeries ?? "")
+    .split("\n\n")
+    .filter((chunk: string) => !chunk.trimStart().startsWith("── Assessment"))
+    .join("\n\n")
+    .trim();
 
   const tabs = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
@@ -604,32 +655,142 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
           )}
 
           {tab === "medical" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <SectionTitle title="Medical History" />
-              <QrFlagGroup
-                title="Recorded Conditions"
-                icon={<Stethoscope className="h-4 w-4" />}
-                tone="bad"
-                columns={2}
-                items={[
-                  { label: "Hypertension", value: Boolean(mh?.hasHypertension) },
-                  { label: "Diabetes", value: Boolean(mh?.hasDiabetes) },
-                  { label: "STI / HIV", value: Boolean(mh?.hasStiHiv) },
-                  { label: "Heart Disease", value: Boolean(mh?.hasHeartDisease) },
-                  { label: "Kidney Failure", value: Boolean(mh?.hasKidneyFailure) },
-                  { label: "Tuberculosis", value: Boolean(mh?.hasTuberculosis) },
-                  { label: "Allergies", value: Boolean(mh?.hasAllergies) },
-                  { label: "Cancer", value: Boolean(mh?.hasCancer) },
-                  { label: "Other Conditions", value: Boolean(mh?.hasOtherConditions) },
-                ]}
-              />
-              <div className="grid gap-2 sm:grid-cols-2">
-                {mh?.allergiesDetails && <InfoCard label="Allergies Details" value={mh.allergiesDetails} />}
-                {mh?.cancerDetails && <InfoCard label="Cancer Details" value={mh.cancerDetails} />}
-                {mh?.otherConditionsDetails && <InfoCard label="Other Conditions Details" value={mh.otherConditionsDetails} />}
-                {mh?.maintenanceMedications && <InfoCard label="Maintenance Medications" value={mh.maintenanceMedications} />}
-                {mh?.previousIllnessesSurgeries && <InfoCard label="Previous Illnesses / Surgeries" value={mh.previousIllnessesSurgeries} />}
+
+              {/* Recorded conditions — tap a "Yes" to see who recorded it */}
+              <div>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+                    <Stethoscope className="h-4 w-4" />
+                  </span>
+                  <h4 className="text-sm font-black uppercase tracking-wide text-slate-700">Recorded Conditions</h4>
+                  <span className="text-[11px] font-semibold text-slate-400">Tap a “Yes” to see who recorded it</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {MEDICAL_CONDITIONS.map(({ key, label }) => {
+                    const yes = Boolean((mh as Record<string, unknown> | null | undefined)?.[key]);
+                    const author = conditionAuthors[key];
+                    const open = expandedCond === key;
+                    return (
+                      <div
+                        key={key}
+                        className={`rounded-2xl border transition ${
+                          yes ? "border-rose-200 bg-rose-50/50" : "border-slate-200 bg-slate-50"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          disabled={!yes}
+                          onClick={() => setExpandedCond(open ? null : key)}
+                          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left disabled:cursor-default"
+                        >
+                          <span className="text-sm font-bold text-slate-800">{label}</span>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black ${
+                              yes ? "bg-rose-100 text-rose-700" : "bg-slate-200 text-slate-500"
+                            }`}
+                          >
+                            {yes ? "Yes" : "No"}
+                            {yes && (
+                              <ChevronDown className={`h-3.5 w-3.5 transition ${open ? "rotate-180" : ""}`} />
+                            )}
+                          </span>
+                        </button>
+                        {open && yes && (
+                          <div className="border-t border-rose-100 px-4 py-2.5 text-xs">
+                            {author ? (
+                              <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold text-slate-600">
+                                <UserRound className="h-3.5 w-3.5 text-rose-500" />
+                                Recorded by <span className="font-black text-slate-800">{authorName(author)}</span>
+                                {authorCenter(author) && <span className="text-slate-400">· {authorCenter(author)}</span>}
+                                <span className="text-slate-400">· {shortDate(author.createdAt)}</span>
+                              </p>
+                            ) : (
+                              <p className="font-semibold text-slate-500">Self-reported at registration.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Condition details + declared previous illnesses */}
+              {(mh?.allergiesDetails ||
+                mh?.cancerDetails ||
+                mh?.otherConditionsDetails ||
+                mh?.maintenanceMedications ||
+                declaredPrevIllness) && (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {mh?.allergiesDetails && <InfoCard label="Allergies Details" value={mh.allergiesDetails} />}
+                  {mh?.cancerDetails && <InfoCard label="Cancer Details" value={mh.cancerDetails} />}
+                  {mh?.otherConditionsDetails && <InfoCard label="Other Conditions Details" value={mh.otherConditionsDetails} />}
+                  {mh?.maintenanceMedications && <InfoCard label="Maintenance Medications" value={mh.maintenanceMedications} />}
+                  {declaredPrevIllness && <InfoCard label="Previous Illnesses / Surgeries" value={declaredPrevIllness} />}
+                </div>
+              )}
+
+              {/* Assessment history — modern cards with author at the bottom */}
+              {diagnoses.length > 0 && (
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                      <CalendarDays className="h-4 w-4" />
+                    </span>
+                    <h4 className="text-sm font-black uppercase tracking-wide text-slate-700">Assessment History</h4>
+                  </div>
+                  <div className="space-y-3">
+                    {diagnoses.map((d) => {
+                      const findings = (d.conditions ?? []).map((c) => CONDITION_LABEL[c] ?? c);
+                      return (
+                        <div key={d.id} className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                          <div className="mb-3 flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                              <CalendarDays className="h-3.5 w-3.5" />
+                              {shortDate(d.createdAt)}
+                            </span>
+                            {d.isHealthy && findings.length === 0 && (
+                              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700">
+                                Healthy
+                              </span>
+                            )}
+                          </div>
+
+                          {findings.length > 0 && (
+                            <div className="mb-2 flex flex-wrap gap-1.5">
+                              {findings.map((f) => (
+                                <span key={f} className="rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-black text-rose-700">
+                                  {f}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {d.notes && d.notes.trim() && (
+                            <p className="whitespace-pre-line text-sm text-slate-700">
+                              <span className="font-black text-slate-500">Notes: </span>
+                              {d.notes}
+                            </p>
+                          )}
+                          {d.medicalAdvice && d.medicalAdvice.trim() && (
+                            <p className="mt-1 whitespace-pre-line text-sm text-emerald-800">
+                              <span className="font-black text-emerald-600">Advice: </span>
+                              {d.medicalAdvice}
+                            </p>
+                          )}
+
+                          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-2.5 text-xs font-semibold text-slate-500">
+                            <UserRound className="h-3.5 w-3.5 text-sky-500" />
+                            <span className="font-black text-slate-700">{authorName(d)}</span>
+                            {authorCenter(d) && <span className="text-slate-400">· {authorCenter(d)}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
