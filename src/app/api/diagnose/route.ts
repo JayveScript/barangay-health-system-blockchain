@@ -126,17 +126,17 @@ export async function POST(req: Request) {
 
       effectiveResidentId = referral.residentId;
       effectiveAppointmentId = null;
-      // Only the resident's home (source) barangay updates the canonical medical
-      // history. A cross-barangay consult records the assessment on its own.
-      syncHistory = referral.sourceBarangayId === user.barangayId;
+      // Both the referring (home) and the receiving barangay fold their
+      // assessment into the resident's medical history, so recent findings from
+      // a cross-barangay consult become part of the permanent medical record
+      // and are visible to everyone caring for this referred patient.
+      syncHistory = true;
 
-      if (syncHistory) {
-        const homeResident = await db.resident.findFirst({
-          where: { id: effectiveResidentId },
-          include: { medicalHistory: true },
-        });
-        historyMedical = (homeResident?.medicalHistory ?? null) as Record<string, unknown> | null;
-      }
+      const homeResident = await db.resident.findFirst({
+        where: { id: effectiveResidentId },
+        include: { medicalHistory: true },
+      });
+      historyMedical = (homeResident?.medicalHistory ?? null) as Record<string, unknown> | null;
     } else {
       const resident = await db.resident.findFirst({
         where: { id: residentId, barangayId: user.barangayId },
@@ -193,7 +193,11 @@ export async function POST(req: Request) {
       // receiving barangay can read the recent findings after a referral.
       const findingLabels = finalConditions.map((k) => CONDITION_FIELDS[k]?.label ?? k);
       const dateStr = new Date().toISOString().slice(0, 10);
-      const entryLines: string[] = [`── Assessment (${dateStr}) ──`];
+      const centerName =
+        (user as { barangay?: { name?: string | null } }).barangay?.name ?? "";
+      const entryLines: string[] = [
+        `── Assessment (${dateStr}${centerName ? ` · ${centerName}` : ""}) ──`,
+      ];
       entryLines.push(
         `Findings: ${findingLabels.length ? findingLabels.join(", ") : "Healthy / No findings"}`
       );
