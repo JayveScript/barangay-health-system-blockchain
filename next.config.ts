@@ -10,11 +10,15 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  // 'wasm-unsafe-eval' lets the QR scanner (@yudiel/react-qr-scanner ->
+  // zxing-wasm) compile its WebAssembly module; it permits WASM only, not
+  // arbitrary JS eval. 'unsafe-eval' stays dev-only (React debugging).
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://api.qrserver.com https://ui-avatars.com",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // jsDelivr is where zxing-wasm fetches its .wasm binary for QR decoding.
+  "connect-src 'self' https://fastly.jsdelivr.net https://cdn.jsdelivr.net",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
