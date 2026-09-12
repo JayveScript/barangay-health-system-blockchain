@@ -305,3 +305,102 @@ export async function getWalletBalance(): Promise<WalletBalance> {
     return { configured: false };
   }
 }
+
+// ── Per-resident medical-record blockchain anchor lookup ────────────────────
+export type MedicalAnchor = {
+  configured: boolean;
+  anchored: boolean;
+  recordHash?: string;
+  timestamp?: number; // unix seconds (block time of the anchor)
+  blockNumber?: number;
+  txHash?: string;
+  contractAddress?: string;
+  network?: string;
+  explorer?: { tx?: string; block?: string; address?: string };
+};
+
+const anchorCache = new Map<string, { data: MedicalAnchor; expiresAt: number }>();
+const ANCHOR_CACHE_MS = 5 * 60 * 1000;
+const EXPLORER_BASE = "https://sepolia.etherscan.io";
+
+// Looks up where a resident's medical_history record is anchored on-chain.
+// Reads work regardless of the write kill-switch (BLOCKCHAIN_ENABLED) — an
+// existing anchor stays readable even while new anchoring is paused. The block
+// number / tx hash come from the RecordAnchored event, scanned newest-first in
+// 10k-block windows (Infura's eth_getLogs cap) and cached.
+export async function getMedicalRecordAnchor(residentId: string): Promise<MedicalAnchor> {
+  const cached = anchorCache.get(residentId);
+  if (cached && cached.expiresAt > Date.now()) return cached.data;
+
+  const registryAddress = process.env.HEALTH_RECORD_REGISTRY_ADDRESS;
+  if (!process.env.BLOCKCHAIN_RPC_URL || !registryAddress) {
+    return { configured: false, anchored: false };
+  }
+
+  let result: MedicalAnchor;
+  try {
+    const { provider, registry } = getBlockchainClient();
+    const [hash, tsBig] = await registry.getLatestRecord(residentId, "medical_history");
+    const recordHash: string = hash;
+
+    if (!recordHash || recordHash.toLowerCase() === ethers.ZeroHash) {
+      result = {
+        configured: true,
+        anchored: false,
+        contractAddress: registryAddress,
+        network: "sepolia",
+        explorer: { address: `${EXPLORER_BASE}/address/${registryAddress}` },
+      };
+    } else {
+      // Find the anchoring tx's block via the indexed event, newest-first.
+      let blockNumber: number | undefined;
+      let txHash: string | undefined;
+      try {
+        const latest = await provider.getBlockNumber();
+        const CHUNK = 9900;
+        const MAX_CHUNKS = 16; // ~158k blocks (~3 weeks on Sepolia)
+        const filter = registry.filters.RecordAnchored(residentId);
+        for (let i = 0; i < MAX_CHUNKS; i++) {
+          const to = latest - i * CHUNK;
+          if (to < 0) break;
+          const from = Math.max(0, to - CHUNK + 1);
+          const events = await registry.queryFilter(filter, from, to);
+          const med = events.filter(
+            (e) => "args" in e && (e as ethers.EventLog).args?.recordType === "medical_history"
+          );
+          if (med.length) {
+            const last = med[med.length - 1];
+            blockNumber = last.blockNumber;
+            txHash = last.transactionHash;
+            break;
+          }
+          if (from === 0) break;
+        }
+      } catch {
+        // Event scan is best-effort; the anchor status/hash below still stand.
+      }
+
+      result = {
+        configured: true,
+        anchored: true,
+        recordHash,
+        timestamp: Number(tsBig),
+        blockNumber,
+        txHash,
+        contractAddress: registryAddress,
+        network: "sepolia",
+        explorer: {
+          address: `${EXPLORER_BASE}/address/${registryAddress}`,
+          ...(txHash ? { tx: `${EXPLORER_BASE}/tx/${txHash}` } : {}),
+          ...(blockNumber ? { block: `${EXPLORER_BASE}/block/${blockNumber}` } : {}),
+        },
+      };
+    }
+  } catch (err) {
+    console.error("[blockchain] getMedicalRecordAnchor failed:", err);
+    result = { configured: false, anchored: false };
+  }
+
+  anchorCache.set(residentId, { data: result, expiresAt: Date.now() + ANCHOR_CACHE_MS });
+  return result;
+}
