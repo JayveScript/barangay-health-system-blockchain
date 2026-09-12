@@ -100,6 +100,9 @@ const LIMITS: Record<string, { max: number; windowMs: number }> = {
   "/api/register":                     { max: 10, windowMs: 60 * 60 * 1000 },
   "/api/admin/verify-password":        { max: 5,  windowMs: 15 * 60 * 1000 },
   "/api/verify-password":              { max: 10, windowMs: 15 * 60 * 1000 },
+  // Gmail OTP sends — throttle to stop email spam / abuse.
+  "/api/admin/create-user/send-code":  { max: 4,  windowMs: 15 * 60 * 1000 },
+  "/api/me/change-password/send-code": { max: 4,  windowMs: 15 * 60 * 1000 },
 };
 
 export async function middleware(req: NextRequest) {
@@ -143,5 +146,7 @@ export const config = {
     "/api/verify-code",
     "/api/admin/verify-password",
     "/api/verify-password",
+    "/api/admin/create-user/send-code",
+    "/api/me/change-password/send-code",
   ],
 };

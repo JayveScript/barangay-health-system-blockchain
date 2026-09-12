@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Mail, Send, Lock, ShieldCheck } from "lucide-react";
 
@@ -14,6 +14,14 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  // Countdown that gates the "Resend code" button after each send.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +52,34 @@ export default function ForgotPasswordPage() {
       }
 
       setMessage("Verification code sent to your email.");
+      setCooldown(45);
       setStep("reset");
+    } catch {
+      setError("Unable to connect to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Re-send the reset code to the same email (rate-limited server-side).
+  const handleResend = async () => {
+    if (cooldown > 0 || loading) return;
+    setError("");
+    setMessage("");
+    try {
+      setLoading(true);
+      const res = await fetch("/api/forgot-password/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to resend code.");
+        return;
+      }
+      setMessage("A new verification code has been sent to your email.");
+      setCooldown(45);
     } catch {
       setError("Unable to connect to server.");
     } finally {
@@ -193,6 +228,17 @@ export default function ForgotPasswordPage() {
                   maxLength={6}
                   className="w-full bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
                 />
+              </div>
+              <div className="mt-2 flex items-center gap-1.5 text-sm">
+                <span className="text-slate-500">Didn&apos;t get the code?</span>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={loading || cooldown > 0}
+                  className="font-bold text-[#0EA5E9] underline underline-offset-2 transition hover:text-sky-600 disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+                >
+                  {loading ? "Resending..." : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+                </button>
               </div>
             </div>
 
