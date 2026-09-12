@@ -17,10 +17,28 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const date = searchParams.get("date");
+    const manage = searchParams.get("manage") === "1";
+    const statusFilter = searchParams.get("status"); // PENDING | PUBLISHED | ARCHIVED
     const barangayId = resolveScopeBarangayId(
       user,
       searchParams.get("barangayId")
     );
+
+    // Admin "Manage Announcements": every announcement for the barangay,
+    // any date, filterable by status. Admins only.
+    if (manage) {
+      if (!canManageBarangay(user)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const announcements = await prisma.announcement.findMany({
+        where: {
+          barangayId,
+          ...(statusFilter ? { status: statusFilter } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(announcements);
+    }
 
     const selectedDate = date ? new Date(date) : new Date();
 
@@ -30,13 +48,13 @@ export async function GET(req: Request) {
     const end = new Date(selectedDate);
     end.setHours(23, 59, 59, 999);
 
+    // Date view: published announcements, plus the viewer's own submissions
+    // (so a staff member can see their still-pending post).
     const announcements = await prisma.announcement.findMany({
       where: {
         barangayId,
-        publishDate: {
-          gte: start,
-          lte: end,
-        },
+        publishDate: { gte: start, lte: end },
+        OR: [{ status: "PUBLISHED" }, { authorId: user.id }],
       },
       orderBy: {
         publishDate: "desc",
@@ -58,8 +76,9 @@ export async function POST(req: Request) {
     const user = await getCurrentApiUser();
 
     const role = String(user?.role || "");
-    const canPostAnnouncement =
-      canManageBarangay(user) || role === "DOCTOR" || role === "NURSE";
+    const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"];
+    const isAdmin = canManageBarangay(user);
+    const canPostAnnouncement = isAdmin || STAFF_ROLES.includes(role);
 
     if (!canPostAnnouncement || !user?.barangayId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -75,6 +94,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // Admins publish directly; staff posts wait for admin approval.
+    const status = isAdmin ? "PUBLISHED" : "PENDING";
+
     const announcement = await prisma.announcement.create({
       data: {
         barangayId,
@@ -82,8 +104,18 @@ export async function POST(req: Request) {
         content: body.content,
         imageUrl: body.imageUrl || null,
         publishDate: new Date(body.publishDate),
+        status,
+        authorId: user.id,
+        authorName: (user as { fullName?: string | null }).fullName ?? null,
+        authorRole: role,
       },
     });
+
+    // A pending (staff-submitted) announcement is not emailed to residents
+    // until an admin approves/publishes it.
+    if (status !== "PUBLISHED") {
+      return NextResponse.json(announcement);
+    }
 
     const barangay = await prisma.barangay.findUnique({
       where: { id: barangayId },

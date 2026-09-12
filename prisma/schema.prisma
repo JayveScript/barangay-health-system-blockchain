@@ -414,12 +414,20 @@ model Announcement {
   content     String
   imageUrl    String?
   publishDate DateTime
+  // Approval workflow: staff posts start PENDING; an admin publishes them.
+  // Defaults to PUBLISHED so existing announcements stay visible after this
+  // column is added. Values: PENDING | PUBLISHED | ARCHIVED.
+  status      String   @default("PUBLISHED")
+  authorId    String?
+  authorName  String?
+  authorRole  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   barangay Barangay @relation(fields: [barangayId], references: [id])
 
   @@index([barangayId, publishDate])
+  @@index([barangayId, status])
 }
 
 model ResidentReferral {

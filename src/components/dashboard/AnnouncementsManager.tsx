@@ -11,6 +11,9 @@ type Announcement = {
   imageUrl?: string | null;
   publishDate: string;
   createdAt?: string;
+  status?: string;
+  authorName?: string | null;
+  authorRole?: string | null;
 };
 
 function formatLongDate(value: string) {
@@ -126,7 +129,11 @@ export function AnnouncementsManager({
         return;
       }
 
-      setMessage("Announcement posted successfully.");
+      setMessage(
+        json?.status === "PENDING"
+          ? "Submitted — waiting for an admin to review and publish it."
+          : "Announcement posted successfully."
+      );
       setForm({ title: "", content: "", imageUrl: "", publishDate: today });
       setImageFile(null);
       setSelectedDate(json.publishDate ? json.publishDate.split("T")[0] : form.publishDate);
@@ -315,9 +322,21 @@ export function AnnouncementsManager({
                 )}
 
                 <div className="p-5">
-                  <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-600">
-                    {formatLongDate(item.publishDate)}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-600">
+                      {formatLongDate(item.publishDate)}
+                    </span>
+                    {item.status === "PENDING" && (
+                      <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+                        Pending approval
+                      </span>
+                    )}
+                    {item.status === "ARCHIVED" && (
+                      <span className="inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-black text-slate-500">
+                        Archived
+                      </span>
+                    )}
+                  </div>
                   <h3 className="mt-3 text-2xl font-black text-slate-900">
                     {item.title}
                   </h3>
