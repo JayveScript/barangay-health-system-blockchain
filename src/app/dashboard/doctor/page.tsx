@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
+import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { DonutChart, BarList } from "@/components/dashboard/Charts";
@@ -1075,7 +1076,11 @@ function OverviewTab() {
   }
 
   return (
-    <div className="space-y-5 pb-4">
+    <div className="print-area space-y-5 pb-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <ExportPdfButton />
+      </div>
       <div className="grid grid-cols-4 items-stretch gap-2 sm:gap-4">
         <MetricCard
           icon={<Users className="h-5 w-5" />}

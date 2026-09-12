@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { DonutChart, BarList } from "./Charts";
 import { InlineLoader } from "./InlineLoader";
+import { ExportPdfButton } from "./ExportPdfButton";
 
 const SEX_COLORS = ["#075985", "#7DD3FC", "#94A3B8"];
 
@@ -93,7 +94,11 @@ export function ResidentStatsOverview() {
   if (!data) return null;
 
   return (
-    <div className="space-y-5 pb-4">
+    <div className="print-area space-y-5 pb-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <ExportPdfButton />
+      </div>
       <div className="grid grid-cols-3 gap-2 sm:gap-4 [&>*]:min-w-0">
         <StatCard
           icon={<Users className="h-5 w-5" />}

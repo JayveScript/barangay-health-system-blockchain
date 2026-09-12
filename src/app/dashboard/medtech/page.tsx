@@ -38,6 +38,7 @@ type MedTechUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { KeyRound } from "lucide-react";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
@@ -243,7 +244,11 @@ export default function MedTechDashboardPage() {
 
 function OverviewTab() {
   return (
-    <div className="space-y-5 pb-4">
+    <div className="print-area space-y-5 pb-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <ExportPdfButton />
+      </div>
       <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
         <MetricCard icon={<TestTube className="h-5 w-5" />} label="Tests Processed" value="184" />
         <MetricCard icon={<FlaskConical className="h-5 w-5" />} label="Samples Collected" value="121" />

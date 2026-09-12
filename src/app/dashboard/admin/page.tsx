@@ -60,6 +60,7 @@ import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { AnnouncementsAdmin } from "@/components/dashboard/AnnouncementsAdmin";
+import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { PortalLoader } from "@/components/PortalLoader";
 import { HEALTH_CENTERS } from "@/lib/barangay-options";
@@ -1257,7 +1258,11 @@ export default function AdminDashboardPage() {
                 )}
 
                 {tab === "overview" && (
-                  <div className="space-y-5">
+                  <div className="print-area space-y-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="text-lg font-black text-slate-900">Overview</h2>
+                      <ExportPdfButton />
+                    </div>
                     <div className="grid grid-cols-3 gap-2 sm:gap-4 [&>*]:min-w-0">
                       <StatCard
                         icon={<Users className="h-5 w-5" />}
