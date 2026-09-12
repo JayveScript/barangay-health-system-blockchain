@@ -3,10 +3,12 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  Blocks,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
   ClipboardList,
+  ExternalLink,
   Edit,
   Eye,
   HeartPulse,
@@ -493,6 +495,18 @@ type ViewDiagnosis = {
   } | null;
 };
 
+type MedicalAnchorView = {
+  configured: boolean;
+  anchored: boolean;
+  recordHash?: string;
+  timestamp?: number;
+  blockNumber?: number;
+  txHash?: string;
+  contractAddress?: string;
+  network?: string;
+  explorer?: { tx?: string; block?: string; address?: string };
+};
+
 // Medical-history condition flags, in display order, with their diagnosis keys.
 const MEDICAL_CONDITIONS: { key: string; label: string }[] = [
   { key: "hasHypertension", label: "Hypertension" },
@@ -521,9 +535,13 @@ function shortDate(iso: string): string {
     ? ""
     : dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
+function shortHash(h: string): string {
+  return h && h.length > 16 ? `${h.slice(0, 10)}…${h.slice(-6)}` : h;
+}
 
 function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
+  const [anchor, setAnchor] = useState<MedicalAnchorView | null>(null);
   const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
   const [expandedCond, setExpandedCond] = useState<string | null>(null);
 
@@ -537,9 +555,20 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
     }
   }, [resident.id]);
 
+  const loadAnchor = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/residents/${resident.id}/blockchain`, { cache: "no-store" });
+      const json = (await res.json().catch(() => null)) as MedicalAnchorView | null;
+      if (res.ok && json) setAnchor(json);
+    } catch (err) {
+      console.error("VIEW_ANCHOR_ERROR", err);
+    }
+  }, [resident.id]);
+
   useEffect(() => {
     loadDiagnoses();
-  }, [loadDiagnoses]);
+    loadAnchor();
+  }, [loadDiagnoses, loadAnchor]);
 
   const mh = resident.medicalHistory;
   const fh = resident.familyHistory;
@@ -657,6 +686,79 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
           {tab === "medical" && (
             <div className="space-y-6">
               <SectionTitle title="Medical History" />
+
+              {/* Blockchain anchor — where this medical record is sealed on-chain */}
+              {anchor?.anchored && (
+                <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4 shadow-sm">
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white">
+                      <Blocks className="h-4 w-4" />
+                    </span>
+                    <h4 className="text-sm font-black uppercase tracking-wide text-indigo-900">Secured on Blockchain</h4>
+                    <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-indigo-700">
+                      {anchor.network ?? "sepolia"}
+                    </span>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Block Number</p>
+                      {anchor.blockNumber ? (
+                        <a
+                          href={anchor.explorer?.block}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-0.5 inline-flex items-center gap-1 text-sm font-black text-indigo-700 hover:underline"
+                        >
+                          #{anchor.blockNumber} <ExternalLink className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <p className="mt-0.5 text-sm font-semibold text-slate-400">Not found (older than 3 weeks)</p>
+                      )}
+                    </div>
+                    <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Transaction</p>
+                      {anchor.txHash ? (
+                        <a
+                          href={anchor.explorer?.tx}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-0.5 inline-flex items-center gap-1 break-all text-sm font-bold text-indigo-700 hover:underline"
+                        >
+                          {shortHash(anchor.txHash)} <ExternalLink className="h-3 w-3 shrink-0" />
+                        </a>
+                      ) : (
+                        <p className="mt-0.5 text-sm font-semibold text-slate-400">—</p>
+                      )}
+                    </div>
+                    <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Record Hash</p>
+                      <p className="mt-0.5 break-all text-sm font-semibold text-slate-800">{shortHash(anchor.recordHash ?? "")}</p>
+                    </div>
+                    <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Anchored</p>
+                      <p className="mt-0.5 text-sm font-semibold text-slate-800">
+                        {anchor.timestamp ? new Date(anchor.timestamp * 1000).toLocaleString() : "—"}
+                      </p>
+                    </div>
+                  </div>
+                  {anchor.explorer?.address && (
+                    <a
+                      href={anchor.explorer.address}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:underline"
+                    >
+                      View registry contract <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              )}
+              {anchor && !anchor.anchored && anchor.configured && (
+                <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-500">
+                  <Blocks className="h-4 w-4 text-slate-400" />
+                  This medical record isn&apos;t anchored on the blockchain yet.
+                </div>
+              )}
 
               {/* Recorded conditions — tap a "Yes" to see who recorded it */}
               <div>
