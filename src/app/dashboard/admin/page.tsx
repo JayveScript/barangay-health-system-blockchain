@@ -59,6 +59,7 @@ import {
 import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
+import { AnnouncementsAdmin } from "@/components/dashboard/AnnouncementsAdmin";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { PortalLoader } from "@/components/PortalLoader";
 import { HEALTH_CENTERS } from "@/lib/barangay-options";
@@ -216,6 +217,7 @@ export default function AdminDashboardPage() {
   | "staff-users"
   | "activity-logs"
   | "announcements"
+  | "manage-announcements"
   | "scan-qr"
   | "change-password"
 >("overview");
@@ -1056,6 +1058,16 @@ export default function AdminDashboardPage() {
             />
 
             <SidebarButton
+              active={tab === "manage-announcements"}
+              icon={<ShieldCheck className="h-6 w-6 shrink-0" />}
+              label="Manage Announcements"
+              onClick={() => {
+                setTab("manage-announcements");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={tab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5 shrink-0" />}
               label="Scan QR"
@@ -1136,6 +1148,13 @@ export default function AdminDashboardPage() {
   label="Announcements"
   onClick={() => setTab("announcements")}
 />
+
+              <SidebarButton
+                active={tab === "manage-announcements"}
+                icon={<ShieldCheck className="h-5 w-5 shrink-0" />}
+                label="Manage Announcements"
+                onClick={() => setTab("manage-announcements")}
+              />
 
               <SidebarButton
                 active={tab === "scan-qr"}
@@ -1873,6 +1892,7 @@ export default function AdminDashboardPage() {
                 )}
 
 {tab === "announcements" && <AdminAnnouncementsTab barangayId={selectedBarangayId} />}
+{tab === "manage-announcements" && <AnnouncementsAdmin />}
                 {tab === "change-password" && <ChangePasswordTab />}
 
 
