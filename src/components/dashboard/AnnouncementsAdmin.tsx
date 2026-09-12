@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
+import { formatRoleLabel } from "@/lib/role-labels";
 
 type Announcement = {
   id: string;
@@ -169,7 +170,7 @@ export function AnnouncementsAdmin() {
               {(a.authorName || a.authorRole) && (
                 <p className="mt-2 text-xs font-semibold text-slate-400">
                   Submitted by {a.authorName || "Staff"}
-                  {a.authorRole ? ` · ${a.authorRole}` : ""}
+                  {a.authorRole ? ` · ${formatRoleLabel(a.authorRole)}` : ""}
                 </p>
               )}
 
