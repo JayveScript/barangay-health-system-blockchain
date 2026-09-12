@@ -11,6 +11,7 @@ import {
   ClipboardList,
   HeartPulse,
   LogOut,
+  Megaphone,
   Menu,
   ShieldCheck,
   Stethoscope,
@@ -40,10 +41,11 @@ import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResiden
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
+import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { KeyRound } from "lucide-react";
 
 export default function MidwifeDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "scan-qr" | "diagnose" | "change-password">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "announcements" | "scan-qr" | "diagnose" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<MidwifeUser | null>(null);
@@ -165,6 +167,15 @@ export default function MidwifeDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "announcements"}
+              icon={<Megaphone className="h-5 w-5" />}
+              label="Announcements"
+              onClick={() => {
+                setActiveTab("announcements");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -230,6 +241,12 @@ export default function MidwifeDashboardPage() {
                 icon={<Baby className="h-5 w-5" />}
                 label="Maternal Records"
                 onClick={() => setActiveTab("maternal")}
+              />
+              <SidebarButton
+                active={activeTab === "announcements"}
+                icon={<Megaphone className="h-5 w-5" />}
+                label="Announcements"
+                onClick={() => setActiveTab("announcements")}
               />
               <SidebarButton
                 active={activeTab === "scan-qr"}
@@ -308,6 +325,7 @@ export default function MidwifeDashboardPage() {
             {activeTab === "residents" && <RegisteredResidentsTab />}
 
             {activeTab === "maternal" && <MaternalRecordsTab />}
+            {activeTab === "announcements" && <AnnouncementsManager />}
 
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5">

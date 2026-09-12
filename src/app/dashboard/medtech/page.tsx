@@ -13,6 +13,7 @@ import {
   Menu,
   Microscope,
   Scale,
+  Megaphone,
   ShieldCheck,
   TestTube,
   UserRound,
@@ -39,11 +40,12 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
+import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { KeyRound } from "lucide-react";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function MedTechDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "scan-qr" | "bmi" | "change-password">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "scan-qr" | "bmi" | "announcements" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<MedTechUser | null>(null);
@@ -133,6 +135,7 @@ export default function MedTechDashboardPage() {
             <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "bmi"} icon={<Scale className="h-5 w-5" />} label="BMI Records" onClick={() => { setActiveTab("bmi"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => { setActiveTab("announcements"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => { setActiveTab("change-password"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
@@ -155,6 +158,7 @@ export default function MedTechDashboardPage() {
               <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
               <SidebarButton active={activeTab === "bmi"} icon={<Scale className="h-5 w-5" />} label="BMI Records" onClick={() => setActiveTab("bmi")} />
+              <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => setActiveTab("announcements")} />
               <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => setActiveTab("change-password")} />
             </div>
           </div>
@@ -218,6 +222,7 @@ export default function MedTechDashboardPage() {
             )}
 
             {activeTab === "bmi" && <BMITab />}
+            {activeTab === "announcements" && <AnnouncementsManager />}
             {activeTab === "change-password" && <ChangePasswordTab />}
 
             {activeTab === "personal" && (
