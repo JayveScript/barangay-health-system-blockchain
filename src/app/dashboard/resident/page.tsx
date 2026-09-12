@@ -31,6 +31,7 @@ import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
 import { Baby } from "lucide-react";
+import { formatRoleLabel } from "@/lib/role-labels";
 import {
   buildConditionHistory,
   formatUpdateDate,
@@ -149,6 +150,8 @@ type Announcement = {
   imageUrl?: string | null;
   publishDate: string;
   createdAt: string;
+  authorName?: string | null;
+  authorRole?: string | null;
 };
 
 function ResidentAnnouncementsTab() {
@@ -266,6 +269,17 @@ function ResidentAnnouncementsTab() {
                 <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
                   {item.content}
                 </p>
+
+                {item.authorName && (
+                  <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-500">
+                    <UserRound className="h-3.5 w-3.5 text-sky-500" />
+                    Posted by
+                    <span className="font-black text-slate-700">{item.authorName}</span>
+                    {item.authorRole && (
+                      <span className="text-slate-400">· {formatRoleLabel(item.authorRole)}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}
