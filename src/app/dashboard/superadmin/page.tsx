@@ -6,6 +6,7 @@ import { PortalLoader } from "@/components/PortalLoader";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import { BlockchainBalanceWarning } from "@/components/dashboard/BlockchainBalanceWarning";
+import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
@@ -296,7 +297,11 @@ function OverviewTab() {
   if (!data) return null;
 
   return (
-    <div className="space-y-5 pb-4">
+    <div className="print-area space-y-5 pb-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black text-slate-900">System Overview</h2>
+        <ExportPdfButton />
+      </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
         <StatCard icon={<Building2 className="h-5 w-5" />} label="Barangays" value={data.totals.barangays} />
         <StatCard icon={<Users className="h-5 w-5" />} label="Total Residents" value={data.totals.residents} />
