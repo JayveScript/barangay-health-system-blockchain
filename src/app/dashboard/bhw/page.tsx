@@ -55,6 +55,7 @@ import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { KeyRound } from "lucide-react";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
+import { BHWAppointmentsTab } from "@/components/dashboard/BHWAppointmentsTab";
 import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
@@ -67,6 +68,7 @@ export default function BHWDashboardPage() {
     | "announcements"
     | "registration"
     | "referrals"
+    | "appointments"
     | "maternal"
     | "scan-qr"
     | "logbook"
@@ -213,6 +215,15 @@ export default function BHWDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "appointments"}
+              icon={<CalendarDays className="h-5 w-5" />}
+              label="Appointments"
+              onClick={() => {
+                setActiveTab("appointments");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "maternal"}
               icon={<Baby className="h-5 w-5" />}
               label="Maternal Records"
@@ -317,6 +328,12 @@ export default function BHWDashboardPage() {
                 icon={<Send className="h-5 w-5" />}
                 label="Referrals"
                 onClick={() => setActiveTab("referrals")}
+              />
+              <SidebarButton
+                active={activeTab === "appointments"}
+                icon={<CalendarDays className="h-5 w-5" />}
+                label="Appointments"
+                onClick={() => setActiveTab("appointments")}
               />
               <SidebarButton
                 active={activeTab === "maternal"}
@@ -432,6 +449,7 @@ export default function BHWDashboardPage() {
             )}
 
             {activeTab === "referrals" && <ReferralsTab />}
+            {activeTab === "appointments" && <BHWAppointmentsTab />}
 
             {activeTab === "residents" && <RegisteredResidentsTab />}
 
