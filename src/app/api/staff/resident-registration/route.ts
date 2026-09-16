@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
+import { anchorRecord } from "@/lib/blockchain";
+import {
+  buildResidentRecords,
+  MEDICAL_RECORD_ORDER,
+  type ResidentWithHistories,
+} from "@/lib/resident-records";
 
 const STATIC_BARANGAY = "Colosas Proper, Brgy. Colosas";
 const STATIC_CITY = "Davao City";
@@ -209,6 +215,40 @@ export async function POST(req: Request) {
 
       return resident;
     });
+
+    // Seal the newly-created medical records on-chain (fire-and-forget so the
+    // registration response isn't blocked by the transaction). No-ops when the
+    // blockchain is disabled — anchorRecord itself checks isBlockchainEnabled().
+    ;(async () => {
+      try {
+        const residentId = result.id;
+        const full = await db.resident.findUnique({
+          where: { id: residentId },
+          include: {
+            medicalHistory: true,
+            familyHistory: true,
+            personalSocialHistory: true,
+          },
+        });
+        if (!full) return;
+
+        const records = buildResidentRecords(
+          full as unknown as ResidentWithHistories
+        );
+
+        for (const recordType of MEDICAL_RECORD_ORDER) {
+          const data = records[recordType];
+          if (data) {
+            await anchorRecord(residentId, data, recordType);
+          }
+        }
+      } catch (blockchainErr) {
+        console.error(
+          "[blockchain] staff-registration anchor failed:",
+          blockchainErr
+        );
+      }
+    })();
 
     return NextResponse.json({
       success: true,
