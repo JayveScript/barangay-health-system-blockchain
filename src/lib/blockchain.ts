@@ -114,6 +114,50 @@ export async function anchorRecord(
   return { txHash: receipt.hash, recordHash };
 }
 
+export type BackfillEntry = { residentId: string; recordType: RecordType; data: object };
+
+// One-time backfill: anchors many resident medical records at once. Submits
+// transactions with explicit sequential nonces (parallel, no per-tx wait) so it
+// finishes in seconds; the txns then confirm on-chain within a block or two.
+// Residents that already have any anchored record are skipped, so re-running is
+// safe and doesn't waste gas.
+export async function anchorRecordsBatch(
+  entries: BackfillEntry[]
+): Promise<{ submitted: number; skipped: number; failed: number; total: number }> {
+  const total = entries.length;
+  if (!isBlockchainEnabled()) {
+    return { submitted: 0, skipped: total, failed: 0, total };
+  }
+  const { provider, registry, wallet } = getBlockchainClient();
+
+  // Skip residents that already have on-chain records.
+  const uniqueResidents = [...new Set(entries.map((e) => e.residentId))];
+  const alreadyAnchored = new Set<string>();
+  for (const rid of uniqueResidents) {
+    try {
+      const count = Number(await registry.getRecordCount(rid));
+      if (count > 0) alreadyAnchored.add(rid);
+    } catch {
+      // treat as not-anchored on read error
+    }
+  }
+  const todo = entries.filter((e) => !alreadyAnchored.has(e.residentId));
+  const skipped = total - todo.length;
+
+  let nonce = await provider.getTransactionCount(wallet.address, "pending");
+  const results = await Promise.allSettled(
+    todo.map((e) =>
+      registry.anchorRecord(e.residentId, hashRecord(e.data), e.recordType, { nonce: nonce++ })
+    )
+  );
+  const failed = results.filter((r) => r.status === "rejected").length;
+
+  // Drop cached anchor lookups so the Medical tab re-reads once they confirm.
+  anchorCache.clear();
+
+  return { submitted: todo.length - failed, skipped, failed, total };
+}
+
 export async function verifyRecord(
   residentId: string,
   recordData: object,
