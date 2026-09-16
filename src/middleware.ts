@@ -110,26 +110,32 @@ export async function middleware(req: NextRequest) {
   const limit = LIMITS[pathname];
 
   if (limit) {
-    // Prefer x-real-ip (set by Vercel to the true client IP; not client-
-    // spoofable through the platform). Fall back to the LAST hop of
-    // x-forwarded-for — the entry added by the closest trusted proxy — rather
-    // than the leftmost value, which a client can forge to rotate fake IPs.
+    // Rate limit PER DEVICE, not per network. A household/clinic puts many
+    // devices behind one public IP (NAT), so IP-only limiting made a PC hitting
+    // the limit also block a phone on the same Wi-Fi. We key on a per-device
+    // cookie instead; a device is throttled on its own without affecting others.
+    // If the cookie is missing (first request) we mint one and set it below, and
+    // fall back to the IP so a cookie-less client is still limited.
     const xff = req.headers.get("x-forwarded-for");
     const ip =
       req.headers.get("x-real-ip")?.trim() ||
       xff?.split(",").map((s) => s.trim()).filter(Boolean).pop() ||
       "unknown";
 
-    const key = `rl:${pathname}:${ip}`;
+    // Per-device id set client-side (see DeviceIdInit). When present, each
+    // device gets its own bucket even behind the same NAT/public IP; when
+    // absent (e.g. JS disabled), we fall back to the IP so it's still limited.
+    const deviceId = req.cookies.get("did")?.value;
+    const key = deviceId
+      ? `rl:${pathname}:dev:${deviceId}`
+      : `rl:${pathname}:ip:${ip}`;
+
     const { allowed, retryAfterSec } = await rateLimitShared(key, limit.max, limit.windowMs);
 
     if (!allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
-        {
-          status: 429,
-          headers: { "Retry-After": String(retryAfterSec) },
-        }
+        { status: 429, headers: { "Retry-After": String(retryAfterSec) } }
       );
     }
   }
