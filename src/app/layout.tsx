@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+import DeviceIdInit from "@/components/DeviceIdInit";
 
 export const metadata: Metadata = {
   title: {
@@ -36,6 +37,7 @@ export default function RootLayout({
       </head>
       <body className="bg-slate-100 text-slate-900 antialiased">
         <ServiceWorkerRegister />
+        <DeviceIdInit />
         {children}
       </body>
     </html>
