@@ -7,6 +7,7 @@ import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
 import { BlockchainBalanceWarning } from "@/components/dashboard/BlockchainBalanceWarning";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
+import { AnchorAllButton } from "@/components/dashboard/AnchorAllButton";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
@@ -188,8 +189,9 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <BlockchainBalanceWarning />
+              <AnchorAllButton />
             </div>
 
             {tab === "overview" && <OverviewTab />}
