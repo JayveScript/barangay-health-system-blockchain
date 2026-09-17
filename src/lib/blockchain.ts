@@ -99,7 +99,8 @@ export function hashIp(ip: string): string {
 export async function anchorRecord(
   residentId: string,
   recordData: object,
-  recordType: RecordType
+  recordType: RecordType,
+  opts?: { waitForReceipt?: boolean }
 ): Promise<{ txHash: string; recordHash: string }> {
   const recordHash = hashRecord(recordData);
 
@@ -109,8 +110,20 @@ export async function anchorRecord(
 
   const { registry } = getBlockchainClient();
   const tx = await registry.anchorRecord(residentId, recordHash, recordType);
-  const receipt = await tx.wait();
 
+  // Drop any cached anchor lookup for this resident so the Medical tab re-reads
+  // the fresh state once the tx mines (instead of serving the stale "not
+  // anchored" result). The transaction is already broadcast at this point, so it
+  // will mine even if the serverless function returns immediately.
+  invalidateAnchorCache(residentId);
+
+  // For latency-sensitive callers (e.g. saving a diagnosis) we only need the tx
+  // broadcast, not confirmed — awaiting the submission is enough for durability.
+  if (opts?.waitForReceipt === false) {
+    return { txHash: tx.hash, recordHash };
+  }
+
+  const receipt = await tx.wait();
   return { txHash: receipt.hash, recordHash };
 }
 
@@ -365,7 +378,17 @@ export type MedicalAnchor = {
 
 const anchorCache = new Map<string, { data: MedicalAnchor; expiresAt: number }>();
 const ANCHOR_CACHE_MS = 5 * 60 * 1000;
+// A "not anchored yet" answer is cached only briefly, so that right after a
+// diagnosis re-anchors a record (which mines within a block or two) the Medical
+// tab picks up the new block number quickly instead of waiting out the full TTL.
+const ANCHOR_NEG_CACHE_MS = 15 * 1000;
 const EXPLORER_BASE = "https://sepolia.etherscan.io";
+
+// Drop a resident's cached anchor lookup (e.g. right after re-anchoring) so the
+// next read fetches fresh chain state.
+export function invalidateAnchorCache(residentId: string): void {
+  anchorCache.delete(residentId);
+}
 
 // Looks up where a resident's medical_history record is anchored on-chain.
 // Reads work regardless of the write kill-switch (BLOCKCHAIN_ENABLED) — an
@@ -445,6 +468,7 @@ export async function getMedicalRecordAnchor(residentId: string): Promise<Medica
     result = { configured: false, anchored: false };
   }
 
-  anchorCache.set(residentId, { data: result, expiresAt: Date.now() + ANCHOR_CACHE_MS });
+  const ttl = result.anchored ? ANCHOR_CACHE_MS : ANCHOR_NEG_CACHE_MS;
+  anchorCache.set(residentId, { data: result, expiresAt: Date.now() + ttl });
   return result;
 }

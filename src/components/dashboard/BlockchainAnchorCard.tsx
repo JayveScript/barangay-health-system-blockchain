@@ -43,19 +43,33 @@ export function BlockchainAnchorCard({
   useEffect(() => {
     if (anchorProp !== undefined || !endpoint) return;
     let active = true;
-    (async () => {
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const load = async () => {
       try {
         const res = await fetch(endpoint, { cache: "no-store" });
         const json = (await res
           .json()
           .catch(() => null)) as MedicalAnchorView | null;
-        if (active && res.ok && json) setFetched(json);
+        if (!active || !res.ok || !json) return;
+        setFetched(json);
+        // A record just anchored by a diagnosis mines within a block or two.
+        // While the chain is configured but this record isn't anchored yet, poll
+        // a few times so the block number appears without a manual refresh.
+        if (json.configured && !json.anchored && tries < 5) {
+          tries++;
+          timer = setTimeout(load, 8000);
+        }
       } catch {
         /* leave unset — card simply doesn't render */
       }
-    })();
+    };
+
+    load();
     return () => {
       active = false;
+      if (timer) clearTimeout(timer);
     };
   }, [endpoint, anchorProp]);
 
