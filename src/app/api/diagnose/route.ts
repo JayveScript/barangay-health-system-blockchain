@@ -7,6 +7,9 @@ import {
   type ResidentWithHistories,
 } from "@/lib/resident-records";
 
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
 const ALLOWED_ROLES = [
   "DOCTOR",
   "NURSE",
@@ -230,9 +233,21 @@ export async function POST(req: Request) {
         updatedFull as unknown as ResidentWithHistories
       ).medical_history;
       if (medicalRecord) {
-        anchorRecord(effectiveResidentId, medicalRecord, "medical_history").catch(
-          (err) => console.error("[blockchain] medical re-anchor failed:", err)
-        );
+        // Await the submission (not the confirmation) so the tx is actually
+        // broadcast before this serverless function returns — otherwise Vercel
+        // can freeze the instance and the anchor never happens. It mines within a
+        // block or two; the Medical tab's short "not anchored" cache then picks up
+        // the new block number. Wrapped so a chain hiccup never fails the save.
+        try {
+          await anchorRecord(
+            effectiveResidentId,
+            medicalRecord,
+            "medical_history",
+            { waitForReceipt: false }
+          );
+        } catch (err) {
+          console.error("[blockchain] medical re-anchor failed:", err);
+        }
       }
     }
 
