@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
+import { getMedicalRecordAnchor } from "@/lib/blockchain";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 
 export default async function ResidentQRPage({
   params,
@@ -35,6 +37,8 @@ export default async function ResidentQRPage({
     .replace(/\s+/g, " ")
     .trim();
 
+  const blockchainAnchor = await getMedicalRecordAnchor(id).catch(() => null);
+
   return (
     <main className="min-h-screen bg-[#EEF4FF] p-6">
       <div className="mx-auto max-w-2xl rounded-[28px] border border-blue-100 bg-white p-6 shadow-xl">
@@ -46,7 +50,11 @@ export default async function ResidentQRPage({
           Resident verification information
         </p>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6">
+          <BlockchainAnchorCard anchor={blockchainAnchor} />
+        </div>
+
+        <div className="mt-4 space-y-3">
           <Info label="Full Name" value={fullName} />
           <Info label="Sex" value={resident.sex} />
           <Info label="Age" value={resident.age} />

@@ -19,6 +19,8 @@ import {
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { MaternalRecordView } from "@/components/dashboard/MaternalRecordView";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { getMedicalRecordAnchor } from "@/lib/blockchain";
 import { Baby, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -315,6 +317,11 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
       })
     : null;
 
+  // Where this resident's medical record is sealed on-chain. Computed server-side
+  // because this page is already authorized by the QR token, so the card shows
+  // for any authorized viewer (not only staff who can call the API).
+  const blockchainAnchor = await getMedicalRecordAnchor(id).catch(() => null);
+
   const fullName = `${resident.firstName ?? ""} ${resident.middleName ?? ""} ${
     resident.lastName ?? ""
   }`
@@ -510,6 +517,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             <section className="tab-panel panel-medical">
               <SectionTitle title="Medical History" />
               <div className="space-y-5">
+                <BlockchainAnchorCard anchor={blockchainAnchor} />
                 <div>
                   <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">Recorded Conditions</p>
                   <ConditionHistoryCard

@@ -29,6 +29,7 @@ import {
   InfoCard,
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 
 type Identifying = Record<string, unknown> | null | undefined;
 type HistoryJson = Record<string, unknown> | null | undefined;
@@ -427,6 +428,9 @@ function ReferralModal({
             {tab === "medical" && (
               <div className="space-y-5">
                 <SectionTitle title="Medical History" />
+                <BlockchainAnchorCard
+                  endpoint={`/api/residents/${referral.residentId}/blockchain`}
+                />
                 <QrFlagGroup
                   title="Recorded Conditions"
                   icon={<Stethoscope className="h-4 w-4" />}
