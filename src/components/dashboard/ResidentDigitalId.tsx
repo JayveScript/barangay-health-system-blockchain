@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import * as htmlToImage from "html-to-image";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, QrCode, X } from "lucide-react";
 
 export type DigitalIdResident = {
   id: string;
@@ -91,7 +92,13 @@ export function ResidentDigitalId({
   const [downloading, setDownloading] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState("/images/davao-logo.png");
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
   const qrLoading = qrImageUrl === null;
+  // Larger render of the same live token for the "View QR" modal — QR codes stay
+  // crisp when the server generates them at a bigger size instead of upscaling.
+  const bigQrUrl = qrImageUrl
+    ? qrImageUrl.replace("size=220x220", "size=600x600")
+    : null;
 
   useEffect(() => {
     toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
@@ -255,6 +262,18 @@ export function ResidentDigitalId({
         </div>
       </div>
 
+      {/* View QR — opens a big, easy-to-scan QR (great on phones) */}
+      <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
+        <button
+          type="button"
+          onClick={() => setShowQr(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-sky-200 bg-white px-6 py-3.5 text-sm font-bold text-sky-700 shadow-sm transition hover:bg-sky-50 lg:py-4 lg:text-base"
+        >
+          <QrCode className="h-4 w-4" />
+          View QR Code
+        </button>
+      </div>
+
       {allowDownload ? (
         <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
           <button
@@ -286,6 +305,62 @@ export function ResidentDigitalId({
           </div>
         </div>
       )}
+
+      {showQr &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+            onClick={() => setShowQr(false)}
+          >
+            <div
+              className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setShowQr(false)}
+                aria-label="Close"
+                className="absolute right-4 top-4 rounded-xl bg-slate-100 p-2 text-slate-600 transition hover:bg-slate-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <p className="text-center text-xs font-black uppercase tracking-wide text-sky-600">
+                Health Record QR
+              </p>
+              <h3 className="mt-1 text-center text-lg font-black text-slate-900">
+                {formatIdName(resident)}
+              </h3>
+
+              <div className="mx-auto mt-4 w-[min(80vw,320px)] rounded-2xl border border-sky-100 bg-white p-3 shadow-inner">
+                {bigQrUrl ? (
+                  <img
+                    src={bigQrUrl}
+                    alt="Health record QR code"
+                    className="aspect-square w-full object-contain"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-400">
+                    {qrLoading ? "Loading..." : "QR N/A"}
+                  </div>
+                )}
+              </div>
+
+              <p className="mt-3 text-center text-xs font-semibold text-slate-500">
+                Show this to a health worker to scan.
+              </p>
+
+              {!allowDownload && (
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-black text-emerald-700">
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  LIVE — refreshes automatically
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
