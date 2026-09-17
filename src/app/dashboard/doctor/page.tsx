@@ -23,8 +23,6 @@ import {
   MapPin,
   Menu,
   Megaphone,
-MessageSquareText,
-Send,
   Plus,
   Save,
   ShieldCheck,
@@ -537,8 +535,6 @@ function AppointmentsTab() {
   const [error, setError] = useState("");
   const [selectedAppointment, setSelectedAppointment] =
     useState<DoctorAppointment | null>(null);
-    const [suggestionAppointment, setSuggestionAppointment] =
-  useState<DoctorAppointment | null>(null);
 
   const [form, setForm] = useState({
     date: "",
@@ -647,39 +643,6 @@ function AppointmentsTab() {
       setError("Unable to connect to the server.");
     }
   };
-
-  const saveAppointmentSuggestion = async (
-  appointmentId: string,
-  suggestion: string
-) => {
-  setMessage("");
-  setError("");
-
-  try {
-    const res = await fetch(`/api/doctor/appointments/${appointmentId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ suggestion }),
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      setError(json.error || "Failed to save suggestion.");
-      return false;
-    }
-
-    setMessage("Suggestion saved successfully.");
-    await fetchAppointments();
-    return true;
-  } catch (err) {
-    console.error(err);
-    setError("Unable to connect to the server.");
-    return false;
-  }
-};
 
   const postedSchedules = items.length;
 
@@ -886,19 +849,6 @@ function AppointmentsTab() {
       <Eye className="h-4 w-4" />
     </button>
 
-    <button
-      type="button"
-      title="Suggestion"
-      onClick={() => setSuggestionAppointment(appointment)}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${
-        appointment.suggestion
-          ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-          : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-      }`}
-    >
-      <MessageSquareText className="h-4 w-4" />
-    </button>
-
     {appointment.status === "PENDING" && (
       <>
         <button
@@ -941,13 +891,6 @@ function AppointmentsTab() {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
-{suggestionAppointment && (
-  <SuggestionModal
-    appointment={suggestionAppointment}
-    onClose={() => setSuggestionAppointment(null)}
-    onSave={saveAppointmentSuggestion}
-  />
-)}
 
     </div>
   );
@@ -1349,106 +1292,6 @@ function getResidentName(appointment: DoctorAppointment) {
     .replace(/\s+/g, " ")
     .trim();
 }
-function SuggestionModal({
-  appointment,
-  onClose,
-  onSave,
-}: {
-  appointment: DoctorAppointment;
-  onClose: () => void;
-  onSave: (appointmentId: string, suggestion: string) => Promise<boolean>;
-}) {
-  const [suggestion, setSuggestion] = useState(appointment.suggestion || "");
-  const [saving, setSaving] = useState(false);
-
-  const residentName = getResidentName(appointment);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setSaving(true);
-    const ok = await onSave(appointment.id, suggestion.trim());
-    setSaving(false);
-
-    if (ok) {
-      onClose();
-    }
-  };
-
-  return (
-    <div className="fixed left-0 top-0 z-[99999] flex h-screen w-screen items-center justify-center bg-slate-950/50 px-4 py-8 backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[30px] bg-white shadow-2xl">
-        <div className="bg-gradient-to-r from-[#0EA5E9] to-sky-500 px-6 py-5 text-white">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-100">
-                Doctor Suggestion
-              </p>
-              <h2 className="mt-1 text-2xl font-black">{residentName}</h2>
-              <p className="mt-1 text-sm text-sky-100">
-                {formatTime(appointment.time)} • Queue #{appointment.queueNumber || "-"}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-white/20 px-3 py-2 text-sm font-black text-white ring-1 ring-white/25 hover:bg-white/30"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50 p-4">
-            <p className="text-xs font-black uppercase tracking-wide text-sky-600">
-              Appointment Reason
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-900">
-              {appointment.reason === "Others"
-                ? appointment.otherReason || "Others"
-                : appointment.reason}
-            </p>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
-              Suggestion / Medicine / Advice
-            </label>
-
-            <textarea
-              value={suggestion}
-              onChange={(e) => setSuggestion(e.target.value)}
-              placeholder="Example: Take paracetamol after meals if fever occurs. Avoid oily foods. Drink plenty of water. Return after 3 days if symptoms continue."
-              className="min-h-[180px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold leading-7 text-slate-900 outline-none transition focus:border-sky-500"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black text-slate-600 hover:bg-slate-200"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#0EA5E9] px-5 py-3 text-sm font-black text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600 disabled:opacity-60"
-            >
-              <Send className="h-4 w-4" />
-              {saving ? "Saving..." : "Save Suggestion"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 function ResidentDetailsModal({
   appointment,
   onClose,
