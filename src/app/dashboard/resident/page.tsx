@@ -23,8 +23,6 @@ X,
   ScanLine,
   ChevronRight,
   KeyRound,
-  Blocks,
-  ExternalLink,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
@@ -32,6 +30,7 @@ import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { Baby } from "lucide-react";
 import { formatRoleLabel } from "@/lib/role-labels";
 import {
@@ -1808,22 +1807,6 @@ type ResidentAssessment = {
   } | null;
 };
 
-type ResidentMedicalAnchor = {
-  configured: boolean;
-  anchored: boolean;
-  recordHash?: string;
-  timestamp?: number;
-  blockNumber?: number;
-  txHash?: string;
-  contractAddress?: string;
-  network?: string;
-  explorer?: { tx?: string; block?: string; address?: string };
-};
-
-function shortAnchorHash(h: string): string {
-  return h && h.length > 16 ? `${h.slice(0, 10)}…${h.slice(-6)}` : h;
-}
-
 function ResidentMedicalHistoryTab({
   resident,
 }: {
@@ -1842,23 +1825,6 @@ function ResidentMedicalHistoryTab({
     label: string;
     field: string;
   } | null>(null);
-  const [anchor, setAnchor] = useState<ResidentMedicalAnchor | null>(null);
-
-  useEffect(() => {
-    const fetchAnchor = async () => {
-      try {
-        const res = await fetch("/api/residents/me/blockchain", {
-          cache: "no-store",
-        });
-        const json = (await res
-          .json()
-          .catch(() => null)) as ResidentMedicalAnchor | null;
-        if (res.ok && json) setAnchor(json);
-      } catch {
-      }
-    };
-    fetchAnchor();
-  }, []);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -2033,89 +1999,7 @@ function ResidentMedicalHistoryTab({
         </div>
 
         {/* Blockchain anchor — where your medical record is sealed on-chain */}
-        {anchor?.anchored && (
-          <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4 shadow-sm">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <Blocks className="h-4 w-4" />
-              </span>
-              <h4 className="text-sm font-black uppercase tracking-wide text-indigo-900">
-                Secured on Blockchain
-              </h4>
-              <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-indigo-700">
-                {anchor.network ?? "sepolia"}
-              </span>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  Block Number
-                </p>
-                {anchor.blockNumber ? (
-                  <a
-                    href={anchor.explorer?.block}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-0.5 inline-flex items-center gap-1 text-sm font-black text-indigo-700 hover:underline"
-                  >
-                    #{anchor.blockNumber}{" "}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <p className="mt-0.5 text-sm font-semibold text-slate-400">
-                    Not found (older than 3 weeks)
-                  </p>
-                )}
-              </div>
-              <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  Transaction
-                </p>
-                {anchor.txHash ? (
-                  <a
-                    href={anchor.explorer?.tx}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-0.5 inline-flex items-center gap-1 break-all text-sm font-bold text-indigo-700 hover:underline"
-                  >
-                    {shortAnchorHash(anchor.txHash)}{" "}
-                    <ExternalLink className="h-3 w-3 shrink-0" />
-                  </a>
-                ) : (
-                  <p className="mt-0.5 text-sm font-semibold text-slate-400">—</p>
-                )}
-              </div>
-              <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  Record Hash
-                </p>
-                <p className="mt-0.5 break-all text-sm font-semibold text-slate-800">
-                  {shortAnchorHash(anchor.recordHash ?? "")}
-                </p>
-              </div>
-              <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  Anchored
-                </p>
-                <p className="mt-0.5 text-sm font-semibold text-slate-800">
-                  {anchor.timestamp
-                    ? new Date(anchor.timestamp * 1000).toLocaleString()
-                    : "—"}
-                </p>
-              </div>
-            </div>
-            {anchor.explorer?.address && (
-              <a
-                href={anchor.explorer.address}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:underline"
-              >
-                View registry contract <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-          </div>
-        )}
+        <BlockchainAnchorCard endpoint="/api/residents/me/blockchain" />
 
         {error && (
           <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
