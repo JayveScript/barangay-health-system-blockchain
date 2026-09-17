@@ -155,7 +155,12 @@ import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { KeyRound } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
-import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
+import {
+  RegisteredResidentsTab,
+  ResidentViewModal,
+  Portal,
+  type StaffResident,
+} from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -1451,231 +1456,63 @@ function ResidentDetailsModal({
   appointment: DoctorAppointment;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<
-    "identifying" | "medical" | "family" | "social"
-  >("identifying");
-
   const resident = appointment.resident;
-
   if (!resident) return null;
 
-  return (
-    <div className="fixed left-0 top-0 z-[99999] flex h-screen w-screen items-center justify-center bg-slate-950/50 px-4 py-8 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-[30px] bg-white shadow-2xl">
-        <div className="bg-gradient-to-r from-[#0EA5E9] to-sky-500 px-6 py-5 text-white">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-100">
-                Resident Details
-              </p>
-              <h2 className="mt-1 text-2xl font-black">
-                {resident.fullName || getResidentName(appointment)}
-              </h2>
-              <p className="mt-1 text-sm text-sky-100">
-                Appointment at {formatTime(appointment.time)} • Queue #
-                {appointment.queueNumber || "-"}
-              </p>
-            </div>
+  // Map the appointment's resident into the shared StaffResident shape so we can
+  // reuse the exact same modal (design + info + blockchain + assessments) as the
+  // Registered Residents tab. Rendered via Portal so it centers globally.
+  const derivedName = resident.fullName || getResidentName(appointment) || "";
+  const mapped = {
+    id: resident.id ?? "",
+    firstName: resident.firstName ?? derivedName,
+    middleName: resident.middleName ?? null,
+    lastName: resident.lastName ?? "",
+    age: resident.age ?? 0,
+    sex: resident.sex ?? "",
+    birthDate: resident.birthDate ?? "",
+    religion: resident.religion ?? null,
+    civilStatus: resident.civilStatus ?? null,
+    educationalAttainment: resident.educationalAttainment ?? null,
+    occupation: resident.occupation ?? null,
+    contactNumber: resident.contactNumber ?? null,
+    accompanyingPerson: resident.accompanyingPerson ?? null,
+    relationship: resident.relationship ?? null,
+    spouseMaidenName: resident.spouseMaidenName ?? null,
+    spouseOccupation: resident.spouseOccupation ?? null,
+    spouseContactNumber: resident.spouseContactNumber ?? null,
+    completeAddress: resident.completeAddress ?? null,
+    barangayName: resident.barangayName ?? null,
+    city: resident.city ?? null,
+    isPregnant: null,
+    user: {
+      username: resident.username ?? "",
+      email: resident.email ?? null,
+      isVerified: Boolean(resident.isVerified),
+      phoneNumber: resident.phoneNumber ?? null,
+    },
+    medicalHistory: (resident.medicalHistory ?? null) as unknown,
+    familyHistory: (resident.familyHistory ?? null) as unknown,
+    personalSocialHistory: (resident.personalSocialHistory ?? null) as unknown,
+  } as unknown as StaffResident;
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-white/20 px-3 py-2 text-sm font-black text-white ring-1 ring-white/25 hover:bg-white/30"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <div className="border-b border-sky-200 bg-white px-5 pt-4">
-          <div className="flex gap-2 overflow-x-auto">
-            <ModalTabButton
-              active={tab === "identifying"}
-              label="Identifying Data"
-              onClick={() => setTab("identifying")}
-            />
-            <ModalTabButton
-              active={tab === "medical"}
-              label="Medical History"
-              onClick={() => setTab("medical")}
-            />
-            <ModalTabButton
-              active={tab === "family"}
-              label="Family History"
-              onClick={() => setTab("family")}
-            />
-            <ModalTabButton
-              active={tab === "social"}
-              label="Personal / Social"
-              onClick={() => setTab("social")}
-            />
-          </div>
-        </div>
-
-        <div className="max-h-[70vh] overflow-y-auto p-5">
-          <div className="mb-5 rounded-[24px] border border-sky-200 bg-sky-50 p-4">
-            <p className="text-xs font-black uppercase tracking-wide text-sky-500">
-              Appointment Reason
-            </p>
-            <p className="mt-1 text-base font-bold text-slate-900">
-              {appointment.reason === "Others"
-                ? appointment.otherReason
-                : appointment.reason}
-            </p>
-          </div>
-
-          {tab === "identifying" && (
-            <DetailSection title="Identifying Data">
-              <DetailInfo label="Full Name" value={resident.fullName} />
-              <DetailInfo label="Age" value={resident.age} />
-              <DetailInfo label="Sex" value={resident.sex} />
-              <DetailInfo
-                label="Birth Date"
-                value={
-                  resident.birthDate
-                    ? new Date(resident.birthDate).toLocaleDateString()
-                    : null
-                }
-              />
-              <DetailInfo label="Civil Status" value={resident.civilStatus} />
-              <DetailInfo label="Religion" value={resident.religion} />
-              <DetailInfo
-                label="Educational Attainment"
-                value={resident.educationalAttainment}
-              />
-              <DetailInfo label="Occupation" value={resident.occupation} />
-              <DetailInfo label="Contact Number" value={resident.contactNumber} />
-              <DetailInfo label="Email" value={resident.email} />
-              <DetailInfo label="Phone Number" value={resident.phoneNumber} />
-              <DetailInfo label="Username" value={resident.username} />
-              <DetailInfo
-                label="Verified Resident"
-                value={resident.isVerified ? "Yes" : "No"}
-              />
-              <DetailInfo label="House / Street" value={resident.houseStreet} />
-              <DetailInfo label="Complete Address" value={resident.completeAddress} />
-              <DetailInfo label="Barangay" value={resident.barangayName} />
-              <DetailInfo label="City" value={resident.city} />
-              <DetailInfo label="Accompanying Person" value={resident.accompanyingPerson} />
-              <DetailInfo label="Relationship" value={resident.relationship} />
-              <DetailInfo label="Spouse Maiden Name" value={resident.spouseMaidenName} />
-              <DetailInfo label="Spouse Occupation" value={resident.spouseOccupation} />
-              <DetailInfo label="Spouse Contact Number" value={resident.spouseContactNumber} />
-            </DetailSection>
-          )}
-
-          {tab === "medical" && (
-            <DetailSection title="Past Medical History">
-              <DetailInfo label="Hypertension" value={yesNo(resident.medicalHistory?.hasHypertension)} />
-              <DetailInfo label="Diabetes" value={yesNo(resident.medicalHistory?.hasDiabetes)} />
-              <DetailInfo label="STI / HIV" value={yesNo(resident.medicalHistory?.hasStiHiv)} />
-              <DetailInfo label="Heart Disease" value={yesNo(resident.medicalHistory?.hasHeartDisease)} />
-              <DetailInfo label="Kidney Failure" value={yesNo(resident.medicalHistory?.hasKidneyFailure)} />
-              <DetailInfo label="Tuberculosis" value={yesNo(resident.medicalHistory?.hasTuberculosis)} />
-              <DetailInfo label="Allergies" value={yesNo(resident.medicalHistory?.hasAllergies)} />
-              <DetailInfo label="Allergies Details" value={resident.medicalHistory?.allergiesDetails} />
-              <DetailInfo label="Cancer" value={yesNo(resident.medicalHistory?.hasCancer)} />
-              <DetailInfo label="Cancer Details" value={resident.medicalHistory?.cancerDetails} />
-              <DetailInfo label="Other Conditions" value={yesNo(resident.medicalHistory?.hasOtherConditions)} />
-              <DetailInfo label="Other Conditions Details" value={resident.medicalHistory?.otherConditionsDetails} />
-              <DetailInfo label="Maintenance Medications" value={resident.medicalHistory?.maintenanceMedications} />
-              <DetailInfo label="Previous Illnesses / Surgeries" value={resident.medicalHistory?.previousIllnessesSurgeries} />
-            </DetailSection>
-          )}
-
-          {tab === "family" && (
-            <DetailSection title="Family History">
-              <DetailInfo label="Asthma / Allergies" value={yesNo(resident.familyHistory?.asthmaAllergies)} />
-              <DetailInfo label="Birth Defects" value={yesNo(resident.familyHistory?.birthDefects)} />
-              <DetailInfo label="Cancer" value={yesNo(resident.familyHistory?.cancer)} />
-              <DetailInfo label="Dementia" value={yesNo(resident.familyHistory?.dementia)} />
-              <DetailInfo label="Diabetes" value={yesNo(resident.familyHistory?.diabetes)} />
-              <DetailInfo label="Hypertension" value={yesNo(resident.familyHistory?.hypertension)} />
-              <DetailInfo label="Kidney Disease" value={yesNo(resident.familyHistory?.kidneyDisease)} />
-              <DetailInfo label="Mental Illness" value={yesNo(resident.familyHistory?.mentalIllness)} />
-            </DetailSection>
-          )}
-
-          {tab === "social" && (
-            <DetailSection title="Personal / Social History">
-              <DetailInfo label="Eats Healthy Diet" value={yesNo(resident.personalSocialHistory?.eatsHealthyDiet)} />
-              <DetailInfo label="Adequate Physical Activity" value={yesNo(resident.personalSocialHistory?.adequatePhysicalActivity)} />
-              <DetailInfo label="Sufficient Rest / Sleep" value={yesNo(resident.personalSocialHistory?.sufficientRestSleep)} />
-              <DetailInfo label="Normal Growth / Development" value={yesNo(resident.personalSocialHistory?.normalGrowthDevelopment)} />
-              <DetailInfo label="Multiple Sex Partners" value={yesNo(resident.personalSocialHistory?.multipleSexPartners)} />
-              <DetailInfo label="Smokes Tobacco" value={yesNo(resident.personalSocialHistory?.smokesTobacco)} />
-              <DetailInfo label="Tobacco Packs Per Year" value={resident.personalSocialHistory?.tobaccoPacksPerYear} />
-              <DetailInfo label="Drinks Alcohol" value={yesNo(resident.personalSocialHistory?.drinksAlcohol)} />
-              <DetailInfo label="Alcohol Bottles Per Day" value={resident.personalSocialHistory?.alcoholBottlesPerDay} />
-              <DetailInfo label="Takes Illicit Drugs" value={yesNo(resident.personalSocialHistory?.takesIllicitDrugs)} />
-              <DetailInfo label="Illicit Drugs Details" value={resident.personalSocialHistory?.illicitDrugsDetails} />
-            </DetailSection>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ModalTabButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`whitespace-nowrap rounded-t-2xl px-4 py-3 text-sm font-black transition ${
-        active
-          ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-          : "bg-sky-50 text-sky-600 hover:bg-sky-100"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function DetailSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[24px] border border-sky-200 bg-white p-5 shadow-sm">
-      <h3 className="text-lg font-black text-sky-900">{title}</h3>
-      <div className="mt-2 h-1 w-16 rounded-full bg-[#0EA5E9]" />
-      <div className="mt-4 grid gap-3">{children}</div>
-    </div>
-  );
-}
-
-function DetailInfo({ label, value }: { label: string; value: unknown }) {
-  if (value === null || value === undefined || String(value).trim() === "") {
-    return null;
-  }
+  const reason =
+    (appointment.reason === "Others"
+      ? appointment.otherReason
+      : appointment.reason) || undefined;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 break-words text-sm font-bold text-slate-950">
-        {String(value)}
-      </p>
-    </div>
+    <Portal>
+      <ResidentViewModal
+        resident={mapped}
+        onClose={onClose}
+        subtitle={`Appointment at ${formatTime(appointment.time)} • Queue #${
+          appointment.queueNumber || "-"
+        }`}
+        reason={reason ?? undefined}
+      />
+    </Portal>
   );
-}
-
-function yesNo(value: boolean | null | undefined) {
-  return value ? "Yes" : "No";
 }
 
 function getResidentInitials(appointment: DoctorAppointment) {

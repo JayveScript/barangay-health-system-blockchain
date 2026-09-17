@@ -43,7 +43,7 @@ import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
 
 type History = Record<string, boolean | string | null> | null;
 
-type StaffResident = {
+export type StaffResident = {
   id: string;
   firstName: string;
   middleName: string | null;
@@ -77,7 +77,7 @@ const fullName = (r: { firstName: string; middleName: string | null; lastName: s
 const tableName = (r: { firstName: string; middleName: string | null; lastName: string }) =>
   `${r.lastName}, ${r.firstName} ${r.middleName ?? ""}`.replace(/\s+/g, " ").trim();
 
-function Portal({ children }: { children: React.ReactNode }) {
+export function Portal({ children }: { children: React.ReactNode }) {
   if (typeof document === "undefined") return null;
   return createPortal(children, document.body);
 }
@@ -409,7 +409,7 @@ export function RegisteredResidentsTab({
 
       {viewResident && (
         <Portal>
-          <ViewModal resident={viewResident} onClose={() => setViewResident(null)} />
+          <ResidentViewModal resident={viewResident} onClose={() => setViewResident(null)} />
         </Portal>
       )}
 
@@ -539,7 +539,17 @@ function shortHash(h: string): string {
   return h && h.length > 16 ? `${h.slice(0, 10)}…${h.slice(-6)}` : h;
 }
 
-function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: () => void }) {
+export function ResidentViewModal({
+  resident,
+  onClose,
+  subtitle,
+  reason,
+}: {
+  resident: StaffResident;
+  onClose: () => void;
+  subtitle?: string;
+  reason?: string;
+}) {
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
   const [anchor, setAnchor] = useState<MedicalAnchorView | null>(null);
   const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
@@ -609,6 +619,9 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
               <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-sky-600">Resident Profile</p>
                 <h3 className="text-xl font-black text-slate-900">{fullName(resident)}</h3>
+                {subtitle && (
+                  <p className="mt-0.5 text-xs font-semibold text-slate-500">{subtitle}</p>
+                )}
               </div>
             </div>
             <button onClick={onClose} className="rounded-xl bg-white p-2 text-slate-600 ring-1 ring-slate-200">
@@ -638,6 +651,14 @@ function ViewModal({ resident, onClose }: { resident: StaffResident; onClose: ()
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+          {reason && (
+            <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+              <p className="text-xs font-black uppercase tracking-wide text-sky-500">
+                Appointment Reason
+              </p>
+              <p className="mt-1 text-base font-bold text-slate-900">{reason}</p>
+            </div>
+          )}
           {tab === "identifying" && (
             <div>
               <SectionTitle title="Identifying Data" />
