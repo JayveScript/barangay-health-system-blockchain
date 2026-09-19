@@ -1284,7 +1284,7 @@ function MaternalFormModal({
                           <Select k="fpa_client_type" options={["New Acceptor", "Current User", "Changing Method", "Changing Clinic", "Restart", "Dropout"]} />
                         </Row>
                         <Row label="FP Method (Current / Accepted)">
-                          <Select k="fpa_method" options={["FSTR / BTL", "MSTR / NSV", "Condom", "IUD-Interval", "IUD-Postpartum", "Pills-POP", "Pills-COC", "Injectables"]} />
+                          <Select k="fpa_method" options={["FSTR / BTL", "MSTR / NSV", "Condom", "IUD-Interval", "IUD-Postpartum", "Pills-POP", "Pills-COC", "Injectables", "Implants-Interval", "Implants-Postpartum", "NFP-CMM", "NFP-BBT", "NFP-STM", "NFP-SDM", "NFP-LAM"]} />
                         </Row>
                         <Row label="Reason for FP">
                           <Select k="fpa_fp_reason" options={["Spacing", "Limiting", "Others"]} />
