@@ -982,115 +982,17 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-            <SidebarButton
-              active={tab === "overview"}
-              icon={<Activity className="h-5 w-5 shrink-0" />}
-              label="Overview"
-              onClick={() => {
-                setTab("overview");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "personal"}
-              icon={<UserRound className="h-5 w-5 shrink-0" />}
-              label="Personal Info"
-              onClick={() => {
-                setTab("personal");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "residents"}
-              icon={<Users className="h-5 w-5 shrink-0" />}
-              label="Registered Residents"
-              onClick={() => {
-                setTab("residents");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "archive"}
-              icon={<Archive className="h-5 w-5 shrink-0" />}
-              label="Archived Residents"
-              onClick={() => {
-                setTab("archive");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "create-user"}
-              icon={<UserPlus className="h-5 w-5 shrink-0" />}
-              label="Create User"
-              onClick={() => {
-                setTab("create-user");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "staff-users"}
-              icon={<Stethoscope className="h-5 w-5 shrink-0" />}
-              label="Staff Users"
-              onClick={() => {
-                setTab("staff-users");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "activity-logs"}
-              icon={<ClipboardList className="h-5 w-5 shrink-0" />}
-              label="Activity Logs"
-              onClick={() => {
-                setTab("activity-logs");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "announcements"}
-              icon={<Megaphone className="h-6 w-6 shrink-0" />}
-              label="Announcements"
-              onClick={() => {
-                setTab("announcements");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "manage-announcements"}
-              icon={<ShieldCheck className="h-6 w-6 shrink-0" />}
-              label="Manage Announcements"
-              onClick={() => {
-                setTab("manage-announcements");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "reports"}
-              icon={<FileBarChart2 className="h-5 w-5 shrink-0" />}
-              label="Reports"
-              onClick={() => {
-                setTab("reports");
-                setMobileSidebarOpen(false);
-              }}
-            />
-
-            <SidebarButton
-              active={tab === "scan-qr"}
-              icon={<ScanLine className="h-5 w-5 shrink-0" />}
-              label="Scan QR"
-              onClick={() => {
-                setTab("scan-qr");
-                setMobileSidebarOpen(false);
-              }}
-            />
+            <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label="Overview" onClick={() => { setTab("overview"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label="Personal Info" onClick={() => { setTab("personal"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label="Reports" onClick={() => { setTab("reports"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label="Registered Residents" onClick={() => { setTab("residents"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label="Announcements" onClick={() => { setTab("announcements"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-6 w-6 shrink-0" />} label="Manage Announcements" onClick={() => { setTab("manage-announcements"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label="Archived Residents" onClick={() => { setTab("archive"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Create User" onClick={() => { setTab("create-user"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label="Staff Users" onClick={() => { setTab("staff-users"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label="Activity Logs" onClick={() => { setTab("activity-logs"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label="Scan QR" onClick={() => { setTab("scan-qr"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
 
@@ -1108,89 +1010,18 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex flex-col space-y-3">
-              <SidebarButton
-                active={tab === "overview"}
-                icon={<Activity className="h-5 w-5 shrink-0" />}
-                label="Overview"
-                onClick={() => setTab("overview")}
-              />
-
-              <SidebarButton
-                active={tab === "personal"}
-                icon={<UserRound className="h-5 w-5 shrink-0" />}
-                label="Personal Info"
-                onClick={() => setTab("personal")}
-              />
-
-              <SidebarButton
-                active={tab === "residents"}
-                icon={<Users className="h-5 w-5 shrink-0" />}
-                label="Registered Residents"
-                onClick={() => setTab("residents")}
-              />
-
-              <SidebarButton
-                active={tab === "archive"}
-                icon={<Archive className="h-5 w-5 shrink-0" />}
-                label="Archived Residents"
-                onClick={() => setTab("archive")}
-              />
-
-              <SidebarButton
-                active={tab === "create-user"}
-                icon={<UserPlus className="h-5 w-5 shrink-0" />}
-                label="Create User"
-                onClick={() => setTab("create-user")}
-              />
-
-              <SidebarButton
-                active={tab === "staff-users"}
-                icon={<Stethoscope className="h-5 w-5 shrink-0" />}
-                label="Staff Users"
-                onClick={() => setTab("staff-users")}
-              />
-
-              <SidebarButton
-                active={tab === "activity-logs"}
-                icon={<ClipboardList className="h-5 w-5 shrink-0" />}
-                label="Activity Logs"
-                onClick={() => setTab("activity-logs")}
-              />
-
-              <SidebarButton
-  active={tab === "announcements"}
-  icon={<Megaphone className="h-6 w-6 shrink-0" />}
-  label="Announcements"
-  onClick={() => setTab("announcements")}
-/>
-
-              <SidebarButton
-                active={tab === "manage-announcements"}
-                icon={<ShieldCheck className="h-5 w-5 shrink-0" />}
-                label="Manage Announcements"
-                onClick={() => setTab("manage-announcements")}
-              />
-
-              <SidebarButton
-                active={tab === "reports"}
-                icon={<FileBarChart2 className="h-5 w-5 shrink-0" />}
-                label="Reports"
-                onClick={() => setTab("reports")}
-              />
-
-              <SidebarButton
-                active={tab === "scan-qr"}
-                icon={<ScanLine className="h-5 w-5 shrink-0" />}
-                label="Scan QR"
-                onClick={() => setTab("scan-qr")}
-              />
-              <SidebarButton
-                active={tab === "change-password"}
-                icon={<KeyRound className="h-5 w-5 shrink-0" />}
-                label="Change Password"
-                onClick={() => setTab("change-password")}
-              />
-
+              <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label="Overview" onClick={() => setTab("overview")} />
+              <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label="Personal Info" onClick={() => setTab("personal")} />
+              <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label="Reports" onClick={() => setTab("reports")} />
+              <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label="Registered Residents" onClick={() => setTab("residents")} />
+              <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label="Announcements" onClick={() => setTab("announcements")} />
+              <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-5 w-5 shrink-0" />} label="Manage Announcements" onClick={() => setTab("manage-announcements")} />
+              <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label="Archived Residents" onClick={() => setTab("archive")} />
+              <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Create User" onClick={() => setTab("create-user")} />
+              <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label="Staff Users" onClick={() => setTab("staff-users")} />
+              <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label="Activity Logs" onClick={() => setTab("activity-logs")} />
+              <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label="Scan QR" onClick={() => setTab("scan-qr")} />
+              <SidebarButton active={tab === "change-password"} icon={<KeyRound className="h-5 w-5 shrink-0" />} label="Change Password" onClick={() => setTab("change-password")} />
             </div>
           </div>
         </aside>
