@@ -72,6 +72,32 @@ function gestationBetween(lmp: string | undefined, visitDate: string | undefined
   return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
 }
 
+// Pregnancy outcome, auto-classified from gestational age (Date of Delivery − LMP)
+// using DOH/WHO thresholds:
+//   < 20 weeks            → Abortion / Miscarriage
+//   fetus born dead ≥20wk → Fetal Death (stillbirth)  [needs the death indicator]
+//   20 to < 37 weeks      → Preterm
+//   ≥ 37 weeks            → Full Term
+// Gestational age alone can't distinguish a live birth from a stillbirth, so
+// Fetal Death is taken from the newborn "Death" indicator.
+function computeOutcome(
+  lmp?: string,
+  delivery?: string,
+  newbornSex?: string
+): string {
+  if (!lmp || !delivery) return "";
+  const a = new Date(lmp);
+  const b = new Date(delivery);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return "";
+  const days = Math.floor((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 0) return "";
+  const weeks = Math.floor(days / 7);
+  if (weeks < 20) return "Abortion / Miscarriage";
+  if (newbornSex === "Death") return "Fetal Death";
+  if (weeks < 37) return "Preterm";
+  return "Full Term";
+}
+
 function prettyDate(dateStr: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -661,7 +687,16 @@ function MaternalFormModal({
       setSaving(true);
       setError("");
       setMessage("");
-      const payload = { ...form, edd: computeEdd(form.lmp ?? ""), gestation_age: aog };
+      const payload = {
+        ...form,
+        edd: computeEdd(form.lmp ?? ""),
+        gestation_age: aog,
+        post_pregnancy_outcome: computeOutcome(
+          form.lmp,
+          form.post_delivery_date,
+          form.post_newborn_sex
+        ),
+      };
       const res = await fetch(`/api/maternal/${resident.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -1113,7 +1148,12 @@ function MaternalFormModal({
                         <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
                         <Row label="Place of Delivery"><Text k="post_place" /></Row>
                         <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section", "Combined Vaginal-Cesarean"]} /></Row>
-                        <Row label="Pregnancy Outcome"><Select k="post_pregnancy_outcome" options={["Full Term", "Preterm", "Fetal Death", "Abortion / Miscarriage"]} /></Row>
+                        <Row label="Pregnancy Outcome">
+                          <ReadOnly
+                            value={computeOutcome(form.lmp, form.post_delivery_date, form.post_newborn_sex) || "—"}
+                            note="Auto from LMP → Date of Delivery · <20 wks Abortion · 20–<37 Preterm · ≥37 Full Term · Newborn 'Death' = Fetal Death"
+                          />
+                        </Row>
                         <Row label="Outcome Notes"><Text k="post_outcome" /></Row>
                         <Row label="Facility (Public / Private)"><Select k="post_facility_sector" options={["Public", "Private", "Home / Non-facility"]} /></Row>
                         <Row label="PNC Classification"><Select k="pnc_class" options={["Resident", "Trans-in", "Trans-out"]} /></Row>
@@ -1126,7 +1166,9 @@ function MaternalFormModal({
                             <Select k="post_newborn_sex" options={["Female", "Male", "Death"]} />
                             {form.post_newborn_sex === "Death" && (
                               <p className="mt-1 text-[11px] font-black uppercase tracking-wide text-red-600">
-                                Considered as abortion
+                                {computeOutcome(form.lmp, form.post_delivery_date, "Death") === "Abortion / Miscarriage"
+                                  ? "Counted as Abortion / Miscarriage (<20 weeks)"
+                                  : "Counted as Fetal Death (≥20 weeks)"}
                               </p>
                             )}
                           </div>

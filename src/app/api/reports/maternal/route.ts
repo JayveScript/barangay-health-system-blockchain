@@ -38,6 +38,22 @@ function bandOf(age: number | null | undefined): Band {
   return "b2049";
 }
 
+// Auto-classify pregnancy outcome from gestational age (delivery − LMP), DOH/WHO:
+// <20 wks Abortion · fetus dead ≥20 wks Fetal Death · 20–<37 Preterm · ≥37 Full Term.
+function computeOutcome(lmp: string, delivery: string, newbornSex: string): string {
+  if (!lmp || !delivery) return "";
+  const a = new Date(lmp);
+  const b = new Date(delivery);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return "";
+  const days = Math.floor((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 0) return "";
+  const weeks = Math.floor(days / 7);
+  if (weeks < 20) return "Abortion / Miscarriage";
+  if (newbornSex === "Death") return "Fetal Death";
+  if (weeks < 37) return "Preterm";
+  return "Full Term";
+}
+
 function birthGrams(v: string): number | null {
   const num = parseFloat(v.replace(/[^0-9.]/g, ""));
   if (!Number.isFinite(num) || num <= 0) return null;
@@ -127,7 +143,9 @@ export async function GET() {
       if (d.anc_referred === "Yes") add("anc_referred", band);
 
       // ── II. INTRAPARTUM & NEWBORN ────────────────────────────────
-      const outcome = s(d.post_pregnancy_outcome);
+      const outcome =
+        s(d.post_pregnancy_outcome) ||
+        computeOutcome(s(d.lmp), s(d.post_delivery_date), s(d.post_newborn_sex));
       const isAbortion = outcome === "Abortion / Miscarriage";
       const isFetalDeath = outcome === "Fetal Death";
       const isLiveBirth = outcome === "Full Term" || outcome === "Preterm";
