@@ -5,6 +5,7 @@ import {
   isSuperAdmin,
   canManageBarangay,
 } from "@/lib/tenant-auth";
+import { displayAge } from "@/lib/age";
 
 export const runtime = "nodejs";
 
@@ -79,7 +80,7 @@ export async function GET() {
       },
       select: {
         data: true,
-        resident: { select: { age: true, barangayName: true } },
+        resident: { select: { age: true, birthDate: true, barangayName: true } },
       },
     });
 
@@ -92,7 +93,7 @@ export async function GET() {
 
     for (const rec of records) {
       const d = (rec.data as Data) || {};
-      const band = bandOf(rec.resident?.age);
+      const band = bandOf(displayAge(rec.resident?.birthDate, rec.resident?.age));
       const months = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
       const monthDates = months.filter((n) => has(d[`pn${n}_date`])).length;

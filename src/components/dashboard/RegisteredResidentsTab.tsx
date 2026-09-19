@@ -27,6 +27,7 @@ import {
   EDUCATIONAL_ATTAINMENT_OPTIONS,
   RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
+import { displayAge } from "@/lib/age";
 import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import {
   SectionTitle,
@@ -350,7 +351,7 @@ export function RegisteredResidentsTab({
                       <span className="block truncate whitespace-nowrap">{tableName(r)}</span>
                     </td>
                     <td className="px-3 py-3 text-sm text-slate-600">{r.sex}</td>
-                    <td className="px-3 py-3 text-sm text-slate-600">{r.age}</td>
+                    <td className="px-3 py-3 text-sm text-slate-600">{displayAge(r.birthDate, r.age) ?? r.age}</td>
                     <td className="px-3 py-3 text-sm text-slate-600">{r.contactNumber || "—"}</td>
                     <td className="rounded-r-2xl px-3 py-3">{actions(r, false)}</td>
                   </tr>
@@ -637,7 +638,7 @@ export function ResidentViewModal({
               <div className="grid gap-x-10 gap-y-6 lg:grid-cols-2">
                 <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
                   <QrInfoRow label="Full Name" value={fullName(resident)} />
-                  <QrInfoRow label="Age" value={resident.age} />
+                  <QrInfoRow label="Age" value={displayAge(resident.birthDate, resident.age) ?? resident.age} />
                   <QrInfoRow label="Sex" value={resident.sex} />
                   {resident.sex === "FEMALE" && (
                     <QrInfoRow

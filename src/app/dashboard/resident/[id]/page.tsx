@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser } from "@/lib/tenant-auth";
 import { getMedicalRecordAnchor } from "@/lib/blockchain";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { displayAge } from "@/lib/age";
 
 export default async function ResidentQRPage({
   params,
@@ -57,7 +58,7 @@ export default async function ResidentQRPage({
         <div className="mt-4 space-y-3">
           <Info label="Full Name" value={fullName} />
           <Info label="Sex" value={resident.sex} />
-          <Info label="Age" value={resident.age} />
+          <Info label="Age" value={displayAge(resident.birthDate, resident.age) ?? resident.age} />
           <Info
             label="Birth Date"
             value={

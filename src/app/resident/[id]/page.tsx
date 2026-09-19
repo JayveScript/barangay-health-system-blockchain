@@ -21,6 +21,7 @@ import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { MaternalRecordView } from "@/components/dashboard/MaternalRecordView";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { getMedicalRecordAnchor } from "@/lib/blockchain";
+import { displayAge } from "@/lib/age";
 import { Baby, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -471,7 +472,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
               <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
                 <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
                   <QrInfoRow label="Full Name" value={fullName} />
-                  <QrInfoRow label="Age" value={resident.age} />
+                  <QrInfoRow label="Age" value={displayAge(resident.birthDate, resident.age) ?? resident.age} />
                   <QrInfoRow label="Sex" value={resident.sex} />
                   {resident.sex === "FEMALE" && (
                     <QrInfoRow

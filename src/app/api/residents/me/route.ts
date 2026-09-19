@@ -1,4 +1,5 @@
 import { getCurrentResidentUser } from "@/lib/current-user";
+import { displayAge } from "@/lib/age";
 
 export async function GET() {
   const user = await getCurrentResidentUser();
@@ -12,7 +13,7 @@ export async function GET() {
     lastName: user.resident.lastName,
     firstName: user.resident.firstName,
     middleName: user.resident.middleName,
-    age: user.resident.age,
+    age: displayAge(user.resident.birthDate, user.resident.age),
     sex: user.resident.sex,
     isPregnant: user.resident.isPregnant,
     birthDate: user.resident.birthDate,

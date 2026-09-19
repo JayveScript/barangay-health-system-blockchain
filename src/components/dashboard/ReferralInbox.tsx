@@ -30,6 +30,7 @@ import {
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { displayAge } from "@/lib/age";
 
 type Identifying = Record<string, unknown> | null | undefined;
 type HistoryJson = Record<string, unknown> | null | undefined;
@@ -397,7 +398,7 @@ function ReferralModal({
                 <div className="grid gap-x-10 gap-y-6 lg:grid-cols-2">
                   <QrInfoGroup title="Personal Details" icon={<UserRound className="h-4 w-4" />}>
                     <QrInfoRow label="Full Name" value={identifying.fullName} />
-                    <QrInfoRow label="Age" value={identifying.age} />
+                    <QrInfoRow label="Age" value={displayAge(identifying.birthDate as string | undefined) ?? (identifying.age as number | string | undefined)} />
                     <QrInfoRow label="Sex" value={identifying.sex} />
                     <QrInfoRow label="Birth Date" value={fmtDate(identifying.birthDate)} />
                     <QrInfoRow label="Civil Status" value={identifying.civilStatus} />
