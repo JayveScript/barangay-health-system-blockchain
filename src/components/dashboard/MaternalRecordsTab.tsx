@@ -197,6 +197,58 @@ function TestRow({ label, k, disabled }: { label: string; k: string; disabled?: 
   );
 }
 
+function TextArea({ k, ph, disabled }: { k: string; ph?: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  return (
+    <textarea
+      value={form[k] ?? ""}
+      onChange={(e) => set(k, e.target.value)}
+      placeholder={ph}
+      disabled={disabled}
+      rows={3}
+      className="w-full resize-y rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+    />
+  );
+}
+
+// Single checkbox chip: stores "Yes" / "" for its key. Used by the Family
+// Planning physical-exam and method sections where several boxes may be ticked.
+function Check({ k, label, disabled }: { k: string; label: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  const on = form[k] === "Yes";
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => set(k, on ? "" : "Yes")}
+      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+        on
+          ? "border-[#2563EB] bg-[#EFF6FF] text-[#1E3A8A]"
+          : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#F8FAFC]"
+      }`}
+    >
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-black ${
+          on ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-300 bg-white"
+        }`}
+      >
+        {on ? "✓" : ""}
+      </span>
+      <span className="min-w-0">{label}</span>
+    </button>
+  );
+}
+
+function CheckGrid({ items, disabled }: { items: [string, string][]; disabled?: boolean }) {
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {items.map(([k, l]) => (
+        <Check key={k} k={k} label={l} disabled={disabled} />
+      ))}
+    </div>
+  );
+}
+
 // Read-only chip for the prenatal Summary view (renders nothing when empty).
 function SumChip({ label, value }: { label: string; value?: string }) {
   if (!value || !value.trim()) return null;
@@ -463,7 +515,11 @@ function MaternalFormModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [formTab, setFormTab] = useState<"obgyne" | "prenatal" | "postnatal">("obgyne");
+  const [formTab, setFormTab] = useState<
+    "obgyne" | "prenatal" | "postnatal" | "familyplanning"
+  >("obgyne");
+  // Family Planning has two nested tabs matching the paper form's two sides.
+  const [fpSide, setFpSide] = useState<"a" | "b">("a");
   // Each tab is summary-first: when records already exist we show the read-only
   // summary and reveal the editable form via the Edit button; when a tab is
   // empty we open straight into editing.
@@ -514,6 +570,9 @@ function MaternalFormModal({
 
   // Age of Gestation is derived live from LMP + today's date.
   const aog = computeGestation(form.lmp);
+
+  // Family Planning Side B keeps a growing list of visit rows.
+  const visitCount = Math.max(1, parseInt(form.fpb_visit_count || "1", 10) || 1);
 
   const save = async () => {
     try {
@@ -598,6 +657,7 @@ function MaternalFormModal({
                   ["obgyne", "OB-Gyne History"],
                   ["prenatal", "Prenatal Care"],
                   ["postnatal", "Postnatal Care"],
+                  ["familyplanning", "Family Planning"],
                 ] as const).map(([id, label]) => (
                   <button
                     key={id}
@@ -1000,6 +1060,193 @@ function MaternalFormModal({
                           No postnatal records yet. Tap Edit to start encoding.
                         </div>
                       )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {formTab === "familyplanning" && (
+                <div className="space-y-5">
+                  {/* Nested Side A / Side B tabs (matching the paper form) */}
+                  <div className="flex gap-1 rounded-2xl bg-[#DBEAFE] p-1.5">
+                    {([
+                      ["a", "Side A — Assessment"],
+                      ["b", "Side B — Visits"],
+                    ] as const).map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setFpSide(id)}
+                        className={`flex-1 rounded-xl px-2 py-2.5 text-[11px] font-black uppercase tracking-wide transition sm:text-xs ${
+                          fpSide === id
+                            ? "bg-[#2563EB] text-white shadow-sm"
+                            : "text-slate-600 hover:bg-white"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {fpSide === "a" && (
+                    <>
+                      <Section title="Client Type & FP Method">
+                        <Row label="Type of Client">
+                          <Select k="fpa_client_type" options={["New Acceptor", "Current User", "Changing Method", "Changing Clinic", "Dropout / Restart"]} />
+                        </Row>
+                        <Row label="Reason for FP">
+                          <Select k="fpa_fp_reason" options={["Spacing", "Limiting", "Others"]} />
+                        </Row>
+                        <Row label="Reason for Changing">
+                          <Text k="fpa_change_reason" ph="Medical condition / side effects / others" />
+                        </Row>
+                        <div>
+                          <SubTitle title="Method Currently Used (for Changing Method)" />
+                          <div className="mt-3">
+                            <CheckGrid items={[
+                              ["fpa_m_coc", "COC"], ["fpa_m_pop", "POP"], ["fpa_m_injectable", "Injectable"],
+                              ["fpa_m_iud_interval", "IUD (Interval)"], ["fpa_m_iud_pp", "IUD (Post-Partum)"], ["fpa_m_condom", "Condom"],
+                              ["fpa_m_bom", "BOM / CMM"], ["fpa_m_bbt", "BBT"], ["fpa_m_stm", "STM"],
+                              ["fpa_m_sdm", "SDM"], ["fpa_m_lam", "LAM"],
+                            ]} />
+                          </div>
+                          <div className="mt-3">
+                            <Row label="Others (specify)"><Text k="fpa_m_others" ph="Other method" /></Row>
+                          </div>
+                        </div>
+                      </Section>
+
+                      <Section title="I. Medical History">
+                        <p className="text-xs font-semibold text-slate-500">Does the client have any of the following?</p>
+                        {([
+                          ["fpa_mh_headache", "Severe headaches / migraine"],
+                          ["fpa_mh_stroke", "History of stroke / heart attack / hypertension"],
+                          ["fpa_mh_bruising", "Non-traumatic hematoma, bruising or gum bleeding"],
+                          ["fpa_mh_breast", "Current or history of breast cancer / breast mass"],
+                          ["fpa_mh_chestpain", "Severe chest pain"],
+                          ["fpa_mh_cough", "Cough for more than 14 days"],
+                          ["fpa_mh_jaundice", "Jaundice (yellowish skin or eyes)"],
+                          ["fpa_mh_bleeding", "Unexplained vaginal bleeding"],
+                          ["fpa_mh_discharge", "Abnormal vaginal discharge"],
+                          ["fpa_mh_meds", "Intake of anti-seizure (phenobarbital) or anti-TB (rifampicin)"],
+                          ["fpa_mh_smoker", "Is the client a SMOKER?"],
+                          ["fpa_mh_disability", "With Disability?"],
+                        ] as [string, string][]).map(([k, l]) => (
+                          <Row key={k} label={l}><YesNo k={k} /></Row>
+                        ))}
+                        <Row label="If disabled, specify"><Text k="fpa_mh_disability_note" ph="Specify disability" /></Row>
+                      </Section>
+
+                      <Section title="II. Obstetrical History">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Row label="Gravida (G)"><NumI k="fpa_ob_g" /></Row>
+                          <Row label="Para (P)"><NumI k="fpa_ob_p" /></Row>
+                          <Row label="Full Term"><NumI k="fpa_ob_fullterm" /></Row>
+                          <Row label="Premature"><NumI k="fpa_ob_premature" /></Row>
+                          <Row label="Abortion"><NumI k="fpa_ob_abortion" /></Row>
+                          <Row label="Living Children"><NumI k="fpa_ob_living" /></Row>
+                        </div>
+                        <Row label="Date of Last Delivery"><DateI k="fpa_ob_last_delivery" /></Row>
+                        <Row label="Type of Last Delivery"><Select k="fpa_ob_delivery_type" options={["Vaginal", "Cesarean Section"]} /></Row>
+                        <Row label="Last Menstrual Period"><DateI k="fpa_ob_lmp" /></Row>
+                        <Row label="Previous Menstrual Period"><DateI k="fpa_ob_pmp" /></Row>
+                        <Row label="Menstrual Flow"><Select k="fpa_ob_flow" options={["Scanty (1-2 pads/day)", "Moderate (3-5 pads/day)", "Heavy (>5 pads/day)"]} /></Row>
+                        <Row label="Dysmenorrhea"><YesNo k="fpa_ob_dysmenorrhea" /></Row>
+                        <Row label="Hydatidiform Mole (last 12 months)"><YesNo k="fpa_ob_mole" /></Row>
+                        <Row label="History of Ectopic Pregnancy"><YesNo k="fpa_ob_ectopic" /></Row>
+                      </Section>
+
+                      <Section title="III. Risks for Sexually Transmitted Infections">
+                        <p className="text-xs font-semibold text-slate-500">Does the client or client&apos;s partner have any of the following?</p>
+                        {([
+                          ["fpa_sti_discharge", "Abnormal discharge from the genital area"],
+                          ["fpa_sti_sores", "Sores or ulcers in the genital area"],
+                          ["fpa_sti_pain", "Pain or burning sensation in the genital area"],
+                          ["fpa_sti_history", "History of treatment for STI"],
+                          ["fpa_sti_hiv", "HIV / AIDS / Pelvic inflammatory disease"],
+                        ] as [string, string][]).map(([k, l]) => (
+                          <Row key={k} label={l}><YesNo k={k} /></Row>
+                        ))}
+                      </Section>
+
+                      <Section title="IV. Risks for Violence Against Women (VAW)">
+                        {([
+                          ["fpa_vaw_relationship", "Unpleasant relationship with partner"],
+                          ["fpa_vaw_approval", "Partner does not approve of the visit to FP clinic"],
+                          ["fpa_vaw_history", "History of domestic violence or VAW"],
+                        ] as [string, string][]).map(([k, l]) => (
+                          <Row key={k} label={l}><YesNo k={k} /></Row>
+                        ))}
+                        <Row label="Referred To"><Select k="fpa_vaw_referred" options={["DSWD", "WCPU", "NGO", "Others"]} /></Row>
+                      </Section>
+
+                      <Section title="V. Physical Examination">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Row label="Weight (kg)"><Text k="fpa_pe_weight" ph="kg" /></Row>
+                          <Row label="Height (cm)"><Text k="fpa_pe_height" ph="cm" /></Row>
+                          <Row label="Blood Pressure"><Text k="fpa_pe_bp" ph="mmHg" /></Row>
+                          <Row label="Pulse Rate"><Text k="fpa_pe_pulse" ph="/min" /></Row>
+                        </div>
+                        <div><SubTitle title="Skin" /><div className="mt-2"><CheckGrid items={[["fpa_pe_skin_normal", "Normal"], ["fpa_pe_skin_pale", "Pale"], ["fpa_pe_skin_yellow", "Yellowish"], ["fpa_pe_skin_hematoma", "Hematoma"]]} /></div></div>
+                        <div><SubTitle title="Conjunctiva" /><div className="mt-2"><CheckGrid items={[["fpa_pe_conj_normal", "Normal"], ["fpa_pe_conj_pale", "Pale"], ["fpa_pe_conj_yellow", "Yellowish"]]} /></div></div>
+                        <div><SubTitle title="Neck" /><div className="mt-2"><CheckGrid items={[["fpa_pe_neck_normal", "Normal"], ["fpa_pe_neck_mass", "Neck Mass"], ["fpa_pe_neck_nodes", "Enlarged Lymph Nodes"]]} /></div></div>
+                        <div><SubTitle title="Breast" /><div className="mt-2"><CheckGrid items={[["fpa_pe_breast_normal", "Normal"], ["fpa_pe_breast_mass", "Mass"], ["fpa_pe_breast_discharge", "Nipple Discharge"]]} /></div></div>
+                        <div><SubTitle title="Abdomen" /><div className="mt-2"><CheckGrid items={[["fpa_pe_abd_normal", "Normal"], ["fpa_pe_abd_mass", "Abdominal Mass"], ["fpa_pe_abd_varicose", "Varicosities"]]} /></div></div>
+                        <div><SubTitle title="Extremities" /><div className="mt-2"><CheckGrid items={[["fpa_pe_ext_normal", "Normal"], ["fpa_pe_ext_edema", "Edema"], ["fpa_pe_ext_varicose", "Varicosities"]]} /></div></div>
+                        <div><SubTitle title="Pelvic Examination" /><div className="mt-2"><CheckGrid items={[["fpa_pe_pelvic_normal", "Normal"], ["fpa_pe_pelvic_mass", "Mass"], ["fpa_pe_pelvic_discharge", "Abnormal Discharge"], ["fpa_pe_pelvic_cervix", "Cervical Abnormalities"], ["fpa_pe_pelvic_warts", "Warts"], ["fpa_pe_pelvic_polyp", "Polyp or Cyst"], ["fpa_pe_pelvic_inflammation", "Inflammation / Erosion"], ["fpa_pe_pelvic_bloody", "Bloody Discharge"], ["fpa_pe_pelvic_tenderness", "Cervical Tenderness"]]} /></div></div>
+                        <Row label="Uterine Depth (cm)"><Text k="fpa_pe_uterine_depth" ph="cm" /></Row>
+                      </Section>
+
+                      <div className="rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] p-4 text-xs font-semibold text-slate-600">
+                        Acknowledgement: This certifies that the physician / nurse / midwife has fully explained the different methods available in family planning and the client has freely chosen a method. For WRA below 18 years old, parent / guardian consent is required.
+                      </div>
+                    </>
+                  )}
+
+                  {fpSide === "b" && (
+                    <>
+                      <Section title="How to be Reasonably Sure a Client is Not Pregnant">
+                        {([
+                          ["fpb_np_1", "Did you have a baby less than 6 months ago, are fully / nearly fully breastfeeding, and have had no menstrual period since?"],
+                          ["fpb_np_2", "Have you abstained from sexual intercourse since your last menstrual period or delivery?"],
+                          ["fpb_np_3", "Have you had a baby in the last 4 weeks?"],
+                          ["fpb_np_4", "Did your last menstrual period start within the past 7 days?"],
+                          ["fpb_np_5", "Have you had a miscarriage or abortion in the last 7 days?"],
+                          ["fpb_np_6", "Have you been using a reliable contraceptive method consistently and correctly?"],
+                        ] as [string, string][]).map(([k, l]) => (
+                          <Row key={k} label={l}><YesNo k={k} /></Row>
+                        ))}
+                        <div className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-3 text-xs font-semibold text-slate-600">
+                          If the client answered YES to at least one question, provide the client with the desired method. If NO to all, pregnancy cannot be ruled out — the client should await menses or take a pregnancy test.
+                        </div>
+                      </Section>
+
+                      <Section title="Client Assessment Record — Visits">
+                        <div className="space-y-4">
+                          {Array.from({ length: visitCount }).map((_, i) => {
+                            const n = i + 1;
+                            return (
+                              <div key={n} className="rounded-2xl border border-[#BFDBFE] bg-[#F8FAFC] p-4">
+                                <p className="mb-3 text-xs font-black uppercase tracking-wide text-[#2563EB]">Visit {n}</p>
+                                <div className="space-y-3">
+                                  <Row label="Date of Visit"><DateI k={`fpb_v${n}_date`} /></Row>
+                                  <Row label="Medical Findings"><TextArea k={`fpb_v${n}_findings`} ph="Observation, complaints, service rendered / procedures, laboratory, treatment and referral" /></Row>
+                                  <Row label="Method Accepted"><Text k={`fpb_v${n}_method`} ph="Method accepted" /></Row>
+                                  <Row label="Service Provider"><Text k={`fpb_v${n}_provider`} ph="Name of service provider" /></Row>
+                                  <Row label="Date of Follow-up"><DateI k={`fpb_v${n}_followup`} /></Row>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => set("fpb_visit_count", String(visitCount + 1))}
+                          className="mt-4 inline-flex min-h-[42px] items-center gap-2 rounded-xl border border-[#2563EB] bg-white px-4 text-sm font-bold text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                        >
+                          + Add Visit
+                        </button>
+                      </Section>
                     </>
                   )}
                 </div>
