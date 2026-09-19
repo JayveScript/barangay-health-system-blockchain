@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
-const ALLOWED_ROLES = ["MIDWIFE", "NURSE", "BHW"];
+const ALLOWED_ROLES = ["MIDWIFE", "NURSE", "BHW", "DOCTOR"];
 
 export async function GET() {
   try {
