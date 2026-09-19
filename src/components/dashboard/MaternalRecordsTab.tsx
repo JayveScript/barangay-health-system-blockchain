@@ -333,12 +333,16 @@ const PRENATAL_SUPPLEMENT_OPTIONS = [
   "Deworming Tablet",
 ];
 
-// Extra tests recorded per prenatal visit (and in the baseline test list).
+// Extra tests recorded per prenatal visit (and in the baseline test list) as
+// Result / Date rows.
 const EXTRA_TESTS: { label: string; k: string }[] = [
   { label: "CBC / HGB & HCT", k: "cbc" },
-  { label: "Diagnosed with Anemia", k: "anemia" },
   { label: "Gestational Diabetes Screen", k: "gdm_screen" },
-  { label: "Positive for Diabetes", k: "diabetes" },
+];
+// Yes/No findings recorded alongside the extra tests.
+const EXTRA_YESNO: [string, string][] = [
+  ["anemia", "Diagnosed with Anemia"],
+  ["diabetes", "Positive for Diabetes"],
 ];
 
 const POSTNATAL_DAYS = [0, 3, 7, 42];
@@ -927,6 +931,9 @@ function MaternalFormModal({
                         <SubTitle title="Tests (Result / Date)" />
                         {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
                         {EXTRA_TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
+                        {EXTRA_YESNO.map(([k, label]) => (
+                          <Row key={k} label={label}><YesNo k={`pre_${k}`} /></Row>
+                        ))}
                         <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
                       </Section>
 
@@ -967,6 +974,9 @@ function MaternalFormModal({
                               <div className="mt-2 space-y-2">
                                 {EXTRA_TESTS.map((t) => (
                                   <TestRow key={`pn${n}_${t.k}`} label={t.label} k={`pn${n}_${t.k}`} />
+                                ))}
+                                {EXTRA_YESNO.map(([k, label]) => (
+                                  <Row key={k} label={label}><YesNo k={`pn${n}_${k}`} /></Row>
                                 ))}
                               </div>
                             </div>
@@ -1014,6 +1024,9 @@ function MaternalFormModal({
                               />
                             );
                           })}
+                          {EXTRA_YESNO.map(([k, label]) => (
+                            <SumChip key={k} label={label} value={form[`pre_${k}`]} />
+                          ))}
                           <SumChip label="Other Tests" value={form.pre_other_tests} />
                         </div>
                       </div>
@@ -1045,6 +1058,9 @@ function MaternalFormModal({
                                   />
                                 );
                               })}
+                              {EXTRA_YESNO.map(([k, label]) => (
+                                <SumChip key={k} label={label} value={form[`pn${n}_${k}`]} />
+                              ))}
                             </div>
                           </div>
                         ))}
