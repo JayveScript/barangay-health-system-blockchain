@@ -60,6 +60,13 @@ const METHODS: [string, string][] = [
   ["Pills-POP", "6. Pills-POP"],
   ["Pills-COC", "7. Pills-COC"],
   ["Injectables", "8. Injectables"],
+  ["Implants-Interval", "9. Implants-Interval"],
+  ["Implants-Postpartum", "10. Implants-Postpartum"],
+  ["NFP-CMM", "11. NFP-CMM"],
+  ["NFP-BBT", "12. NFP-BBT"],
+  ["NFP-STM", "13. NFP-STM"],
+  ["NFP-SDM", "14. NFP-SDM"],
+  ["NFP-LAM", "15. NFP-LAM"],
 ];
 const BANDS: [Band, string][] = [
   ["b1014", "10 – 14 y.o"],
