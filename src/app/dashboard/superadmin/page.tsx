@@ -10,6 +10,8 @@ import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { AnchorAllButton } from "@/components/dashboard/AnchorAllButton";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
+import { FileBarChart2 } from "lucide-react";
 import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
 import {
   BARANGAY_ADMIN_USERNAME_SUFFIX,
@@ -77,7 +79,7 @@ type Me = {
   isVerified: boolean;
 };
 
-type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements" | "change-password";
+type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements" | "reports" | "change-password";
 
 export default function SuperAdminDashboard() {
   const [me, setMe] = useState<Me | null>(null);
@@ -115,6 +117,7 @@ export default function SuperAdminDashboard() {
     { id: "create-barangay", label: "Create Barangay", icon: <UserPlus className="h-5 w-5" /> },
     { id: "admins", label: "Barangay Admins", icon: <ShieldCheck className="h-5 w-5" /> },
     { id: "announcements", label: "Announcements", icon: <Megaphone className="h-5 w-5" /> },
+    { id: "reports", label: "Reports", icon: <FileBarChart2 className="h-5 w-5" /> },
     { id: "change-password", label: "Change Password", icon: <KeyRound className="h-5 w-5" /> },
   ];
 
@@ -200,6 +203,7 @@ export default function SuperAdminDashboard() {
             {tab === "create-barangay" && <CreateBarangayTab />}
             {tab === "admins" && <AdminsListTab />}
             {tab === "announcements" && <AnnouncementsTab />}
+            {tab === "reports" && <ReportsTab />}
             {tab === "change-password" && <ChangePasswordTab />}
           </section>
         </div>

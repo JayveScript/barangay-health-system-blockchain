@@ -366,12 +366,17 @@ const PREGHIST_SUMMARY_FIELDS: [string, string][] = [
 ];
 const POSTNATAL_DELIVERY_FIELDS: [string, string][] = [
   ["post_delivery_date", "Date of Delivery"], ["post_place", "Place of Delivery"],
-  ["post_type", "Type of Delivery"], ["post_outcome", "Outcome of Pregnancy"],
+  ["post_type", "Type of Delivery"], ["post_pregnancy_outcome", "Pregnancy Outcome"],
+  ["post_outcome", "Outcome Notes"],
+  ["post_facility_sector", "Facility (Public/Private)"], ["pnc_class", "PNC Classification"],
   ["post_bp", "Blood Pressure"],
-  ["post_attended", "Attended By"], ["post_complications", "Complications"],
+  ["post_attendant_type", "Attendant Type"], ["post_attended", "Attended By"],
+  ["post_complications", "Complications"],
   ["post_newborn_sex", "Sex of Newborn"], ["post_birthweight", "Birthweight"],
   ["post_hemoglobin", "Hemoglobin"], ["post_hemoglobin_date", "Hemoglobin Date"],
+  ["post_iron_folic", "Iron + Folic Acid"],
   ["post_vitamin_a", "Vitamin A"], ["post_vitamin_a_date", "Vitamin A Date"],
+  ["pnc_referred", "Referred to Higher Facility (PNC)"],
 ];
 const POSTNATAL_DAY_FIELDS: [string, string][] = [
   ["date", "Date of Visit"], ["bp", "Blood Pressure"], ["temp", "Temperature"],
@@ -900,6 +905,8 @@ function MaternalFormModal({
                           <ReadOnly value={aog} note="Auto from LMP, updates daily" />
                         </Row>
                         <Row label="Risk Code"><Select k="risk_code" options={RISK_CODE_OPTIONS} /></Row>
+                        <Row label="Client Classification"><Select k="client_class" options={["Resident", "Trans-in", "Trans-out"]} /></Row>
+                        <Row label="Nutritional Status (1st Trimester)"><Select k="nutrition_bmi" options={["Normal BMI", "Low BMI", "High BMI"]} /></Row>
                         <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
                         <Row label="Tetanus Toxoid (TT1–TT5+)">
                           <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
@@ -922,6 +929,7 @@ function MaternalFormModal({
                         <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
                         <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
                         <Row label="Prenatal Supplementation"><Select k="prenatal_supplement" options={PRENATAL_SUPPLEMENT_OPTIONS} /></Row>
+                        <Row label="Referred to Higher Facility (high BP / danger signs)"><YesNo k="anc_referred" /></Row>
                         <Row label="Seen by Dentist">
                           <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
                         </Row>
@@ -997,6 +1005,9 @@ function MaternalFormModal({
                           <SumChip label="Expected Date of Delivery" value={prettyDate(form.edd ?? "")} />
                           <SumChip label="Age of Gestation" value={aog} />
                           <SumChip label="Risk Code" value={form.risk_code} />
+                          <SumChip label="Client Classification" value={form.client_class} />
+                          <SumChip label="Nutritional Status (1st Trimester)" value={form.nutrition_bmi} />
+                          <SumChip label="Referred to Higher Facility" value={form.anc_referred} />
                           <SumChip label="Mother-Baby Book" value={form.mother_baby_book} />
                           {TT_LEVELS.map(([k, label]) => (
                             <SumChip key={k} label={label} value={prettyDate(form[k] ?? "")} />
@@ -1101,9 +1112,13 @@ function MaternalFormModal({
                       <Section title="Delivery Details">
                         <Row label="Date of Delivery"><DateI k="post_delivery_date" /></Row>
                         <Row label="Place of Delivery"><Text k="post_place" /></Row>
-                        <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
-                        <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
+                        <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section", "Combined Vaginal-Cesarean"]} /></Row>
+                        <Row label="Pregnancy Outcome"><Select k="post_pregnancy_outcome" options={["Full Term", "Preterm", "Fetal Death", "Abortion / Miscarriage"]} /></Row>
+                        <Row label="Outcome Notes"><Text k="post_outcome" /></Row>
+                        <Row label="Facility (Public / Private)"><Select k="post_facility_sector" options={["Public", "Private", "Home / Non-facility"]} /></Row>
+                        <Row label="PNC Classification"><Select k="pnc_class" options={["Resident", "Trans-in", "Trans-out"]} /></Row>
                         <Row label="Blood Pressure (BP Measured)"><BpInput k="post_bp" /></Row>
+                        <Row label="Attendant Type"><Select k="post_attendant_type" options={["Physician", "Nurse", "Midwife", "Other"]} /></Row>
                         <Row label="Attended By"><Text k="post_attended" /></Row>
                         <Row label="Complications"><Text k="post_complications" /></Row>
                         <Row label="Sex of Newborn">
@@ -1120,9 +1135,11 @@ function MaternalFormModal({
                         <Row label="Hemoglobin">
                           <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
                         </Row>
+                        <Row label="Iron + Folic Acid (postpartum)"><YesNo k="post_iron_folic" /></Row>
                         <Row label="Vitamin A">
                           <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_vitamin_a" /><DateI k="post_vitamin_a_date" /></div>
                         </Row>
+                        <Row label="Referred to Higher Facility (PNC)"><YesNo k="pnc_referred" /></Row>
                       </Section>
 
                       <p className="rounded-xl bg-[#EFF6FF] px-4 py-2.5 text-xs font-semibold text-[#2563EB]">
