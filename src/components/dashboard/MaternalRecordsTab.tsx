@@ -249,6 +249,39 @@ function CheckGrid({ items, disabled }: { items: [string, string][]; disabled?: 
   );
 }
 
+// Blood pressure is "high" at systolic ≥130 OR diastolic ≥90.
+function isHighBp(v: string): boolean {
+  const m = (v || "").match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+  if (!m) return false;
+  return Number(m[1]) >= 130 || Number(m[2]) >= 90;
+}
+
+// BP field that turns red (with a "High blood pressure" flag) at ≥130/90.
+function BpInput({ k, disabled }: { k: string; ph?: string; disabled?: boolean }) {
+  const { form, set } = useContext(MaternalFormCtx);
+  const high = isHighBp(form[k] ?? "");
+  return (
+    <div>
+      <input
+        value={form[k] ?? ""}
+        onChange={(e) => set(k, e.target.value)}
+        placeholder="e.g. 120/80"
+        disabled={disabled}
+        className={`min-h-[42px] w-full rounded-xl border px-3 text-sm font-bold outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 ${
+          high
+            ? "border-red-400 bg-red-50 text-red-700 focus:border-red-500"
+            : "border-[#BFDBFE] bg-white text-slate-900 focus:border-[#2563EB]"
+        }`}
+      />
+      {high && (
+        <p className="mt-1 text-[11px] font-black uppercase tracking-wide text-red-600">
+          High blood pressure (≥130/90)
+        </p>
+      )}
+    </div>
+  );
+}
+
 // Read-only chip for the prenatal Summary view (renders nothing when empty).
 function SumChip({ label, value }: { label: string; value?: string }) {
   if (!value || !value.trim()) return null;
@@ -267,6 +300,45 @@ const PRENATAL_MONTH_FIELDS: [string, string][] = [
   ["fundal", "Fundal Height (cm)"],
   ["fht", "Fetal Heart Tone"],
   ["remarks", "Findings / Remarks"],
+];
+
+// Tetanus Toxoid levels (TT1–TT5, plus a TT5+ booster).
+const TT_LEVELS: [string, string][] = [
+  ["tt1", "TT1"], ["tt2", "TT2"], ["tt3", "TT3"],
+  ["tt4", "TT4"], ["tt5", "TT5"], ["tt5plus", "TT5+"],
+];
+
+const RISK_CODE_OPTIONS = [
+  "A(1) - Too old (>35 yrs old)",
+  "A(2) - Too young (<18 yrs old)",
+  "B(1) - Height <145 cm (4'9\")",
+  "B(2) - < Ideal weight",
+  "B(3) - > Ideal weight",
+  "C - Too many (>4 children)",
+  "D - Poor obstetrical history",
+  "E - Poor medical history",
+  "F - Too close (<3 yrs gap of pregnancy)",
+  "G - Risky lifestyle",
+  "H - Violence against women",
+  "I - 2 or more risks",
+];
+
+const PLAN_DELIVER_SECTOR = ["Private", "Public"];
+const PLAN_DELIVER_TYPE = ["Hospital", "Lying-in"];
+
+const PRENATAL_SUPPLEMENT_OPTIONS = [
+  "Folic Acid",
+  "Micronutrient",
+  "Calcium Carbonate",
+  "Deworming Tablet",
+];
+
+// Extra tests recorded per prenatal visit (and in the baseline test list).
+const EXTRA_TESTS: { label: string; k: string }[] = [
+  { label: "CBC / HGB & HCT", k: "cbc" },
+  { label: "Diagnosed with Anemia", k: "anemia" },
+  { label: "Gestational Diabetes Screen", k: "gdm_screen" },
+  { label: "Positive for Diabetes", k: "diabetes" },
 ];
 
 const POSTNATAL_DAYS = [0, 3, 7, 42];
@@ -291,6 +363,7 @@ const PREGHIST_SUMMARY_FIELDS: [string, string][] = [
 const POSTNATAL_DELIVERY_FIELDS: [string, string][] = [
   ["post_delivery_date", "Date of Delivery"], ["post_place", "Place of Delivery"],
   ["post_type", "Type of Delivery"], ["post_outcome", "Outcome of Pregnancy"],
+  ["post_bp", "Blood Pressure"],
   ["post_attended", "Attended By"], ["post_complications", "Complications"],
   ["post_newborn_sex", "Sex of Newborn"], ["post_birthweight", "Birthweight"],
   ["post_hemoglobin", "Hemoglobin"], ["post_hemoglobin_date", "Hemoglobin Date"],
@@ -822,22 +895,29 @@ function MaternalFormModal({
                         <Row label="Age of Gestation">
                           <ReadOnly value={aog} note="Auto from LMP, updates daily" />
                         </Row>
-                        <Row label="Risk Code"><Text k="risk_code" /></Row>
+                        <Row label="Risk Code"><Select k="risk_code" options={RISK_CODE_OPTIONS} /></Row>
                         <Row label="Mother-Baby Book"><YesNo k="mother_baby_book" /></Row>
-                        <Row label="Tetanus Toxoid (TT1–TT5)">
-                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                            {["1", "2", "3", "4", "5"].map((n) => (
-                              <div key={n}>
-                                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">TT{n}</p>
-                                <DateI k={`tt${n}`} />
+                        <Row label="Tetanus Toxoid (TT1–TT5+)">
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
+                            {TT_LEVELS.map(([k, label]) => (
+                              <div key={k}>
+                                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">{label}</p>
+                                <DateI k={k} />
                               </div>
                             ))}
                           </div>
                         </Row>
-                        <Row label="Plan to Deliver At"><Text k="plan_deliver" /></Row>
+                        <Row label="Plan to Deliver At">
+                          <div className="grid gap-2 sm:grid-cols-3">
+                            <Select k="plan_deliver_sector" options={PLAN_DELIVER_SECTOR} />
+                            <Select k="plan_deliver_type" options={PLAN_DELIVER_TYPE} />
+                            <Text k="plan_deliver_facility" ph="Name of facility" />
+                          </div>
+                        </Row>
                         <Row label="Accompanying Person"><Text k="accompanying" /></Row>
                         <Row label="Iodized Salt"><YesNo k="iodized_salt" /></Row>
                         <Row label="Iron Supplement"><YesNo k="iron_supplement" /></Row>
+                        <Row label="Prenatal Supplementation"><Select k="prenatal_supplement" options={PRENATAL_SUPPLEMENT_OPTIONS} /></Row>
                         <Row label="Seen by Dentist">
                           <div className="grid gap-2 sm:grid-cols-2"><YesNo k="pre_dentist" /><DateI k="pre_dentist_date" /></div>
                         </Row>
@@ -846,6 +926,7 @@ function MaternalFormModal({
                         </Row>
                         <SubTitle title="Tests (Result / Date)" />
                         {TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
+                        {EXTRA_TESTS.map((t) => <TestRow key={`pre_${t.k}`} label={t.label} k={`pre_${t.k}`} />)}
                         <Row label="Other Tests, Specify"><Text k="pre_other_tests" /></Row>
                       </Section>
 
@@ -881,6 +962,14 @@ function MaternalFormModal({
                             <Row label="Fundal Height (cm)"><Text k={`pn${n}_fundal`} /></Row>
                             <Row label="Fetal Heart Tone"><Text k={`pn${n}_fht`} /></Row>
                             <Row label="Findings / Remarks"><Text k={`pn${n}_remarks`} /></Row>
+                            <div className="rounded-xl border border-[#BFDBFE] bg-[#F8FAFC] p-3">
+                              <SubTitle title="Test Result / Date (this month)" />
+                              <div className="mt-2 space-y-2">
+                                {EXTRA_TESTS.map((t) => (
+                                  <TestRow key={`pn${n}_${t.k}`} label={t.label} k={`pn${n}_${t.k}`} />
+                                ))}
+                              </div>
+                            </div>
                           </div>
                           )}
                         </div>
@@ -899,18 +988,22 @@ function MaternalFormModal({
                           <SumChip label="Age of Gestation" value={aog} />
                           <SumChip label="Risk Code" value={form.risk_code} />
                           <SumChip label="Mother-Baby Book" value={form.mother_baby_book} />
-                          {["1", "2", "3", "4", "5"].map((n) => (
-                            <SumChip key={n} label={`TT${n}`} value={form[`tt${n}`]} />
+                          {TT_LEVELS.map(([k, label]) => (
+                            <SumChip key={k} label={label} value={prettyDate(form[k] ?? "")} />
                           ))}
-                          <SumChip label="Plan to Deliver At" value={form.plan_deliver} />
+                          <SumChip
+                            label="Plan to Deliver At"
+                            value={[form.plan_deliver_sector, form.plan_deliver_type, form.plan_deliver_facility].filter((v) => (v ?? "").trim()).join(" · ")}
+                          />
                           <SumChip label="Accompanying Person" value={form.accompanying} />
                           <SumChip label="Iodized Salt" value={form.iodized_salt} />
                           <SumChip label="Iron Supplement" value={form.iron_supplement} />
+                          <SumChip label="Prenatal Supplementation" value={form.prenatal_supplement} />
                           <SumChip label="Seen by Dentist" value={form.pre_dentist} />
                           <SumChip label="Dentist Date" value={form.pre_dentist_date} />
                           <SumChip label="Seen by Physician" value={form.pre_physician} />
                           <SumChip label="Physician Date" value={form.pre_physician_date} />
-                          {TESTS.map((t) => {
+                          {[...TESTS, ...EXTRA_TESTS].map((t) => {
                             const r = (form[`pre_${t.k}_result`] ?? "").trim();
                             const d = (form[`pre_${t.k}_date`] ?? "").trim();
                             return (
@@ -941,6 +1034,17 @@ function MaternalFormModal({
                               {PRENATAL_MONTH_FIELDS.filter(([s]) => s !== "date").map(([s, label]) => (
                                 <SumChip key={s} label={label} value={form[`pn${n}_${s}`]} />
                               ))}
+                              {EXTRA_TESTS.map((t) => {
+                                const r = (form[`pn${n}_${t.k}_result`] ?? "").trim();
+                                const d = (form[`pn${n}_${t.k}_date`] ?? "").trim();
+                                return (
+                                  <SumChip
+                                    key={t.k}
+                                    label={t.label}
+                                    value={[r, d ? `(${d})` : ""].filter(Boolean).join(" ")}
+                                  />
+                                );
+                              })}
                             </div>
                           </div>
                         ))}
@@ -983,9 +1087,19 @@ function MaternalFormModal({
                         <Row label="Place of Delivery"><Text k="post_place" /></Row>
                         <Row label="Type of Delivery"><Select k="post_type" options={["Normal", "Caesarean Section"]} /></Row>
                         <Row label="Outcome of Pregnancy"><Text k="post_outcome" /></Row>
+                        <Row label="Blood Pressure (BP Measured)"><BpInput k="post_bp" /></Row>
                         <Row label="Attended By"><Text k="post_attended" /></Row>
                         <Row label="Complications"><Text k="post_complications" /></Row>
-                        <Row label="Sex of Newborn"><Select k="post_newborn_sex" options={["Female", "Male"]} /></Row>
+                        <Row label="Sex of Newborn">
+                          <div>
+                            <Select k="post_newborn_sex" options={["Female", "Male", "Death"]} />
+                            {form.post_newborn_sex === "Death" && (
+                              <p className="mt-1 text-[11px] font-black uppercase tracking-wide text-red-600">
+                                Considered as abortion
+                              </p>
+                            )}
+                          </div>
+                        </Row>
                         <Row label="Birthweight"><Text k="post_birthweight" /></Row>
                         <Row label="Hemoglobin">
                           <div className="grid gap-2 sm:grid-cols-2"><YesNo k="post_hemoglobin" /><DateI k="post_hemoglobin_date" /></div>
@@ -1016,7 +1130,7 @@ function MaternalFormModal({
                             ) : (
                               <div className="space-y-3">
                                 <Row label="Date of Visit"><DateI k={`postd${day}_date`} /></Row>
-                                <Row label="Blood Pressure"><Text k={`postd${day}_bp`} /></Row>
+                                <Row label="Blood Pressure"><BpInput k={`postd${day}_bp`} /></Row>
                                 <Row label="Temperature"><Text k={`postd${day}_temp`} /></Row>
                                 <Row label="Breastfeeding"><YesNo k={`postd${day}_breastfeeding`} /></Row>
                                 <Row label="Counseling"><YesNo k={`postd${day}_counseling`} /></Row>
