@@ -154,6 +154,8 @@ import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { KeyRound, Baby } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
+import { FileBarChart2 } from "lucide-react";
 import {
   RegisteredResidentsTab,
   ResidentViewModal,
@@ -163,7 +165,7 @@ import {
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "residents" | "maternal" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr" | "change-password"
+  "overview" | "personal" | "residents" | "maternal" | "appointments" | "referrals" | "diagnose" | "announcements" | "reports" | "scan-qr" | "change-password"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -312,6 +314,16 @@ export default function DoctorDashboardPage() {
             />
 
             <SidebarButton
+              active={activeTab === "reports"}
+              icon={<FileBarChart2 className="h-5 w-5" />}
+              label="Reports"
+              onClick={() => {
+                setActiveTab("reports");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={activeTab === "personal"}
               icon={<UserRound className="h-5 w-5" />}
               label="Personal Info"
@@ -407,6 +419,13 @@ export default function DoctorDashboardPage() {
   label="Announcements"
   onClick={() => setActiveTab("announcements")}
 />
+
+              <SidebarButton
+                active={activeTab === "reports"}
+                icon={<FileBarChart2 className="h-5 w-5" />}
+                label="Reports"
+                onClick={() => setActiveTab("reports")}
+              />
 
               <SidebarButton
                 active={activeTab === "personal"}
@@ -515,6 +534,8 @@ export default function DoctorDashboardPage() {
             {activeTab === "announcements" && (
               <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
             )}
+
+            {activeTab === "reports" && <ReportsTab />}
 
             {activeTab === "scan-qr" && (
               <div className="rounded-[24px] border border-sky-200 bg-white p-5">

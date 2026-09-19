@@ -53,7 +53,8 @@ import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
-import { KeyRound } from "lucide-react";
+import { KeyRound, FileBarChart2 } from "lucide-react";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { ReferralsTab } from "@/components/dashboard/ReferralsTab";
 import { BHWAppointmentsTab } from "@/components/dashboard/BHWAppointmentsTab";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
@@ -67,6 +68,7 @@ export default function BHWDashboardPage() {
     | "personal"
     | "residents"
     | "announcements"
+    | "reports"
     | "registration"
     | "referrals"
     | "appointments"
@@ -198,6 +200,15 @@ export default function BHWDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "reports"}
+              icon={<FileBarChart2 className="h-5 w-5" />}
+              label="Reports"
+              onClick={() => {
+                setActiveTab("reports");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "registration"}
               icon={<UserPlus className="h-5 w-5" />}
               label="Register Resident"
@@ -317,6 +328,12 @@ export default function BHWDashboardPage() {
                 icon={<Megaphone className="h-6 w-6" />}
                 label="Announcements"
                 onClick={() => setActiveTab("announcements")}
+              />
+              <SidebarButton
+                active={activeTab === "reports"}
+                icon={<FileBarChart2 className="h-5 w-5" />}
+                label="Reports"
+                onClick={() => setActiveTab("reports")}
               />
               <SidebarButton
                 active={activeTab === "registration"}
@@ -446,6 +463,8 @@ export default function BHWDashboardPage() {
             {activeTab === "announcements" && (
               <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
             )}
+
+            {activeTab === "reports" && <ReportsTab />}
 
             {activeTab === "registration" && (
               <ResidentRegistrationTab barangayName={currentBarangayName} />

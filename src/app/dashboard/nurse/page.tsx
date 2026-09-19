@@ -42,13 +42,14 @@ import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { BMITab } from "@/components/dashboard/BMITab";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
-import { KeyRound } from "lucide-react";
+import { KeyRound, FileBarChart2 } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
 
 export default function NurseDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "announcements" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose" | "change-password">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "announcements" | "reports" | "maternal" | "referrals" | "scan-qr" | "bmi" | "diagnose" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<NurseUser | null>(null);
@@ -172,6 +173,15 @@ export default function NurseDashboardPage() {
               }}
             />
             <SidebarButton
+              active={activeTab === "reports"}
+              icon={<FileBarChart2 className="h-5 w-5" />}
+              label="Reports"
+              onClick={() => {
+                setActiveTab("reports");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            <SidebarButton
               active={activeTab === "referrals"}
               icon={<Send className="h-5 w-5" />}
               label="Referred Resident"
@@ -264,6 +274,12 @@ export default function NurseDashboardPage() {
                 icon={<Megaphone className="h-6 w-6" />}
                 label="Announcements"
                 onClick={() => setActiveTab("announcements")}
+              />
+              <SidebarButton
+                active={activeTab === "reports"}
+                icon={<FileBarChart2 className="h-5 w-5" />}
+                label="Reports"
+                onClick={() => setActiveTab("reports")}
               />
               <SidebarButton
                 active={activeTab === "referrals"}
@@ -365,6 +381,8 @@ export default function NurseDashboardPage() {
             {activeTab === "announcements" && (
               <AnnouncementsManager subtitle="Post and view announcements for your barangay." />
             )}
+
+            {activeTab === "reports" && <ReportsTab />}
 
             {activeTab === "referrals" && <ReferralsTab />}
 

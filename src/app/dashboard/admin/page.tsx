@@ -60,6 +60,8 @@ import type { DiagnosisLike } from "@/lib/condition-updates";
 import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { AnnouncementsAdmin } from "@/components/dashboard/AnnouncementsAdmin";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
+import { FileBarChart2 } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { formatRoleLabel } from "@/lib/role-labels";
@@ -220,6 +222,7 @@ export default function AdminDashboardPage() {
   | "activity-logs"
   | "announcements"
   | "manage-announcements"
+  | "reports"
   | "scan-qr"
   | "change-password"
 >("overview");
@@ -1070,6 +1073,16 @@ export default function AdminDashboardPage() {
             />
 
             <SidebarButton
+              active={tab === "reports"}
+              icon={<FileBarChart2 className="h-5 w-5 shrink-0" />}
+              label="Reports"
+              onClick={() => {
+                setTab("reports");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={tab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5 shrink-0" />}
               label="Scan QR"
@@ -1156,6 +1169,13 @@ export default function AdminDashboardPage() {
                 icon={<ShieldCheck className="h-5 w-5 shrink-0" />}
                 label="Manage Announcements"
                 onClick={() => setTab("manage-announcements")}
+              />
+
+              <SidebarButton
+                active={tab === "reports"}
+                icon={<FileBarChart2 className="h-5 w-5 shrink-0" />}
+                label="Reports"
+                onClick={() => setTab("reports")}
               />
 
               <SidebarButton
@@ -1899,6 +1919,7 @@ export default function AdminDashboardPage() {
 
 {tab === "announcements" && <AdminAnnouncementsTab barangayId={selectedBarangayId} />}
 {tab === "manage-announcements" && <AnnouncementsAdmin />}
+{tab === "reports" && <ReportsTab />}
                 {tab === "change-password" && <ChangePasswordTab />}
 
 
