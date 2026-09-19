@@ -607,9 +607,11 @@ export default function RegisterPage() {
                       <InputField
                         label="Age"
                         required
-                        placeholder="Auto-computed"
+                        readOnly
+                        placeholder="Auto from birthday"
                         value={form.age}
-                        onChange={(v) => updateField("age", v)}
+                        onChange={() => {}}
+                        helper="Auto-calculated from birthday"
                         error={errors.age}
                         status={getFieldStatus("age")}
                       />
@@ -1211,6 +1213,7 @@ function InputField({
   required = false,
   status = "default",
   suffix,
+  readOnly = false,
 }: {
   label: string;
   value: string;
@@ -1223,6 +1226,7 @@ function InputField({
   required?: boolean;
   status?: "default" | "success" | "error";
   suffix?: string;
+  readOnly?: boolean;
 }) {
   const borderClass =
     status === "error"
@@ -1238,7 +1242,7 @@ function InputField({
       </label>
 
       <div
-        className={`flex min-h-[52px] items-center rounded-2xl border bg-white px-4 shadow-sm transition ${borderClass}`}
+        className={`flex min-h-[52px] items-center rounded-2xl border px-4 shadow-sm transition ${borderClass} ${readOnly ? "bg-slate-100" : "bg-white"}`}
       >
         {icon && <span className="mr-3 text-sky-400">{icon}</span>}
         <input
@@ -1246,7 +1250,8 @@ function InputField({
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+          readOnly={readOnly}
+          className={`w-full bg-transparent text-sm font-medium outline-none placeholder:text-slate-400 ${readOnly ? "cursor-not-allowed text-slate-500" : "text-slate-900"}`}
         />
         {suffix && value && (
           <span className="ml-1 whitespace-nowrap text-sm font-bold text-slate-400">

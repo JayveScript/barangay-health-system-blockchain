@@ -247,7 +247,7 @@ export default function AdminDashboardPage() {
   const [residentEditMode, setResidentEditMode] = useState(false);
   const [residentEditPassword, setResidentEditPassword] = useState("");
   const [residentModalTab, setResidentModalTab] = useState<
-    "identifying" | "medical" | "family" | "personal"
+    "identifying" | "medical" | "fampersonal"
   >("identifying");
   const [digitalIdResident, setDigitalIdResident] = useState<ResidentRecord | null>(
     null
@@ -2631,11 +2631,11 @@ function ResidentDetailsModal({
   onClose,
 }: {
   resident: ResidentRecord;
-  activeTab: "identifying" | "medical" | "family" | "personal";
+  activeTab: "identifying" | "medical" | "fampersonal";
   editMode: boolean;
   editPassword: string;
   onTabChange: (
-    tab: "identifying" | "medical" | "family" | "personal"
+    tab: "identifying" | "medical" | "fampersonal"
   ) => void;
   onSaved: () => void;
   onClose: () => void;
@@ -2806,8 +2806,7 @@ function ResidentDetailsModal({
             {[
               { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
               { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
-              { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
-              { id: "personal", label: "Personal", icon: <ClipboardList className="h-5 w-5" /> },
+              { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
             ].map((t) => {
               const active = activeTab === t.id;
               return (
@@ -2961,8 +2960,9 @@ function ResidentDetailsModal({
             </div>
           )}
 
-          {activeTab === "family" && (
+          {activeTab === "fampersonal" && (
             <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              <h4 className="mb-4 text-sm font-black uppercase tracking-wide text-[#2563EB]">Family History</h4>
               {resident.familyHistory ? (
                 <ModalFlagGroup
                   title="Hereditary Conditions"
@@ -2988,8 +2988,9 @@ function ResidentDetailsModal({
             </div>
           )}
 
-          {activeTab === "personal" && (
-            <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+          {activeTab === "fampersonal" && (
+            <div className="mt-5 rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              <h4 className="mb-4 text-sm font-black uppercase tracking-wide text-[#2563EB]">Personal / Social History</h4>
               {resident.personalSocialHistory ? (
                 <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
                   <ModalFlagGroup

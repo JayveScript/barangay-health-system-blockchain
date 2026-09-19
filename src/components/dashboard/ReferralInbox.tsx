@@ -51,7 +51,7 @@ export type InboxReferral = {
   referredByStaff?: { fullName?: string | null; username: string } | null;
 };
 
-type TabId = "identifying" | "medical" | "family" | "social" | "assessment";
+type TabId = "identifying" | "medical" | "fampersonal" | "assessment";
 
 type ReferralDiagnosis = {
   id: string;
@@ -331,8 +331,7 @@ function ReferralModal({
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
     { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
-    { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
-    { id: "social", label: "Social", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
     { id: "assessment", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
   ];
 
@@ -459,7 +458,7 @@ function ReferralModal({
               </div>
             )}
 
-            {tab === "family" && (
+            {tab === "fampersonal" && (
               <div className="space-y-5">
                 <SectionTitle title="Family History" />
                 <QrFlagGroup
@@ -478,11 +477,6 @@ function ReferralModal({
                     { label: "Mental Illness", value: Boolean(family.mentalIllness) },
                   ]}
                 />
-              </div>
-            )}
-
-            {tab === "social" && (
-              <div className="space-y-5">
                 <SectionTitle title="Personal / Social History" />
                 <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
                   <QrFlagGroup
