@@ -151,8 +151,9 @@ import { QrScannerTab } from "@/components/QrScannerTab";
 import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Baby } from "lucide-react";
 import { AnnouncementsManager } from "@/components/dashboard/AnnouncementsManager";
+import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import {
   RegisteredResidentsTab,
   ResidentViewModal,
@@ -162,7 +163,7 @@ import {
 
 export default function DoctorDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-  "overview" | "personal" | "residents" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr" | "change-password"
+  "overview" | "personal" | "residents" | "maternal" | "appointments" | "referrals" | "diagnose" | "announcements" | "scan-qr" | "change-password"
 >("overview");
 
   const [user, setUser] = useState<DoctorUser | null>(null);
@@ -331,6 +332,16 @@ export default function DoctorDashboardPage() {
             />
 
             <SidebarButton
+              active={activeTab === "maternal"}
+              icon={<Baby className="h-5 w-5" />}
+              label="Maternal Records"
+              onClick={() => {
+                setActiveTab("maternal");
+                setMobileSidebarOpen(false);
+              }}
+            />
+
+            <SidebarButton
               active={activeTab === "scan-qr"}
               icon={<ScanLine className="h-5 w-5" />}
               label="Scan QR"
@@ -412,6 +423,13 @@ export default function DoctorDashboardPage() {
               />
 
               <SidebarButton
+                active={activeTab === "maternal"}
+                icon={<Baby className="h-5 w-5" />}
+                label="Maternal Records"
+                onClick={() => setActiveTab("maternal")}
+              />
+
+              <SidebarButton
                 active={activeTab === "scan-qr"}
                 icon={<ScanLine className="h-5 w-5" />}
                 label="Scan QR"
@@ -479,6 +497,8 @@ export default function DoctorDashboardPage() {
             {activeTab === "overview" && <OverviewTab />}
 
             {activeTab === "residents" && <RegisteredResidentsTab />}
+
+            {activeTab === "maternal" && <MaternalRecordsTab />}
 
             {activeTab === "appointments" && <AppointmentsTab />}
 
