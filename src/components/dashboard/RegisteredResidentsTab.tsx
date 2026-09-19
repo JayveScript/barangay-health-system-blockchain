@@ -27,7 +27,7 @@ import {
   EDUCATIONAL_ATTAINMENT_OPTIONS,
   RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
-import { displayAge } from "@/lib/age";
+import { computeAge, displayAge } from "@/lib/age";
 import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import {
   SectionTitle,
@@ -536,7 +536,7 @@ export function ResidentViewModal({
   reason?: string;
 }) {
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
-  const [tab, setTab] = useState<"identifying" | "medical" | "family" | "personal" | "assessments">("identifying");
+  const [tab, setTab] = useState<"identifying" | "medical" | "fampersonal" | "assessments">("identifying");
   const [expandedCond, setExpandedCond] = useState<string | null>(null);
 
   const loadDiagnoses = useCallback(async () => {
@@ -575,8 +575,7 @@ export function ResidentViewModal({
   const tabs = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
     { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
-    { id: "family", label: "Family", icon: <Users className="h-5 w-5" /> },
-    { id: "personal", label: "Personal", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
     { id: "assessments", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
   ] as const;
 
@@ -822,7 +821,7 @@ export function ResidentViewModal({
             </div>
           )}
 
-          {tab === "family" && (
+          {tab === "fampersonal" && (
             <div className="space-y-5">
               <SectionTitle title="Family History" />
               <QrFlagGroup
@@ -841,11 +840,6 @@ export function ResidentViewModal({
                   { label: "Mental Illness", value: Boolean(fh?.mentalIllness) },
                 ]}
               />
-            </div>
-          )}
-
-          {tab === "personal" && (
-            <div className="space-y-5">
               <SectionTitle title="Personal / Social History" />
               <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
                 <QrFlagGroup
@@ -1038,7 +1032,14 @@ function EditModal({
             <F label="First Name" k="firstName" />
             <F label="Middle Name" k="middleName" />
             <F label="Last Name" k="lastName" />
-            <F label="Age" k="age" />
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">Age (auto)</label>
+              <input
+                readOnly
+                value={String(displayAge(form.birthDate, Number(form.age) || undefined) ?? form.age ?? "")}
+                className="min-h-[46px] w-full cursor-not-allowed rounded-2xl border border-sky-200 bg-slate-100 px-3 text-sm font-semibold text-slate-500 outline-none"
+              />
+            </div>
             <div>
               <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">Sex</label>
               <select
@@ -1050,7 +1051,18 @@ function EditModal({
                 <option value="FEMALE">Female</option>
               </select>
             </div>
-            <F label="Birth Date" k="birthDate" />
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">Birth Date</label>
+              <input
+                type="date"
+                value={form.birthDate ?? ""}
+                onChange={(e) => {
+                  set("birthDate", e.target.value);
+                  set("age", String(computeAge(e.target.value) ?? ""));
+                }}
+                className="min-h-[46px] w-full rounded-2xl border border-sky-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+              />
+            </div>
             <div>
               <label className="mb-1.5 block text-xs font-bold uppercase text-slate-500">Civil Status</label>
               <select

@@ -351,7 +351,7 @@ function RegistrationModal({
                 updateField("birthDate", v);
                 updateField("age", computeAge(v));
               }} />
-              <ModalInput label="Age" value={form.age} onChange={(v) => updateField("age", v)} />
+              <ModalInput label="Age (auto)" value={form.age} onChange={() => {}} readOnly />
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Sex *</label>
                 <select
@@ -602,11 +602,13 @@ function ModalInput({
   value,
   onChange,
   type = "text",
+  readOnly = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  readOnly?: boolean;
 }) {
   return (
     <div>
@@ -617,7 +619,8 @@ function ModalInput({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
+        readOnly={readOnly}
+        className={`min-h-[48px] w-full rounded-2xl border border-sky-200 px-4 text-sm font-semibold outline-none focus:border-sky-500 ${readOnly ? "cursor-not-allowed bg-slate-100 text-slate-500" : "bg-white text-slate-900"}`}
       />
     </div>
   );

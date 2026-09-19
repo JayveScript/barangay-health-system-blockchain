@@ -341,8 +341,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
 
         #tab-identifying:checked ~ .tab-panels .panel-identifying,
         #tab-medical:checked ~ .tab-panels .panel-medical,
-        #tab-family:checked ~ .tab-panels .panel-family,
-        #tab-social:checked ~ .tab-panels .panel-social,
+        #tab-fampersonal:checked ~ .tab-panels .panel-fampersonal,
         #tab-complaints:checked ~ .tab-panels .panel-complaints,
         #tab-maternal:checked ~ .tab-panels .panel-maternal {
           display: block;
@@ -350,8 +349,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
 
         #tab-identifying:checked ~ .tab-nav label[for="tab-identifying"],
         #tab-medical:checked ~ .tab-nav label[for="tab-medical"],
-        #tab-family:checked ~ .tab-nav label[for="tab-family"],
-        #tab-social:checked ~ .tab-nav label[for="tab-social"],
+        #tab-fampersonal:checked ~ .tab-nav label[for="tab-fampersonal"],
         #tab-complaints:checked ~ .tab-nav label[for="tab-complaints"],
         #tab-maternal:checked ~ .tab-nav label[for="tab-maternal"] {
           background: #2563eb;
@@ -402,13 +400,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             className="tab-input"
             type="radio"
             name="resident-tab"
-            id="tab-family"
-          />
-          <input
-            className="tab-input"
-            type="radio"
-            name="resident-tab"
-            id="tab-social"
+            id="tab-fampersonal"
           />
           <input
             className="tab-input"
@@ -439,16 +431,10 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
               Past Medical History
             </label>
             <label
-              htmlFor="tab-family"
+              htmlFor="tab-fampersonal"
               className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
             >
-              Family History
-            </label>
-            <label
-              htmlFor="tab-social"
-              className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
-            >
-              Personal / Social History
+              Family / Personal History
             </label>
             <label
               htmlFor="tab-complaints"
@@ -602,7 +588,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
               </div>
             </section>
 
-            <section className="tab-panel panel-family">
+            <section className="tab-panel panel-fampersonal">
               <SectionTitle title="Family History" />
               {resident.familyHistory ? (
                 <QrFlagGroup
@@ -626,10 +612,9 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
                   No family history recorded.
                 </p>
               )}
-            </section>
-
-            <section className="tab-panel panel-social">
-              <SectionTitle title="Personal / Social History" />
+              <div className="mt-6">
+                <SectionTitle title="Personal / Social History" />
+              </div>
               {resident.personalSocialHistory ? (
                 <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
                   <QrFlagGroup
