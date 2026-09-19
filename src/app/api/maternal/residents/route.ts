@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
+import { displayAge } from "@/lib/age";
 
 const ALLOWED_ROLES = ["MIDWIFE", "NURSE", "BHW", "DOCTOR"];
 
@@ -24,6 +25,7 @@ export async function GET() {
         middleName: true,
         lastName: true,
         age: true,
+        birthDate: true,
         contactNumber: true,
         barangayName: true,
         maternalRecord: { select: { updatedAt: true } },
@@ -36,7 +38,7 @@ export async function GET() {
       firstName: r.firstName,
       middleName: r.middleName,
       lastName: r.lastName,
-      age: r.age,
+      age: displayAge(r.birthDate, r.age),
       contactNumber: r.contactNumber,
       sitio: r.barangayName,
       hasRecord: !!r.maternalRecord,
