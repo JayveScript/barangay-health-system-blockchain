@@ -12,11 +12,10 @@ async function guard(residentId: string) {
   const role = String(user?.role || "");
   const ok = !!user && (ALLOWED_ROLES.includes(role) || canManageBarangay(user) || isSuperAdmin(user));
   if (!ok) return { error: "Unauthorized", status: 401 as const, user: null };
-  const resident = await prisma.resident.findFirst({
-    where: {
-      id: residentId,
-      ...(isSuperAdmin(user) ? {} : { barangayId: user!.barangayId ?? undefined }),
-    },
+  // Not barangay-scoped: PhilPEN is a clinical assessment reachable via QR scans
+  // and cross-barangay referrals, like the resident's medical history.
+  const resident = await prisma.resident.findUnique({
+    where: { id: residentId },
     select: { id: true },
   });
   if (!resident) return { error: "Resident not found", status: 404 as const, user: null };

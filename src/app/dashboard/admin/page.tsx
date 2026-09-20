@@ -61,6 +61,8 @@ import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ActivityLogsTab } from "@/components/dashboard/ActivityLogsTab";
 import { AnnouncementsAdmin } from "@/components/dashboard/AnnouncementsAdmin";
 import { ReportsTab } from "@/components/dashboard/ReportsTab";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
+import { displayAge } from "@/lib/age";
 import { FileBarChart2 } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
@@ -247,7 +249,7 @@ export default function AdminDashboardPage() {
   const [residentEditMode, setResidentEditMode] = useState(false);
   const [residentEditPassword, setResidentEditPassword] = useState("");
   const [residentModalTab, setResidentModalTab] = useState<
-    "identifying" | "medical" | "fampersonal"
+    "identifying" | "medical" | "fampersonal" | "philpen"
   >("identifying");
   const [digitalIdResident, setDigitalIdResident] = useState<ResidentRecord | null>(
     null
@@ -2462,17 +2464,19 @@ function ResidentDetailsModal({
   onClose,
 }: {
   resident: ResidentRecord;
-  activeTab: "identifying" | "medical" | "fampersonal";
+  activeTab: "identifying" | "medical" | "fampersonal" | "philpen";
   editMode: boolean;
   editPassword: string;
   onTabChange: (
-    tab: "identifying" | "medical" | "fampersonal"
+    tab: "identifying" | "medical" | "fampersonal" | "philpen"
   ) => void;
   onSaved: () => void;
   onClose: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
+  const ppAge = displayAge(resident.birthDate, resident.age) ?? resident.age;
+  const showPhilpen = ppAge != null && ppAge >= 20;
 
   type AppointmentEntry = {
     id: string;
@@ -2638,6 +2642,9 @@ function ResidentDetailsModal({
               { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
               { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
               { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
+              ...(showPhilpen
+                ? [{ id: "philpen", label: "PhilPEN", icon: <ShieldCheck className="h-5 w-5" /> }]
+                : []),
             ].map((t) => {
               const active = activeTab === t.id;
               return (
@@ -2856,6 +2863,12 @@ function ResidentDetailsModal({
                   No personal / social history recorded.
                 </p>
               )}
+            </div>
+          )}
+
+          {activeTab === "philpen" && showPhilpen && (
+            <div className="rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+              <PhilPenTab residentId={resident.id} age={ppAge ?? undefined} />
             </div>
           )}
 

@@ -23,6 +23,7 @@ X,
   ScanLine,
   ChevronRight,
   KeyRound,
+  ShieldCheck,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
@@ -30,6 +31,7 @@ import { ResidentDigitalId } from "@/components/dashboard/ResidentDigitalId";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { displayAge } from "@/lib/age";
 import { Baby } from "lucide-react";
@@ -573,7 +575,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "announcements" | "digital" | "change-password"
+  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "philpen" | "announcements" | "digital" | "change-password"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -631,6 +633,9 @@ export default function ResidentDashboard() {
       />
     );
   }
+
+  const philpenAge = displayAge(resident.birthDate, resident.age) ?? resident.age;
+  const showPhilpen = philpenAge != null && Number(philpenAge) >= 20;
 
   const fullName = `${resident.firstName} ${resident.middleName ?? ""} ${
     resident.lastName
@@ -784,6 +789,24 @@ export default function ResidentDashboard() {
                 </button>
               )}
 
+              {showPhilpen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSidebarTab("philpen");
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "philpen"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                  }`}
+                >
+                  <ShieldCheck className="h-5 w-5 shrink-0" />
+                  PhilPEN
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => {
@@ -926,6 +949,21 @@ export default function ResidentDashboard() {
                   >
                     <Baby className="h-5 w-5 shrink-0" />
                     Maternal Records
+                  </button>
+                )}
+
+                {showPhilpen && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarTab("philpen")}
+                    className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                      sidebarTab === "philpen"
+                        ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                        : "text-slate-600 hover:bg-white hover:text-sky-600"
+                    }`}
+                  >
+                    <ShieldCheck className="h-5 w-5 shrink-0" />
+                    PhilPEN
                   </button>
                 )}
 
@@ -1212,6 +1250,18 @@ export default function ResidentDashboard() {
       icon={<Baby className="h-5 w-5" />}
     >
       <ResidentMaternalTab />
+    </Section>
+  </div>
+)}
+
+            {sidebarTab === "philpen" && showPhilpen && (
+  <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
+    <Section
+      title="PhilPEN — NCD Risk Assessment"
+      subtitle="Your NCD risk assessment recorded by your barangay health workers (read-only)."
+      icon={<ShieldCheck className="h-5 w-5" />}
+    >
+      <PhilPenTab residentId={resident.id} readOnly endpoint="/api/residents/me/philpen" />
     </Section>
   </div>
 )}

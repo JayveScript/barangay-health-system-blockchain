@@ -34,6 +34,7 @@ import {
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { displayAge } from "@/lib/age";
 
 type ReferralAvailabilitySummary = {
@@ -809,10 +810,14 @@ function ReferralDetailsModal({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<
-    "identifying" | "medical" | "fampersonal" | "assessment"
+    "identifying" | "medical" | "fampersonal" | "philpen" | "assessment"
   >("identifying");
   const [diagnoses, setDiagnoses] = useState<ReferralTabDiagnosis[]>([]);
   const identifying = referral.identifyingData || {};
+  const ppAge =
+    displayAge(identifying.birthDate as string | undefined) ??
+    (Number.isFinite(Number(identifying.age)) ? Number(identifying.age) : null);
+  const showPhilpen = ppAge != null && ppAge >= 20;
   const medical = (referral.medicalHistory || {}) as NonNullable<ReferralMedicalHistory>;
   const family = (referral.familyHistory || {}) as NonNullable<ReferralFamilyHistory>;
   const social = (referral.personalSocialHistory || {}) as NonNullable<ReferralSocialHistory>;
@@ -861,6 +866,9 @@ function ReferralDetailsModal({
               { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
               { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
               { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
+              ...(showPhilpen
+                ? [{ id: "philpen", label: "PhilPEN", icon: <ShieldCheck className="h-5 w-5" /> }]
+                : []),
               { id: "assessment", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
             ].map((t) => {
               const active = tab === t.id;
@@ -1016,6 +1024,10 @@ function ReferralDetailsModal({
                   />
                 </div>
               </div>
+            )}
+
+            {tab === "philpen" && showPhilpen && (
+              <PhilPenTab residentId={referral.residentId} age={ppAge ?? undefined} />
             )}
 
             {tab === "assessment" && (
