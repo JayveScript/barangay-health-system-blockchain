@@ -30,6 +30,7 @@ import {
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { displayAge } from "@/lib/age";
 
 type Identifying = Record<string, unknown> | null | undefined;
@@ -51,7 +52,7 @@ export type InboxReferral = {
   referredByStaff?: { fullName?: string | null; username: string } | null;
 };
 
-type TabId = "identifying" | "medical" | "fampersonal" | "assessment";
+type TabId = "identifying" | "medical" | "fampersonal" | "philpen" | "assessment";
 
 type ReferralDiagnosis = {
   id: string;
@@ -313,6 +314,10 @@ function ReferralModal({
   const family = (referral.familyHistory || {}) as Record<string, unknown>;
   const social = (referral.personalSocialHistory || {}) as Record<string, unknown>;
   const pending = (referral.status || "PENDING").toUpperCase() === "PENDING";
+  const ppAge =
+    displayAge(identifying.birthDate as string | undefined) ??
+    (Number.isFinite(Number(identifying.age)) ? Number(identifying.age) : null);
+  const showPhilpen = ppAge != null && ppAge >= 20;
 
   const loadDiagnoses = useCallback(async () => {
     try {
@@ -332,6 +337,9 @@ function ReferralModal({
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
     { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
     { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
+    ...(showPhilpen
+      ? [{ id: "philpen" as TabId, label: "PhilPEN", icon: <ShieldCheck className="h-5 w-5" /> }]
+      : []),
     { id: "assessment", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
   ];
 
@@ -506,6 +514,10 @@ function ReferralModal({
                   />
                 </div>
               </div>
+            )}
+
+            {tab === "philpen" && showPhilpen && (
+              <PhilPenTab residentId={referral.residentId} age={ppAge ?? undefined} />
             )}
 
             {tab === "assessment" && (

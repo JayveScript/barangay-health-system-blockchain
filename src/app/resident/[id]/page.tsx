@@ -20,6 +20,7 @@ import { ConditionHistoryCard } from "@/components/ConditionHistoryCard";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { MaternalRecordView } from "@/components/dashboard/MaternalRecordView";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { getMedicalRecordAnchor } from "@/lib/blockchain";
 import { displayAge } from "@/lib/age";
 import { Baby, Clock } from "lucide-react";
@@ -323,6 +324,9 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
   // for any authorized viewer (not only staff who can call the API).
   const blockchainAnchor = await getMedicalRecordAnchor(id).catch(() => null);
 
+  const philpenAge = displayAge(resident.birthDate, resident.age) ?? resident.age;
+  const showPhilpen = philpenAge != null && philpenAge >= 20;
+
   const fullName = `${resident.firstName ?? ""} ${resident.middleName ?? ""} ${
     resident.lastName ?? ""
   }`
@@ -342,6 +346,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
         #tab-identifying:checked ~ .tab-panels .panel-identifying,
         #tab-medical:checked ~ .tab-panels .panel-medical,
         #tab-fampersonal:checked ~ .tab-panels .panel-fampersonal,
+        #tab-philpen:checked ~ .tab-panels .panel-philpen,
         #tab-complaints:checked ~ .tab-panels .panel-complaints,
         #tab-maternal:checked ~ .tab-panels .panel-maternal {
           display: block;
@@ -350,6 +355,7 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
         #tab-identifying:checked ~ .tab-nav label[for="tab-identifying"],
         #tab-medical:checked ~ .tab-nav label[for="tab-medical"],
         #tab-fampersonal:checked ~ .tab-nav label[for="tab-fampersonal"],
+        #tab-philpen:checked ~ .tab-nav label[for="tab-philpen"],
         #tab-complaints:checked ~ .tab-nav label[for="tab-complaints"],
         #tab-maternal:checked ~ .tab-nav label[for="tab-maternal"] {
           background: #2563eb;
@@ -402,6 +408,14 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             name="resident-tab"
             id="tab-fampersonal"
           />
+          {showPhilpen && (
+            <input
+              className="tab-input"
+              type="radio"
+              name="resident-tab"
+              id="tab-philpen"
+            />
+          )}
           <input
             className="tab-input"
             type="radio"
@@ -436,6 +450,14 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
             >
               Family / Personal History
             </label>
+            {showPhilpen && (
+              <label
+                htmlFor="tab-philpen"
+                className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
+              >
+                PhilPEN
+              </label>
+            )}
             <label
               htmlFor="tab-complaints"
               className="min-w-max cursor-pointer rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition"
@@ -650,6 +672,15 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
                 </p>
               )}
             </section>
+
+            {showPhilpen && (
+              <section className="tab-panel panel-philpen">
+                <SectionTitle title="PhilPEN — NCD Risk Assessment" />
+                <div className="mt-3">
+                  <PhilPenTab residentId={id} age={philpenAge ?? undefined} />
+                </div>
+              </section>
+            )}
 
             <section className="tab-panel panel-complaints">
               <SectionTitle title="Health Concern" />

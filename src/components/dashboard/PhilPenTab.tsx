@@ -5,21 +5,22 @@ import { HeartPulse, Save, CheckCircle2, ShieldAlert } from "lucide-react";
 
 type Form = Record<string, string>;
 
-const Ctx = createContext<{ form: Form; set: (k: string, v: string) => void }>({
+const Ctx = createContext<{ form: Form; set: (k: string, v: string) => void; readOnly: boolean }>({
   form: {},
   set: () => {},
+  readOnly: false,
 });
 
 const fieldCls =
-  "min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB]";
+  "min-h-[42px] w-full rounded-xl border border-[#BFDBFE] bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#2563EB] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
 
 function Text({ k, ph }: { k: string; ph?: string }) {
-  const { form, set } = useContext(Ctx);
-  return <input value={form[k] ?? ""} onChange={(e) => set(k, e.target.value)} placeholder={ph} className={fieldCls} />;
+  const { form, set, readOnly } = useContext(Ctx);
+  return <input value={form[k] ?? ""} onChange={(e) => set(k, e.target.value)} placeholder={ph} disabled={readOnly} className={fieldCls} />;
 }
 function DateI({ k }: { k: string }) {
-  const { form, set } = useContext(Ctx);
-  return <input type="date" value={form[k] ?? ""} onChange={(e) => set(k, e.target.value)} className={fieldCls} />;
+  const { form, set, readOnly } = useContext(Ctx);
+  return <input type="date" value={form[k] ?? ""} onChange={(e) => set(k, e.target.value)} disabled={readOnly} className={fieldCls} />;
 }
 function ReadOnly({ value }: { value: string }) {
   return (
@@ -29,15 +30,16 @@ function ReadOnly({ value }: { value: string }) {
   );
 }
 function YesNo({ k, options = ["Yes", "No"] }: { k: string; options?: string[] }) {
-  const { form, set } = useContext(Ctx);
+  const { form, set, readOnly } = useContext(Ctx);
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((opt) => (
         <button
           key={opt}
           type="button"
+          disabled={readOnly}
           onClick={() => set(k, form[k] === opt ? "" : opt)}
-          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition ${
+          className={`min-h-[42px] flex-1 rounded-xl border px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-70 ${
             form[k] === opt
               ? "border-[#2563EB] bg-[#2563EB] text-white"
               : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#EFF6FF]"
@@ -50,13 +52,14 @@ function YesNo({ k, options = ["Yes", "No"] }: { k: string; options?: string[] }
   );
 }
 function Check({ k, label }: { k: string; label: string }) {
-  const { form, set } = useContext(Ctx);
+  const { form, set, readOnly } = useContext(Ctx);
   const on = form[k] === "Yes";
   return (
     <button
       type="button"
+      disabled={readOnly}
       onClick={() => set(k, on ? "" : "Yes")}
-      className={`flex items-start gap-2 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition ${
+      className={`flex items-start gap-2 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-70 ${
         on ? "border-[#2563EB] bg-[#EFF6FF] text-[#1E3A8A]" : "border-[#BFDBFE] bg-white text-slate-600 hover:bg-[#F8FAFC]"
       }`}
     >
@@ -121,11 +124,16 @@ function avgBp(a: string, b: string): string {
 
 export function PhilPenTab({
   residentId,
+  readOnly = false,
+  endpoint,
 }: {
   residentId: string;
   residentName?: string;
   age?: number;
+  readOnly?: boolean;
+  endpoint?: string;
 }) {
+  const getUrl = endpoint || `/api/philpen/${residentId}`;
   const [form, setForm] = useState<Form>({});
   const [role, setRole] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -139,12 +147,12 @@ export function PhilPenTab({
     (async () => {
       try {
         setLoading(true);
-        const [meRes, recRes] = await Promise.all([
-          fetch("/api/users/me", { cache: "no-store" }),
-          fetch(`/api/philpen/${residentId}`, { cache: "no-store" }),
-        ]);
-        const me = await meRes.json().catch(() => ({}));
-        setRole(String(me?.role || ""));
+        if (!readOnly) {
+          const meRes = await fetch("/api/users/me", { cache: "no-store" });
+          const me = await meRes.json().catch(() => ({}));
+          setRole(String(me?.role || ""));
+        }
+        const recRes = await fetch(getUrl, { cache: "no-store" });
         const rec = await recRes.json().catch(() => ({}));
         if (recRes.ok && rec?.data) setForm(rec.data as Form);
       } catch {
@@ -153,7 +161,7 @@ export function PhilPenTab({
         setLoading(false);
       }
     })();
-  }, [residentId]);
+  }, [getUrl, readOnly]);
 
   // Which parts this role may see. Part I: BHW/Midwife/Nurse. Part II: Nurse/Doctor.
   const parts: ("I" | "II")[] =
@@ -217,7 +225,7 @@ export function PhilPenTab({
   );
 
   return (
-    <Ctx.Provider value={{ form, set }}>
+    <Ctx.Provider value={{ form, set, readOnly }}>
       <div className="space-y-5">
         <div className="rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] p-3 text-xs font-semibold text-[#1E3A8A]">
           PhilPEN — Philippine Package of Essential NCD Interventions. Shown for residents 20 years and older.
@@ -357,26 +365,32 @@ export function PhilPenTab({
           </>
         )}
 
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-sm">
-            {err && <span className="font-semibold text-red-600">{err}</span>}
-            {msg && (
-              <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" />
-                {msg}
-              </span>
-            )}
+        {readOnly ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-500">
+            Read-only view — this PhilPEN assessment is filled in by your health workers.
           </div>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="inline-flex min-h-[46px] items-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
-          >
-            <Save className="h-4 w-4" />
-            {saving ? "Saving..." : "Save PhilPEN"}
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm">
+              {err && <span className="font-semibold text-red-600">{err}</span>}
+              {msg && (
+                <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {msg}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="inline-flex min-h-[46px] items-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
+            >
+              <Save className="h-4 w-4" />
+              {saving ? "Saving..." : "Save PhilPEN"}
+            </button>
+          </div>
+        )}
       </div>
     </Ctx.Provider>
   );

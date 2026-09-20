@@ -33,7 +33,77 @@ function gestationBetween(lmp: string | undefined, visitDate: string | undefined
 }
 
 type Section = { title: string; fields: [string, string][]; tests?: [string, string][] };
-type TabId = "obgyne" | "prenatal" | "postnatal";
+type TabId = "obgyne" | "prenatal" | "postnatal" | "familyplanning";
+
+const FP_SECTIONS: Section[] = [
+  {
+    title: "Family Planning — Client",
+    fields: [
+      ["fpa_client_type", "Type of Client"], ["fpa_method", "FP Method"],
+      ["fpa_fp_reason", "Reason for FP"], ["fpa_change_reason", "Reason for Changing"],
+      ["fpa_m_others", "Other Method"],
+    ],
+  },
+  {
+    title: "Method Currently Used",
+    fields: [
+      ["fpa_m_coc", "COC"], ["fpa_m_pop", "POP"], ["fpa_m_injectable", "Injectable"],
+      ["fpa_m_iud_interval", "IUD (Interval)"], ["fpa_m_iud_pp", "IUD (Post-Partum)"],
+      ["fpa_m_condom", "Condom"], ["fpa_m_bom", "BOM / CMM"], ["fpa_m_bbt", "BBT"],
+      ["fpa_m_stm", "STM"], ["fpa_m_sdm", "SDM"], ["fpa_m_lam", "LAM"],
+    ],
+  },
+  {
+    title: "Medical History",
+    fields: [
+      ["fpa_mh_headache", "Severe headaches / migraine"], ["fpa_mh_stroke", "Stroke / heart attack / hypertension"],
+      ["fpa_mh_bruising", "Bruising / gum bleeding"], ["fpa_mh_breast", "Breast cancer / mass"],
+      ["fpa_mh_chestpain", "Severe chest pain"], ["fpa_mh_cough", "Cough > 14 days"],
+      ["fpa_mh_jaundice", "Jaundice"], ["fpa_mh_bleeding", "Unexplained vaginal bleeding"],
+      ["fpa_mh_discharge", "Abnormal vaginal discharge"], ["fpa_mh_meds", "Anti-seizure / anti-TB meds"],
+      ["fpa_mh_smoker", "Smoker"], ["fpa_mh_disability", "With Disability"], ["fpa_mh_disability_note", "Disability Detail"],
+    ],
+  },
+  {
+    title: "Obstetrical History",
+    fields: [
+      ["fpa_ob_g", "Gravida"], ["fpa_ob_p", "Para"], ["fpa_ob_fullterm", "Full Term"],
+      ["fpa_ob_premature", "Premature"], ["fpa_ob_abortion", "Abortion"], ["fpa_ob_living", "Living"],
+      ["fpa_ob_last_delivery", "Date of Last Delivery"], ["fpa_ob_delivery_type", "Type of Last Delivery"],
+      ["fpa_ob_lmp", "LMP"], ["fpa_ob_pmp", "Previous MP"], ["fpa_ob_flow", "Menstrual Flow"],
+      ["fpa_ob_dysmenorrhea", "Dysmenorrhea"], ["fpa_ob_mole", "Hydatidiform Mole"], ["fpa_ob_ectopic", "Ectopic Pregnancy"],
+    ],
+  },
+  {
+    title: "Risks (STI / VAW)",
+    fields: [
+      ["fpa_sti_discharge", "STI: Abnormal discharge"], ["fpa_sti_sores", "STI: Sores / ulcers"],
+      ["fpa_sti_pain", "STI: Pain / burning"], ["fpa_sti_history", "STI: History of treatment"],
+      ["fpa_sti_hiv", "HIV / AIDS / PID"], ["fpa_vaw_relationship", "VAW: Unpleasant relationship"],
+      ["fpa_vaw_approval", "VAW: Partner disapproval"], ["fpa_vaw_history", "VAW: Domestic violence"],
+      ["fpa_vaw_referred", "Referred To"],
+    ],
+  },
+  {
+    title: "Physical Examination",
+    fields: [
+      ["fpa_pe_weight", "Weight (kg)"], ["fpa_pe_height", "Height (cm)"],
+      ["fpa_pe_bp", "Blood Pressure"], ["fpa_pe_pulse", "Pulse Rate"], ["fpa_pe_uterine_depth", "Uterine Depth (cm)"],
+    ],
+  },
+  {
+    title: "Not Pregnant Checklist",
+    fields: [
+      ["fpb_np_1", "Baby < 6 mos, breastfeeding, no menses"], ["fpb_np_2", "Abstained since last menses/delivery"],
+      ["fpb_np_3", "Baby in last 4 weeks"], ["fpb_np_4", "Menses started within 7 days"],
+      ["fpb_np_5", "Miscarriage/abortion in last 7 days"], ["fpb_np_6", "Reliable contraceptive use"],
+    ],
+  },
+];
+const FPB_VISIT_FIELDS: [string, string][] = [
+  ["date", "Date of Visit"], ["findings", "Medical Findings"], ["method", "Method Accepted"],
+  ["provider", "Service Provider"], ["followup", "Date of Follow-up"],
+];
 
 const OBGYNE_SECTIONS: Section[] = [
   {
@@ -212,10 +282,17 @@ export function MaternalRecordView({
     .map((day) => renderVisit(`Postnatal Visit — Day ${day}`, `postd${day}`, POSTNATAL_VISIT_FIELDS))
     .filter(Boolean);
 
+  const fpVisitCount = Math.max(1, parseInt(d.fpb_visit_count || "1", 10) || 1);
+  const fpVisits = Array.from({ length: fpVisitCount })
+    .map((_, i) => renderVisit(`Family Planning Visit ${i + 1}`, `fpb_v${i + 1}`, FPB_VISIT_FIELDS))
+    .filter(Boolean);
+  const fpSectionContent = FP_SECTIONS.map(renderSection).filter(Boolean);
+
   const tabs: { id: TabId; label: string }[] = [
     { id: "obgyne", label: "OB-Gyne History" },
     { id: "prenatal", label: "Prenatal Care" },
     { id: "postnatal", label: "Postnatal Care" },
+    { id: "familyplanning", label: "Family Planning" },
   ];
 
   const EmptyNote = ({ text }: { text: string }) => (
@@ -285,6 +362,16 @@ export function MaternalRecordView({
           {postnatalVisits}
           {postnatalSectionContent.length === 0 && postnatalVisits.length === 0 && (
             <EmptyNote text="No postnatal care recorded yet." />
+          )}
+        </div>
+      )}
+
+      {tab === "familyplanning" && (
+        <div className="space-y-4">
+          {fpSectionContent}
+          {fpVisits}
+          {fpSectionContent.length === 0 && fpVisits.length === 0 && (
+            <EmptyNote text="No family planning record yet." />
           )}
         </div>
       )}
