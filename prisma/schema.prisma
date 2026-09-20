@@ -127,6 +127,9 @@ model Resident {
   familyHistory         ResidentFamilyHistory?
   personalSocialHistory ResidentPersonalSocialHistory?
 
+  // PhilPEN NCD risk assessment (Part I + Part II), a flat key-value blob.
+  philpenData Json?
+
   appointments Appointment[]
   referrals    ResidentReferral[]
   bmiRecords   BMIRecord[]

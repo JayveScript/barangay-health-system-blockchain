@@ -37,6 +37,7 @@ import {
   InfoCard,
 } from "@/components/dashboard/ResidentInfoSections";
 import { AssessmentForm } from "@/components/dashboard/AssessmentForm";
+import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { BlockchainVerifyModal } from "@/components/dashboard/BlockchainVerifyModal";
 import { DeleteAccountModal } from "@/components/dashboard/DeleteAccountModal";
@@ -536,7 +537,7 @@ export function ResidentViewModal({
   reason?: string;
 }) {
   const [diagnoses, setDiagnoses] = useState<ViewDiagnosis[]>([]);
-  const [tab, setTab] = useState<"identifying" | "medical" | "fampersonal" | "assessments">("identifying");
+  const [tab, setTab] = useState<"identifying" | "medical" | "fampersonal" | "philpen" | "assessments">("identifying");
   const [expandedCond, setExpandedCond] = useState<string | null>(null);
 
   const loadDiagnoses = useCallback(async () => {
@@ -572,12 +573,18 @@ export function ResidentViewModal({
     .join("\n\n")
     .trim();
 
-  const tabs = [
+  const residentAge = displayAge(resident.birthDate, resident.age) ?? resident.age;
+  const showPhilpen = residentAge != null && residentAge >= 20;
+  type ViewTabId = "identifying" | "medical" | "fampersonal" | "philpen" | "assessments";
+  const tabs: { id: ViewTabId; label: string; icon: React.ReactNode }[] = [
     { id: "identifying", label: "Identity", icon: <IdCard className="h-5 w-5" /> },
     { id: "medical", label: "Medical", icon: <HeartPulse className="h-5 w-5" /> },
     { id: "fampersonal", label: "Family / Personal", icon: <Users className="h-5 w-5" /> },
+    ...(showPhilpen
+      ? [{ id: "philpen" as ViewTabId, label: "PhilPEN", icon: <ShieldCheck className="h-5 w-5" /> }]
+      : []),
     { id: "assessments", label: "Assessment", icon: <Stethoscope className="h-5 w-5" /> },
-  ] as const;
+  ];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:p-4">
@@ -869,6 +876,14 @@ export function ResidentViewModal({
                 />
               </div>
             </div>
+          )}
+
+          {tab === "philpen" && showPhilpen && (
+            <PhilPenTab
+              residentId={resident.id}
+              residentName={fullName(resident)}
+              age={residentAge ?? undefined}
+            />
           )}
 
           {tab === "assessments" && (
