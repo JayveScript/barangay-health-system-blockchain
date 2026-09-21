@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileBarChart2, Baby, HeartHandshake, RefreshCw } from "lucide-react";
+import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, RefreshCw } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 
 type Row = {
@@ -19,6 +19,10 @@ type Row = {
   oa?: number;
   do?: number;
   cu?: number;
+  // NCD / PhilPEN shape
+  m?: number;
+  f?: number;
+  t?: number;
 };
 
 type ReportData = {
@@ -27,7 +31,7 @@ type ReportData = {
   rows: Row[];
 };
 
-type ReportId = "maternal" | "familyplanning";
+type ReportId = "maternal" | "familyplanning" | "philpen";
 
 const REPORTS: {
   id: ReportId;
@@ -36,7 +40,7 @@ const REPORTS: {
   endpoint: string;
   title: string;
   subtitle: string;
-  columns: "age" | "fp";
+  columns: "age" | "fp" | "ncd";
 }[] = [
   {
     id: "maternal",
@@ -55,6 +59,15 @@ const REPORTS: {
     title: "Family Planning Program",
     subtitle: "DOH FHSIS · FP M1 — Acceptors by method and age group",
     columns: "fp",
+  },
+  {
+    id: "philpen",
+    label: "PhilPEN / NCD",
+    icon: <ShieldPlus className="h-4 w-4" />,
+    endpoint: "/api/reports/philpen",
+    title: "NCD Summary (PhilPEN)",
+    subtitle: "DOH FHSIS · PhilPEN Risk Assessment, Hypertension & Diabetes",
+    columns: "ncd",
   },
 ];
 
@@ -90,7 +103,9 @@ export function ReportsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  const isFp = current.columns === "fp";
+  const mode = current.columns;
+  const isFp = mode === "fp";
+  const isNcd = mode === "ncd";
 
   return (
     <div className="space-y-5 pb-4">
@@ -138,7 +153,7 @@ export function ReportsTab() {
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </button>
-              <ExportPdfButton fileName={isFp ? "family-planning-report" : "maternal-summary"} />
+              <ExportPdfButton fileName={isFp ? "family-planning-report" : isNcd ? "philpen-ncd-report" : "maternal-summary"} />
             </div>
           </div>
 
@@ -146,7 +161,7 @@ export function ReportsTab() {
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <StatTile label="Coverage" value={data.scope} />
               <StatTile
-                label={isFp ? "FP Clients" : "Maternal Records"}
+                label={isFp ? "FP Clients" : isNcd ? "Assessed (20+)" : "Maternal Records"}
                 value={String(data.totalRecords)}
               />
               <StatTile label="Generated" value={new Date().toLocaleDateString()} />
@@ -173,10 +188,16 @@ export function ReportsTab() {
                     </th>
                     {isFp ? (
                       <>
-                        <Th title="NA">NA</Th>
-                        <Th title="OA">OA</Th>
-                        <Th title="DO">DO</Th>
-                        <Th title="CU">CU</Th>
+                        <Th title="New Acceptor">NA</Th>
+                        <Th title="Other Acceptor">OA</Th>
+                        <Th title="Drop-out">DO</Th>
+                        <Th title="Current User">CU</Th>
+                      </>
+                    ) : isNcd ? (
+                      <>
+                        <Th title="Male">M</Th>
+                        <Th title="Female">F</Th>
+                        <Th title="Total">T</Th>
                       </>
                     ) : (
                       <>
@@ -190,10 +211,11 @@ export function ReportsTab() {
                 </thead>
                 <tbody>
                   {data.rows.map((row, i) => {
+                    const span = isNcd ? 4 : 5;
                     if (row.header) {
                       return (
                         <tr key={i}>
-                          <td colSpan={5} className="bg-[#2563EB] px-4 py-2.5 text-sm font-black uppercase tracking-wide text-white">
+                          <td colSpan={span} className="bg-[#2563EB] px-4 py-2.5 text-sm font-black uppercase tracking-wide text-white">
                             {row.label}
                           </td>
                         </tr>
@@ -202,7 +224,7 @@ export function ReportsTab() {
                     if (!row.isData) {
                       return (
                         <tr key={i} className="border-t border-slate-100 bg-[#F8FAFC]">
-                          <td colSpan={5} className="px-4 py-2 text-sm font-black text-slate-800">
+                          <td colSpan={span} className="px-4 py-2 text-sm font-black text-slate-800">
                             {row.label}
                           </td>
                         </tr>
@@ -223,6 +245,12 @@ export function ReportsTab() {
                             <Num v={row.oa} />
                             <Num v={row.do} />
                             <Num v={row.cu} total />
+                          </>
+                        ) : isNcd ? (
+                          <>
+                            <Num v={row.m} />
+                            <Num v={row.f} />
+                            <Num v={row.t} total />
                           </>
                         ) : (
                           <>
@@ -246,6 +274,13 @@ export function ReportsTab() {
             NA — New Acceptor · OA — Other Acceptor (shifters / changing method /
             clinic / restart) · DO — Drop-out · CU — Current User. Counted live from
             the Family Planning form (method, client type, resident age).
+          </p>
+        ) : isNcd ? (
+          <p className="text-xs font-semibold text-slate-400">
+            M — Male · F — Female · T — Total. Counted live from the PhilPEN form
+            (Adults 20–59, Senior 60+). Sections 1–3 are captured by PhilPEN;
+            blindness, immunization, cancer, mental health and geriatrics need
+            their own forms and aren&apos;t included here.
           </p>
         ) : (
           <p className="text-xs font-semibold text-slate-400">
