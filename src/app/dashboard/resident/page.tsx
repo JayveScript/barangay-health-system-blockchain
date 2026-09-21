@@ -24,6 +24,7 @@ X,
   ChevronRight,
   KeyRound,
   ShieldCheck,
+  Syringe,
 } from "lucide-react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
@@ -32,6 +33,7 @@ import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ResidentComplaints } from "@/components/ResidentComplaints";
 import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab";
 import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
+import { ImmunizationTab } from "@/components/dashboard/ImmunizationTab";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { displayAge } from "@/lib/age";
 import { Baby } from "lucide-react";
@@ -575,7 +577,7 @@ export default function ResidentDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<ResidentData | null>(null);
   const [sidebarTab, setSidebarTab] = useState<
-  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "philpen" | "announcements" | "digital" | "change-password"
+  "personal" | "medical-history" | "appointments" | "notifications" | "complaints" | "maternal" | "philpen" | "immun" | "announcements" | "digital" | "change-password"
 >("personal");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -636,6 +638,7 @@ export default function ResidentDashboard() {
 
   const philpenAge = displayAge(resident.birthDate, resident.age) ?? resident.age;
   const showPhilpen = philpenAge != null && Number(philpenAge) >= 20;
+  const showImmun = philpenAge != null && Number(philpenAge) <= 5;
 
   const fullName = `${resident.firstName} ${resident.middleName ?? ""} ${
     resident.lastName
@@ -807,6 +810,24 @@ export default function ResidentDashboard() {
                 </button>
               )}
 
+              {showImmun && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSidebarTab("immun");
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "immun"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                  }`}
+                >
+                  <Syringe className="h-5 w-5 shrink-0" />
+                  Immunization
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => {
@@ -964,6 +985,21 @@ export default function ResidentDashboard() {
                   >
                     <ShieldCheck className="h-5 w-5 shrink-0" />
                     PhilPEN
+                  </button>
+                )}
+
+                {showImmun && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarTab("immun")}
+                    className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                      sidebarTab === "immun"
+                        ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                        : "text-slate-600 hover:bg-white hover:text-sky-600"
+                    }`}
+                  >
+                    <Syringe className="h-5 w-5 shrink-0" />
+                    Immunization
                   </button>
                 )}
 
@@ -1262,6 +1298,18 @@ export default function ResidentDashboard() {
       icon={<ShieldCheck className="h-5 w-5" />}
     >
       <PhilPenTab residentId={resident.id} readOnly endpoint="/api/residents/me/philpen" />
+    </Section>
+  </div>
+)}
+
+            {sidebarTab === "immun" && showImmun && (
+  <div className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50/40 p-4 shadow-sm md:p-6">
+    <Section
+      title="Child Immunization Record"
+      subtitle="Your child's immunization record from your barangay health center (read-only)."
+      icon={<Syringe className="h-5 w-5" />}
+    >
+      <ImmunizationTab residentId={resident.id} readOnly endpoint="/api/residents/me/immunization" />
     </Section>
   </div>
 )}

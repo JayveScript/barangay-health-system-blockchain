@@ -130,6 +130,9 @@ model Resident {
   // PhilPEN NCD risk assessment (Part I + Part II), a flat key-value blob.
   philpenData Json?
 
+  // Child Immunization ITR (for residents 5 years old and below), key-value blob.
+  immunizationData Json?
+
   appointments Appointment[]
   referrals    ResidentReferral[]
   bmiRecords   BMIRecord[]
