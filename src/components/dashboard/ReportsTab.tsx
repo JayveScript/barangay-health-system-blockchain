@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, RefreshCw } from "lucide-react";
+import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 
 type Row = {
@@ -31,7 +31,7 @@ type ReportData = {
   rows: Row[];
 };
 
-type ReportId = "maternal" | "familyplanning" | "philpen";
+type ReportId = "maternal" | "familyplanning" | "philpen" | "immunization";
 
 const REPORTS: {
   id: ReportId;
@@ -41,6 +41,8 @@ const REPORTS: {
   title: string;
   subtitle: string;
   columns: "age" | "fp" | "ncd";
+  countLabel: string;
+  note: string;
 }[] = [
   {
     id: "maternal",
@@ -50,6 +52,8 @@ const REPORTS: {
     title: "Maternal Health Care Summary",
     subtitle: "DOH FHSIS · BHS SUMTAB — Prenatal, Intrapartum & Postpartum",
     columns: "age",
+    countLabel: "Maternal Records",
+    note: "Counts are computed live from the maternal records staff have encoded (OB-Gyne, Prenatal, Postnatal). Age bands use the resident's age.",
   },
   {
     id: "familyplanning",
@@ -59,6 +63,8 @@ const REPORTS: {
     title: "Family Planning Program",
     subtitle: "DOH FHSIS · FP M1 — Acceptors by method and age group",
     columns: "fp",
+    countLabel: "FP Clients",
+    note: "NA — New Acceptor · OA — Other Acceptor · DO — Drop-out · CU — Current User. Counted live from the Family Planning form (method, client type, resident age).",
   },
   {
     id: "philpen",
@@ -68,6 +74,19 @@ const REPORTS: {
     title: "NCD Summary (PhilPEN)",
     subtitle: "DOH FHSIS · PhilPEN Risk Assessment, Hypertension & Diabetes",
     columns: "ncd",
+    countLabel: "Assessed (20+)",
+    note: "M — Male · F — Female · T — Total. Counted live from the PhilPEN form (Adults 20–59, Senior 60+). Blindness, immunization, cancer, mental health and geriatrics need their own forms and aren't included here.",
+  },
+  {
+    id: "immunization",
+    label: "Child Immunization",
+    icon: <Syringe className="h-4 w-4" />,
+    endpoint: "/api/reports/immunization",
+    title: "Child Immunization",
+    subtitle: "DOH FHSIS · Immunization Services — doses given & FIC/CIC",
+    columns: "ncd",
+    countLabel: "Children with record",
+    note: "M — Male · F — Female · T — Total. Counted live from the Child Immunization form (a dose counts when its date-given is filled). School-based immunization, nutrition and sick-children sections need their own forms and aren't included here.",
   },
 ];
 
@@ -153,17 +172,14 @@ export function ReportsTab() {
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </button>
-              <ExportPdfButton fileName={isFp ? "family-planning-report" : isNcd ? "philpen-ncd-report" : "maternal-summary"} />
+              <ExportPdfButton fileName={`${current.id}-report`} />
             </div>
           </div>
 
           {data && (
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <StatTile label="Coverage" value={data.scope} />
-              <StatTile
-                label={isFp ? "FP Clients" : isNcd ? "Assessed (20+)" : "Maternal Records"}
-                value={String(data.totalRecords)}
-              />
+              <StatTile label={current.countLabel} value={String(data.totalRecords)} />
               <StatTile label="Generated" value={new Date().toLocaleDateString()} />
             </div>
           )}
@@ -269,25 +285,7 @@ export function ReportsTab() {
           ) : null}
         </div>
 
-        {isFp ? (
-          <p className="text-xs font-semibold text-slate-400">
-            NA — New Acceptor · OA — Other Acceptor (shifters / changing method /
-            clinic / restart) · DO — Drop-out · CU — Current User. Counted live from
-            the Family Planning form (method, client type, resident age).
-          </p>
-        ) : isNcd ? (
-          <p className="text-xs font-semibold text-slate-400">
-            M — Male · F — Female · T — Total. Counted live from the PhilPEN form
-            (Adults 20–59, Senior 60+). Sections 1–3 are captured by PhilPEN;
-            blindness, immunization, cancer, mental health and geriatrics need
-            their own forms and aren&apos;t included here.
-          </p>
-        ) : (
-          <p className="text-xs font-semibold text-slate-400">
-            Counts are computed live from the maternal records staff have encoded
-            (OB-Gyne, Prenatal, Postnatal). Age bands use the resident&apos;s age.
-          </p>
-        )}
+        <p className="text-xs font-semibold text-slate-400">{current.note}</p>
       </div>
     </div>
   );
