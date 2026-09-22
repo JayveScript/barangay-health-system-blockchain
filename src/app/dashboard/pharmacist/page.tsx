@@ -129,11 +129,11 @@ export default function PharmacistDashboardPage() {
 
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => { setActiveTab("overview"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => { setActiveTab("reports"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => { setActiveTab("announcements"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => { setActiveTab("change-password"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
@@ -152,11 +152,11 @@ export default function PharmacistDashboardPage() {
 
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
               <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => setActiveTab("overview")} />
-              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => setActiveTab("reports")} />
-              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => setActiveTab("announcements")} />
+              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
+              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => setActiveTab("change-password")} />
             </div>
           </div>

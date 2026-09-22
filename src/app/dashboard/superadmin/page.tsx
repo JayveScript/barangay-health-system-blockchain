@@ -113,8 +113,8 @@ export default function SuperAdminDashboard() {
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
     { id: "reports", label: "Reports", icon: <FileBarChart2 className="h-5 w-5" /> },
-    { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
     { id: "announcements", label: "Announcements", icon: <Megaphone className="h-5 w-5" /> },
+    { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
     { id: "staff", label: "Staff", icon: <Stethoscope className="h-5 w-5" /> },
     { id: "create-barangay", label: "Create Barangay", icon: <UserPlus className="h-5 w-5" /> },
     { id: "admins", label: "Barangay Admins", icon: <ShieldCheck className="h-5 w-5" /> },

@@ -84,7 +84,8 @@ function normalize(value?: string) {
 export async function POST(req: Request) {
   try {
     const user = await getApiUser();
-    if (!user || String(user.role) !== "BHW") {
+    const ALLOWED = ["BHW", "MIDWIFE", "NURSE", "BARANGAY_ADMIN", "SUPER_ADMIN"];
+    if (!user || !ALLOWED.includes(String(user.role))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
