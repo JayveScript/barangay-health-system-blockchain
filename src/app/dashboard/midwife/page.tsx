@@ -38,6 +38,8 @@ type MidwifeUser = {
 import { QrScannerTab } from "@/components/QrScannerTab";
 import { MaternalRecordsTab } from "@/components/dashboard/MaternalRecordsTab";
 import { RegisteredResidentsTab } from "@/components/dashboard/RegisteredResidentsTab";
+import { ResidentRegistrationTab } from "@/components/dashboard/ResidentRegistrationTab";
+import { UserPlus } from "lucide-react";
 import { DiagnoseTab } from "@/components/dashboard/DiagnoseTab";
 import { ChangePasswordTab } from "@/components/dashboard/ChangePasswordTab";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
@@ -46,7 +48,7 @@ import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { KeyRound, FileBarChart2 } from "lucide-react";
 
 export default function MidwifeDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "maternal" | "announcements" | "reports" | "scan-qr" | "diagnose" | "change-password">(
+  const [activeTab, setActiveTab] = useState<"overview" | "personal" | "residents" | "registration" | "maternal" | "announcements" | "reports" | "scan-qr" | "diagnose" | "change-password">(
     "overview"
   );
   const [user, setUser] = useState<MidwifeUser | null>(null);
@@ -132,13 +134,14 @@ export default function MidwifeDashboardPage() {
 
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => { setActiveTab("overview"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => { setActiveTab("reports"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => { setActiveTab("announcements"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => { setActiveTab("diagnose"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "registration"} icon={<UserPlus className="h-5 w-5" />} label="Add Resident" onClick={() => { setActiveTab("registration"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "maternal"} icon={<Baby className="h-5 w-5" />} label="Maternal Records" onClick={() => { setActiveTab("maternal"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => { setActiveTab("diagnose"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => {
                 setActiveTab("change-password");
                 setMobileSidebarOpen(false);
@@ -161,13 +164,14 @@ export default function MidwifeDashboardPage() {
 
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
               <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => setActiveTab("overview")} />
-              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => setActiveTab("reports")} />
-              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-5 w-5" />} label="Announcements" onClick={() => setActiveTab("announcements")} />
-              <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => setActiveTab("diagnose")} />
+              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
+              <SidebarButton active={activeTab === "registration"} icon={<UserPlus className="h-5 w-5" />} label="Add Resident" onClick={() => setActiveTab("registration")} />
               <SidebarButton active={activeTab === "maternal"} icon={<Baby className="h-5 w-5" />} label="Maternal Records" onClick={() => setActiveTab("maternal")} />
+              <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => setActiveTab("diagnose")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
+              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => setActiveTab("change-password")} />
             </div>
           </div>
@@ -226,6 +230,10 @@ export default function MidwifeDashboardPage() {
             {activeTab === "overview" && <OverviewTab />}
 
             {activeTab === "residents" && <RegisteredResidentsTab />}
+
+            {activeTab === "registration" && (
+              <ResidentRegistrationTab barangayName={user.barangay?.name || "Assigned Barangay"} />
+            )}
 
             {activeTab === "maternal" && <MaternalRecordsTab />}
             {activeTab === "announcements" && <AnnouncementsManager />}

@@ -359,6 +359,20 @@ const PRENATAL_SUPPLEMENT_OPTIONS = [
   "Deworming Tablet",
 ];
 
+// Family Planning method options — shared by Side A (FP Method) and Side B
+// (Method Accepted) so both dropdowns stay identical.
+const FP_METHOD_OPTIONS = [
+  "FSTR / BTL", "MSTR / NSV", "Condom", "IUD-Interval", "IUD-Postpartum",
+  "Pills-POP", "Pills-COC", "Injectables", "Implants-Interval",
+  "Implants-Postpartum", "NFP-CMM", "NFP-BBT", "NFP-STM", "NFP-SDM", "NFP-LAM",
+];
+
+// Type of Client options (acceptor categories for the FP report).
+const FP_CLIENT_TYPE_OPTIONS = [
+  "New Acceptor", "New", "Current User", "Changing Method", "Changing Clinic",
+  "Restart", "Other", "Dropout",
+];
+
 // Extra tests recorded per prenatal visit (and in the baseline test list) as
 // Result / Date rows.
 const EXTRA_TESTS: { label: string; k: string }[] = [
@@ -1281,10 +1295,10 @@ function MaternalFormModal({
                     <>
                       <Section title="Client Type & FP Method">
                         <Row label="Type of Client">
-                          <Select k="fpa_client_type" options={["New Acceptor", "Current User", "Changing Method", "Changing Clinic", "Restart", "Dropout"]} />
+                          <Select k="fpa_client_type" options={FP_CLIENT_TYPE_OPTIONS} />
                         </Row>
                         <Row label="FP Method (Current / Accepted)">
-                          <Select k="fpa_method" options={["FSTR / BTL", "MSTR / NSV", "Condom", "IUD-Interval", "IUD-Postpartum", "Pills-POP", "Pills-COC", "Injectables", "Implants-Interval", "Implants-Postpartum", "NFP-CMM", "NFP-BBT", "NFP-STM", "NFP-SDM", "NFP-LAM"]} />
+                          <Select k="fpa_method" options={FP_METHOD_OPTIONS} />
                         </Row>
                         <Row label="Reason for FP">
                           <Select k="fpa_fp_reason" options={["Spacing", "Limiting", "Others"]} />
@@ -1423,7 +1437,7 @@ function MaternalFormModal({
                                 <div className="space-y-3">
                                   <Row label="Date of Visit"><DateI k={`fpb_v${n}_date`} /></Row>
                                   <Row label="Medical Findings"><TextArea k={`fpb_v${n}_findings`} ph="Observation, complaints, service rendered / procedures, laboratory, treatment and referral" /></Row>
-                                  <Row label="Method Accepted"><Text k={`fpb_v${n}_method`} ph="Method accepted" /></Row>
+                                  <Row label="Method Accepted"><Select k={`fpb_v${n}_method`} options={FP_METHOD_OPTIONS} /></Row>
                                   <Row label="Service Provider"><Text k={`fpb_v${n}_provider`} ph="Name of service provider" /></Row>
                                   <Row label="Date of Follow-up"><DateI k={`fpb_v${n}_followup`} /></Row>
                                 </div>

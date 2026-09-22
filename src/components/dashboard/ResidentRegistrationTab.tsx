@@ -155,7 +155,7 @@ export function ResidentRegistrationTab({
           </span>
           <div>
             <h2 className="text-lg font-black text-slate-900">
-              Resident Registration
+              Add Resident
             </h2>
             <p className="text-sm text-slate-500">
               Register walk-in residents without account verification.
@@ -587,7 +587,7 @@ function RegistrationModal({
                 disabled={submitting}
                 className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
               >
-                {submitting ? "Saving..." : "Register Resident"}
+                {submitting ? "Saving..." : "Add Resident"}
               </button>
             )}
           </div>

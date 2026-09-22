@@ -37,12 +37,14 @@ function bandOf(age: number | null | undefined): Band {
 function catOf(clientType: string): Cat {
   switch (clientType) {
     case "New Acceptor":
+    case "New":
       return "na";
     case "Dropout":
       return "do";
     case "Changing Method":
     case "Changing Clinic":
     case "Restart":
+    case "Other":
       return "oa";
     // Current User (and anything unset but with a method) = current user.
     default:

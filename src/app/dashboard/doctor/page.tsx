@@ -255,15 +255,15 @@ export default function DoctorDashboardPage() {
 
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => { setActiveTab("overview"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => { setActiveTab("reports"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-6 w-6" />} label="Announcements" onClick={() => { setActiveTab("announcements"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => { setActiveTab("diagnose"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => { setActiveTab("residents"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "maternal"} icon={<Baby className="h-5 w-5" />} label="Maternal Records" onClick={() => { setActiveTab("maternal"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={activeTab === "referrals"} icon={<Inbox className="h-5 w-5" />} label="Referrals" onClick={() => { setActiveTab("referrals"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => { setActiveTab("diagnose"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "appointments"} icon={<CalendarCheck className="h-5 w-5" />} label="Appointments" onClick={() => { setActiveTab("appointments"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "referrals"} icon={<Inbox className="h-5 w-5" />} label="Referrals" onClick={() => { setActiveTab("referrals"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => { setActiveTab("scan-qr"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => { setActiveTab("personal"); setMobileSidebarOpen(false); }} />
             <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => { setActiveTab("change-password"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
@@ -283,15 +283,15 @@ export default function DoctorDashboardPage() {
 
             <div className="flex flex-col space-y-3">
               <SidebarButton active={activeTab === "overview"} icon={<Activity className="h-5 w-5" />} label="Overview" onClick={() => setActiveTab("overview")} />
-              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "reports"} icon={<FileBarChart2 className="h-5 w-5" />} label="Reports" onClick={() => setActiveTab("reports")} />
-              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "announcements"} icon={<Megaphone className="h-6 w-6" />} label="Announcements" onClick={() => setActiveTab("announcements")} />
-              <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => setActiveTab("diagnose")} />
+              <SidebarButton active={activeTab === "residents"} icon={<Users className="h-5 w-5" />} label="Registered Residents" onClick={() => setActiveTab("residents")} />
               <SidebarButton active={activeTab === "maternal"} icon={<Baby className="h-5 w-5" />} label="Maternal Records" onClick={() => setActiveTab("maternal")} />
-              <SidebarButton active={activeTab === "referrals"} icon={<Inbox className="h-5 w-5" />} label="Referrals" onClick={() => setActiveTab("referrals")} />
+              <SidebarButton active={activeTab === "diagnose"} icon={<Stethoscope className="h-5 w-5" />} label="Diagnose Patient" onClick={() => setActiveTab("diagnose")} />
               <SidebarButton active={activeTab === "appointments"} icon={<CalendarCheck className="h-5 w-5" />} label="Appointments" onClick={() => setActiveTab("appointments")} />
+              <SidebarButton active={activeTab === "referrals"} icon={<Inbox className="h-5 w-5" />} label="Referrals" onClick={() => setActiveTab("referrals")} />
               <SidebarButton active={activeTab === "scan-qr"} icon={<ScanLine className="h-5 w-5" />} label="Scan QR" onClick={() => setActiveTab("scan-qr")} />
+              <SidebarButton active={activeTab === "personal"} icon={<UserRound className="h-5 w-5" />} label="Personal Info" onClick={() => setActiveTab("personal")} />
               <SidebarButton active={activeTab === "change-password"} icon={<KeyRound className="h-5 w-5" />} label="Change Password" onClick={() => setActiveTab("change-password")} />
             </div>
           </div>

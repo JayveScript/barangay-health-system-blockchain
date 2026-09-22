@@ -697,17 +697,17 @@ export default function ResidentDashboard() {
               <button
                 type="button"
                 onClick={() => {
-                  setSidebarTab("personal");
+                  setSidebarTab("announcements");
                   setMobileSidebarOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                  sidebarTab === "personal"
+                  sidebarTab === "announcements"
                     ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
                     : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
                 }`}
               >
-                <UserIcon className="h-5 w-5 shrink-0" />
-                Personal Info
+                <Megaphone className="h-6 w-6 shrink-0" />
+                Announcements
               </button>
 
               <button
@@ -724,54 +724,6 @@ export default function ResidentDashboard() {
               >
                 <Stethoscope className="h-5 w-5 shrink-0 stroke-[2.8]" />
                 Medical History
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSidebarTab("appointments");
-                  setMobileSidebarOpen(false);
-                }}
-                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                  sidebarTab === "appointments"
-                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
-                }`}
-              >
-                <CalendarCheck className="h-5 w-5 shrink-0" />
-                Appointments
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSidebarTab("notifications");
-                  setMobileSidebarOpen(false);
-                }}
-                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                  sidebarTab === "notifications"
-                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
-                }`}
-              >
-                <Bell className="h-5 w-5 shrink-0" />
-                Notifications
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSidebarTab("complaints");
-                  setMobileSidebarOpen(false);
-                }}
-                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                  sidebarTab === "complaints"
-                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
-                }`}
-              >
-                <MessageSquareText className="h-5 w-5 shrink-0" />
-                Health Concern
               </button>
 
               {resident.sex === "FEMALE" && (
@@ -831,17 +783,49 @@ export default function ResidentDashboard() {
               <button
                 type="button"
                 onClick={() => {
-                  setSidebarTab("announcements");
+                  setSidebarTab("appointments");
                   setMobileSidebarOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                  sidebarTab === "announcements"
+                  sidebarTab === "appointments"
                     ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
                     : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
                 }`}
               >
-                <Megaphone className="h-6 w-6 shrink-0" />
-                Announcements
+                <CalendarCheck className="h-5 w-5 shrink-0" />
+                Appointments
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarTab("notifications");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "notifications"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <Bell className="h-5 w-5 shrink-0" />
+                Notifications
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarTab("complaints");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "complaints"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <MessageSquareText className="h-5 w-5 shrink-0" />
+                Health Concern
               </button>
 
               <button
@@ -859,6 +843,23 @@ export default function ResidentDashboard() {
                 <IdCardIcon className="h-5 w-5 shrink-0" />
                 Digital ID
               </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarTab("personal");
+                  setMobileSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                  sidebarTab === "personal"
+                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                }`}
+              >
+                <UserIcon className="h-5 w-5 shrink-0" />
+                Personal Info
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -895,15 +896,15 @@ export default function ResidentDashboard() {
               <div className="mt-8 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden">
                 <button
                   type="button"
-                  onClick={() => setSidebarTab("personal")}
+                  onClick={() => setSidebarTab("announcements")}
                   className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                    sidebarTab === "personal"
-                    ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                    : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
+                    sidebarTab === "announcements"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
                   }`}
                 >
-                  <UserIcon className="h-5 w-5 shrink-0" />
-                  Personal Info
+                  <Megaphone className="h-6 w-6 shrink-0" />
+                  Announcements
                 </button>
 
                 <button
@@ -917,45 +918,6 @@ export default function ResidentDashboard() {
                 >
                   <Stethoscope className="h-5 w-5 shrink-0 stroke-[2.8]" />
                   Medical History
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSidebarTab("appointments")}
-                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                    sidebarTab === "appointments"
-                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                      : "text-slate-600 hover:bg-white hover:text-sky-600"
-                  }`}
-                >
-                  <CalendarCheck className="h-5 w-5 shrink-0" />
-                  Appointments
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSidebarTab("notifications")}
-                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                    sidebarTab === "notifications"
-                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                      : "text-slate-600 hover:bg-white hover:text-sky-600"
-                  }`}
-                >
-                  <Bell className="h-5 w-5 shrink-0" />
-                  Notifications
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSidebarTab("complaints")}
-                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-                    sidebarTab === "complaints"
-                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-                      : "text-slate-600 hover:bg-white hover:text-sky-600"
-                  }`}
-                >
-                  <MessageSquareText className="h-5 w-5 shrink-0" />
-                  Health Concern
                 </button>
 
                 {resident.sex === "FEMALE" && (
@@ -1004,17 +966,43 @@ export default function ResidentDashboard() {
                 )}
 
                 <button
-  type="button"
-  onClick={() => setSidebarTab("announcements")}
-  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
-    sidebarTab === "announcements"
-      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
-      : "text-slate-600 hover:bg-white hover:text-sky-600"
-  }`}
->
-  <Megaphone className="h-6 w-6 shrink-0" />
-  Announcements
-</button>
+                  type="button"
+                  onClick={() => setSidebarTab("appointments")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "appointments"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <CalendarCheck className="h-5 w-5 shrink-0" />
+                  Appointments
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("notifications")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "notifications"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <Bell className="h-5 w-5 shrink-0" />
+                  Notifications
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("complaints")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "complaints"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <MessageSquareText className="h-5 w-5 shrink-0" />
+                  Health Concern
+                </button>
 
                 <button
                   type="button"
@@ -1028,6 +1016,20 @@ export default function ResidentDashboard() {
                   <IdCardIcon className="h-5 w-5 shrink-0" />
                   Digital ID
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab("personal")}
+                  className={`flex w-full items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+                    sidebarTab === "personal"
+                      ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
+                      : "text-slate-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <UserIcon className="h-5 w-5 shrink-0" />
+                  Personal Info
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setSidebarTab("change-password")}
