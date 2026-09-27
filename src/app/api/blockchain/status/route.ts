@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { isBlockchainEnabled, isBlockchainReachable } from "@/lib/blockchain";
 import { getCurrentApiUser, isSuperAdmin, canManageBarangay } from "@/lib/tenant-auth";
 
-// Admin-only: only super admins and barangay admins can read the blockchain
-// status — never residents/staff.
 export async function GET() {
   const user = await getCurrentApiUser();
   if (!user || !(isSuperAdmin(user) || canManageBarangay(user))) {

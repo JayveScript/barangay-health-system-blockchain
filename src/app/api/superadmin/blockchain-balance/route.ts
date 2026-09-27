@@ -4,9 +4,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 export const runtime = "nodejs";
 
-// Super-admin only: the anchoring wallet's balance and an estimate of how many
-// more anchoring transactions it can afford, so the balance can be topped up
-// before it runs out.
 export async function GET() {
   const user = await getCurrentApiUser();
   if (!user || !isSuperAdmin(user)) {

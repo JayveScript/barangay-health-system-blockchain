@@ -20,14 +20,6 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // A staff member sees their own barangay's assessments for this resident
-    // (any authoring role — doctor, nurse, midwife, BHW all share them). When
-    // the viewer's barangay is party to a referral for this resident (as sender
-    // OR receiver), they see EVERY assessment recorded for that resident, so the
-    // sending and receiving teams read each other's notes. We match on the
-    // referral link rather than the assessment's barangay id, because the
-    // assessment is stamped with the assessing staff's barangay, which may not
-    // be the exact barangay record picked as the referral target.
     const involvedInReferral =
       !isSuperAdmin(currentUser) &&
       (await prisma.residentReferral.count({

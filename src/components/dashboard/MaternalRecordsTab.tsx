@@ -32,7 +32,6 @@ type FormData = Record<string, string>;
 const fullName = (r: { firstName: string; middleName: string | null; lastName: string }) =>
   `${r.firstName} ${r.middleName ?? ""} ${r.lastName}`.replace(/\s+/g, " ").trim();
 
-// Expected Date of Delivery = LMP + 280 days
 function computeEdd(lmp: string): string {
   if (!lmp) return "";
   const d = new Date(lmp);
@@ -44,7 +43,6 @@ function computeEdd(lmp: string): string {
   return `${y}-${m}-${day}`;
 }
 
-// Age of Gestation = (today - LMP) in weeks + days; live, based on current date
 function computeGestation(lmp: string): string {
   if (!lmp) return "";
   const start = new Date(lmp);
@@ -58,7 +56,6 @@ function computeGestation(lmp: string): string {
   return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
 }
 
-// Age of Gestation at a specific visit = (Date of Visit - LMP) in weeks + days.
 function gestationBetween(lmp: string | undefined, visitDate: string | undefined): string {
   if (!lmp || !visitDate) return "";
   const start = new Date(lmp);
@@ -72,14 +69,6 @@ function gestationBetween(lmp: string | undefined, visitDate: string | undefined
   return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
 }
 
-// Pregnancy outcome, auto-classified from gestational age (Date of Delivery − LMP)
-// using DOH/WHO thresholds:
-//   < 20 weeks            → Abortion / Miscarriage
-//   fetus born dead ≥20wk → Fetal Death (stillbirth)  [needs the death indicator]
-//   20 to < 37 weeks      → Preterm
-//   ≥ 37 weeks            → Full Term
-// Gestational age alone can't distinguish a live birth from a stillbirth, so
-// Fetal Death is taken from the newborn "Death" indicator.
 function computeOutcome(
   lmp?: string,
   delivery?: string,
@@ -105,10 +94,6 @@ function prettyDate(dateStr: string): string {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
-// Field components are defined at MODULE level (not inside the modal) so their
-// identity stays stable across renders. Defining them inline caused React to
-// remount every input on each keystroke, which dropped focus and scrolled the
-// page back to the top on mobile while typing. They read form state from context.
 const MaternalFormCtx = createContext<{
   form: FormData;
   set: (k: string, v: string) => void;
@@ -237,8 +222,6 @@ function TextArea({ k, ph, disabled }: { k: string; ph?: string; disabled?: bool
   );
 }
 
-// Single checkbox chip: stores "Yes" / "" for its key. Used by the Family
-// Planning physical-exam and method sections where several boxes may be ticked.
 function Check({ k, label, disabled }: { k: string; label: string; disabled?: boolean }) {
   const { form, set } = useContext(MaternalFormCtx);
   const on = form[k] === "Yes";
@@ -275,14 +258,12 @@ function CheckGrid({ items, disabled }: { items: [string, string][]; disabled?: 
   );
 }
 
-// Blood pressure is "high" at systolic ≥130 OR diastolic ≥90.
 function isHighBp(v: string): boolean {
   const m = (v || "").match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
   if (!m) return false;
   return Number(m[1]) >= 130 || Number(m[2]) >= 90;
 }
 
-// BP field that turns red (with a "High blood pressure" flag) at ≥130/90.
 function BpInput({ k, disabled }: { k: string; ph?: string; disabled?: boolean }) {
   const { form, set } = useContext(MaternalFormCtx);
   const high = isHighBp(form[k] ?? "");
@@ -308,7 +289,6 @@ function BpInput({ k, disabled }: { k: string; ph?: string; disabled?: boolean }
   );
 }
 
-// Read-only chip for the prenatal Summary view (renders nothing when empty).
 function SumChip({ label, value }: { label: string; value?: string }) {
   if (!value || !value.trim()) return null;
   return (
@@ -328,7 +308,6 @@ const PRENATAL_MONTH_FIELDS: [string, string][] = [
   ["remarks", "Findings / Remarks"],
 ];
 
-// Tetanus Toxoid levels (TT1–TT5, plus a TT5+ booster).
 const TT_LEVELS: [string, string][] = [
   ["tt1", "TT1"], ["tt2", "TT2"], ["tt3", "TT3"],
   ["tt4", "TT4"], ["tt5", "TT5"], ["tt5plus", "TT5+"],
@@ -359,27 +338,21 @@ const PRENATAL_SUPPLEMENT_OPTIONS = [
   "Deworming Tablet",
 ];
 
-// Family Planning method options — shared by Side A (FP Method) and Side B
-// (Method Accepted) so both dropdowns stay identical.
 const FP_METHOD_OPTIONS = [
   "FSTR / BTL", "MSTR / NSV", "Condom", "IUD-Interval", "IUD-Postpartum",
   "Pills-POP", "Pills-COC", "Injectables", "Implants-Interval",
   "Implants-Postpartum", "NFP-CMM", "NFP-BBT", "NFP-STM", "NFP-SDM", "NFP-LAM",
 ];
 
-// Type of Client options (acceptor categories for the FP report).
 const FP_CLIENT_TYPE_OPTIONS = [
   "New Acceptor", "New", "Current User", "Changing Method", "Changing Clinic",
   "Restart", "Other", "Dropout",
 ];
 
-// Extra tests recorded per prenatal visit (and in the baseline test list) as
-// Result / Date rows.
 const EXTRA_TESTS: { label: string; k: string }[] = [
   { label: "CBC / HGB & HCT", k: "cbc" },
   { label: "Gestational Diabetes Screen", k: "gdm_screen" },
 ];
-// Yes/No findings recorded alongside the extra tests.
 const EXTRA_YESNO: [string, string][] = [
   ["anemia", "Diagnosed with Anemia"],
   ["diabetes", "Positive for Diabetes"],
@@ -388,7 +361,6 @@ const EXTRA_YESNO: [string, string][] = [
 const POSTNATAL_DAYS = [0, 3, 7, 42];
 const MATERNAL_TEST_KEYS = ["bloodtype", "fbs", "hbsag", "hemoglobin", "hiv", "syphilis", "tuberculosis", "urinalysis"];
 
-// Field lists reused by the read-only Summary views for OB-Gyne and Postnatal.
 const OBGYNE_SUMMARY_FIELDS: [string, string][] = [
   ["ob_g", "G"], ["ob_p", "P"], ["ob_fullterm", "Full Term"], ["ob_preterm", "Preterm"],
   ["ob_abortion", "Abortion"], ["ob_living", "Living"], ["menarche_age", "Menarche Age"],
@@ -640,11 +612,7 @@ function MaternalFormModal({
   const [formTab, setFormTab] = useState<
     "obgyne" | "prenatal" | "postnatal" | "familyplanning"
   >("obgyne");
-  // Family Planning has two nested tabs matching the paper form's two sides.
   const [fpSide, setFpSide] = useState<"a" | "b">("a");
-  // Each tab is summary-first: when records already exist we show the read-only
-  // summary and reveal the editable form via the Edit button; when a tab is
-  // empty we open straight into editing.
   const [obgyneEditing, setObgyneEditing] = useState(true);
   const [prenatalEditing, setPrenatalEditing] = useState(true);
   const [postnatalEditing, setPostnatalEditing] = useState(true);
@@ -673,8 +641,6 @@ function MaternalFormModal({
     })();
   }, [resident.id]);
 
-  // Whether any prenatal record has been encoded (controls the empty state in
-  // the summary view).
   const hasPrenatalData =
     Boolean((form.lmp ?? "").trim()) ||
     [1, 2, 3, 4, 5, 6, 7, 8, 9].some((n) =>
@@ -683,17 +649,14 @@ function MaternalFormModal({
 
   const set = useCallback((k: string, v: string) => setForm((prev) => ({ ...prev, [k]: v })), []);
 
-  // Keep Expected Date of Delivery in sync with LMP (LMP + 280 days).
   useEffect(() => {
     if (!form.lmp) return;
     const edd = computeEdd(form.lmp);
     setForm((prev) => (prev.edd === edd ? prev : { ...prev, edd }));
   }, [form.lmp]);
 
-  // Age of Gestation is derived live from LMP + today's date.
   const aog = computeGestation(form.lmp);
 
-  // Family Planning Side B keeps a growing list of visit rows.
   const visitCount = Math.max(1, parseInt(form.fpb_visit_count || "1", 10) || 1);
 
   const save = async () => {
@@ -721,7 +684,6 @@ function MaternalFormModal({
         setError(json.error || "Failed to save maternal record.");
         return;
       }
-      // Drop the prenatal editor back to the read-only summary after save.
       setObgyneEditing(false);
       setPrenatalEditing(false);
       setPostnatalEditing(false);
@@ -782,7 +744,6 @@ function MaternalFormModal({
             </div>
           ) : (
             <div className="space-y-5">
-              {/* Sub-tabs: OB-Gyne History · Prenatal Care · Postnatal Care */}
               <div className="flex gap-1 rounded-2xl bg-[#EFF6FF] p-1.5">
                 {([
                   ["obgyne", "OB-Gyne History"],
@@ -1000,8 +961,6 @@ function MaternalFormModal({
                       </p>
 
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
-                        // A month opens only when every earlier month has a
-                        // Date of Visit — you can't skip ahead.
                         const unlocked = [...Array(n - 1)].every(
                           (_, i) => (form[`pn${i + 1}_date`] ?? "").trim()
                         );
@@ -1204,8 +1163,6 @@ function MaternalFormModal({
                       </p>
 
                       {POSTNATAL_DAYS.map((day, idx) => {
-                        // A visit opens only when every earlier day has a Date of
-                        // Visit — you can't skip ahead.
                         const unlocked = POSTNATAL_DAYS.slice(0, idx).every(
                           (d) => (form[`postd${d}_date`] ?? "").trim()
                         );
@@ -1270,7 +1227,6 @@ function MaternalFormModal({
 
               {formTab === "familyplanning" && (
                 <div className="space-y-5">
-                  {/* Nested Side A / Side B tabs (matching the paper form) */}
                   <div className="flex gap-1 rounded-2xl bg-[#DBEAFE] p-1.5">
                     {([
                       ["a", "Side A — Assessment"],

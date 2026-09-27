@@ -5,8 +5,6 @@ import { sendOtpEmail } from "@/lib/mail";
 
 export const runtime = "nodejs";
 
-// Admin sends a verification code to the new staff member's email before the
-// account can be created.
 export async function POST(req: Request) {
   try {
     const admin = await getCurrentApiUser();

@@ -5,9 +5,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 export const runtime = "nodejs";
 
-// Super-admin only, password-confirmed. Deletes ALL residents and ALL non-admin
-// users (and everything that cascades off them). Super admins and barangay
-// admins are kept.
 export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();
@@ -34,9 +31,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
     }
 
-    // Order matters: residents first (cascades their history/appointments/
-    // diagnoses/referrals/etc.), then non-admin users (cascades their staff
-    // records), keeping SUPER_ADMIN and BARANGAY_ADMIN.
     const [pending, residents, users] = await prisma.$transaction([
       prisma.pendingRegistration.deleteMany({}),
       prisma.resident.deleteMany({}),

@@ -217,9 +217,6 @@ export async function POST(req: Request) {
       return resident;
     });
 
-    // Seal the newly-created medical records on-chain (fire-and-forget so the
-    // registration response isn't blocked by the transaction). No-ops when the
-    // blockchain is disabled — anchorRecord itself checks isBlockchainEnabled().
     ;(async () => {
       try {
         const residentId = result.id;

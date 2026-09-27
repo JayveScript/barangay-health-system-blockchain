@@ -61,7 +61,6 @@ export async function PATCH(
       },
     });
 
-    // On accept, email the referring staff that their patient was accepted.
     if (newStatus === "ACCEPTED" && updated.referredByStaff?.email) {
       const idata = (updated.identifyingData || {}) as Record<string, unknown>;
       const residentName =

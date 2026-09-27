@@ -3,13 +3,6 @@
 import { useEffect, useState } from "react";
 import { Blocks, ExternalLink } from "lucide-react";
 
-// Where a resident's medical record is sealed on-chain (block number, tx, hash).
-// Self-fetches from `endpoint` so the exact same card can be dropped into every
-// resident-info view — Registered Residents modal, doctor appointment modal, the
-// resident's own history, the QR scan page, referral modals — on mobile and
-// desktop alike. Renders nothing until an anchored record is found (or a small
-// "not anchored yet" note when the chain is configured but this record isn't
-// sealed).
 type MedicalAnchorView = {
   configured: boolean;
   anchored: boolean;
@@ -31,9 +24,6 @@ export function BlockchainAnchorCard({
   anchor: anchorProp,
   className = "",
 }: {
-  // Client mode: give an `endpoint` and the card fetches the anchor itself.
-  // Server mode: pass a pre-fetched `anchor` (e.g. from getMedicalRecordAnchor)
-  // so the card renders without a client round-trip and works for any viewer.
   endpoint?: string;
   anchor?: MedicalAnchorView | null;
   className?: string;
@@ -54,15 +44,11 @@ export function BlockchainAnchorCard({
           .catch(() => null)) as MedicalAnchorView | null;
         if (!active || !res.ok || !json) return;
         setFetched(json);
-        // A record just anchored by a diagnosis mines within a block or two.
-        // While the chain is configured but this record isn't anchored yet, poll
-        // a few times so the block number appears without a manual refresh.
         if (json.configured && !json.anchored && tries < 5) {
           tries++;
           timer = setTimeout(load, 8000);
         }
       } catch {
-        /* leave unset — card simply doesn't render */
       }
     };
 

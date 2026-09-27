@@ -196,7 +196,6 @@ export default function RegisterPage() {
   const [serverMessage, setServerMessage] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
 
-  // Countdown that gates the "Resend Code" button after each send.
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((s) => s - 1), 1000);

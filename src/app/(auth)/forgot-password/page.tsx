@@ -16,7 +16,6 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
-  // Countdown that gates the "Resend code" button after each send.
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
@@ -61,7 +60,6 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Re-send the reset code to the same email (rate-limited server-side).
   const handleResend = async () => {
     if (cooldown > 0 || loading) return;
     setError("");

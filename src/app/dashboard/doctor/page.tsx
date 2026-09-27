@@ -1182,9 +1182,6 @@ function ResidentDetailsModal({
   const resident = appointment.resident;
   if (!resident) return null;
 
-  // Map the appointment's resident into the shared StaffResident shape so we can
-  // reuse the exact same modal (design + info + blockchain + assessments) as the
-  // Registered Residents tab. Rendered via Portal so it centers globally.
   const derivedName = resident.fullName || getResidentName(appointment) || "";
   const mapped = {
     id: resident.id ?? "",

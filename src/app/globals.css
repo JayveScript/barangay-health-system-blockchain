@@ -199,7 +199,6 @@ button, a, [role="button"] {
 ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ── Print-to-PDF: when printing, show only the marked overview panel ── */
 @media print {
   body * { visibility: hidden !important; }
   .print-area, .print-area * { visibility: visible !important; }

@@ -81,8 +81,6 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
       );
     }
 
-    // A fresh scan must carry a valid, non-expired live token. This blocks
-    // reused screenshots of a resident's rotating QR.
     const tokenCheck = liveToken ? verifyResidentQrToken(liveToken) : null;
     if (!tokenCheck || tokenCheck.residentId !== id) {
       await logQrScanActivity({
@@ -319,9 +317,6 @@ export default async function PublicResidentPage({ params, searchParams }: PageP
       })
     : null;
 
-  // Where this resident's medical record is sealed on-chain. Computed server-side
-  // because this page is already authorized by the QR token, so the card shows
-  // for any authorized viewer (not only staff who can call the API).
   const blockchainAnchor = await getMedicalRecordAnchor(id).catch(() => null);
 
   const philpenAge = displayAge(resident.birthDate, resident.age) ?? resident.age;

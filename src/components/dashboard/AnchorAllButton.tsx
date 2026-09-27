@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Blocks, Loader2 } from "lucide-react";
 
-// Super-admin one-time action: anchor every existing resident's medical
-// records on-chain (for records created while the blockchain was off).
 export function AnchorAllButton({ className = "" }: { className?: string }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);

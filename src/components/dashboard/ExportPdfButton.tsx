@@ -3,12 +3,6 @@
 import { useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 
-// Directly downloads the overview as a PDF file (no print dialog). On click it
-// captures the nearest `.print-area` container to a high-res image and writes it
-// into a paginated A4 PDF, then saves it straight to the device. Capture uses
-// html-to-image (not html2canvas) because the app uses Tailwind v4 oklch()
-// colors, which html2canvas can't parse. The button and any `.no-print`
-// elements are excluded from the capture.
 export function ExportPdfButton({
   label = "Download PDF",
   fileName = "overview",
@@ -28,7 +22,6 @@ export function ExportPdfButton({
 
     const area = btnRef.current?.closest(".print-area") as HTMLElement | null;
     if (!area) {
-      // Fallback to the print dialog if we can't find the container.
       window.print();
       return;
     }
@@ -44,7 +37,6 @@ export function ExportPdfButton({
       const dataUrl = await toPng(area, {
         pixelRatio: 2,
         backgroundColor: "#ffffff",
-        // Drop the button + anything marked no-print from the snapshot.
         filter: (node) =>
           !(
             node instanceof HTMLElement &&
@@ -53,7 +45,6 @@ export function ExportPdfButton({
           ),
       });
 
-      // Measure the captured image so we can preserve its aspect ratio.
       const img = new Image();
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
@@ -68,8 +59,6 @@ export function ExportPdfButton({
       const imgW = pageW - margin * 2;
       const imgH = (img.height / img.width) * imgW;
 
-      // Place the full image on page 1, then add pages that reveal the next
-      // slice by shifting the image up by one page height each time.
       let position = 0;
       let heightLeft = imgH;
       pdf.addImage(dataUrl, "PNG", margin, position, imgW, imgH);

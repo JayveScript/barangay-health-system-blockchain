@@ -163,17 +163,15 @@ export function PhilPenTab({
     })();
   }, [getUrl, readOnly]);
 
-  // Which parts this role may see. Part I: BHW/Midwife/Nurse. Part II: Nurse/Doctor.
   const parts: ("I" | "II")[] =
     role === "BHW" || role === "MIDWIFE"
       ? ["I"]
       : role === "DOCTOR"
       ? ["II"]
-      : ["I", "II"]; // NURSE + admins see both
+      : ["I", "II"];
   const [part, setPart] = useState<"I" | "II">("I");
   useEffect(() => {
     if (parts.length && !parts.includes(part)) setPart(parts[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
   const save = async () => {
@@ -231,7 +229,6 @@ export function PhilPenTab({
           PhilPEN — Philippine Package of Essential NCD Interventions. Shown for residents 20 years and older.
         </div>
 
-        {/* Part switcher (roles) */}
         {parts.length > 1 && (
           <div className="flex gap-1 rounded-2xl bg-[#DBEAFE] p-1.5">
             {parts.map((p) => (

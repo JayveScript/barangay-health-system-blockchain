@@ -341,8 +341,6 @@ export default function AdminDashboardPage() {
     if (selectedBarangayId) fetchDashboard();
   }, [selectedBarangayId]);
 
-  // Clear the Create User form whenever the admin leaves that tab, so it opens
-  // blank next time instead of keeping stale half-filled data and OTP state.
   useEffect(() => {
     if (tab === "create-user") return;
     setForm({

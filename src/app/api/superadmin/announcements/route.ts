@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
-// Super admin broadcast: create the announcement for EVERY barangay so all
-// barangays (their residents and staff) see it through the normal per-barangay
-// announcement feed.
 export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();

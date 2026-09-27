@@ -4,9 +4,6 @@ import { getCurrentResidentUser } from "@/lib/current-user";
 
 export const runtime = "nodejs";
 
-// Where the signed-in resident's OWN medical record is anchored on the
-// blockchain (block number, tx, hash). Resident-scoped — only returns the
-// caller's own anchor.
 export async function GET() {
   try {
     const user = await getCurrentResidentUser();

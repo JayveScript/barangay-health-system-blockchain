@@ -129,10 +129,6 @@ export async function POST(req: Request) {
 
       effectiveResidentId = referral.residentId;
       effectiveAppointmentId = null;
-      // Both the referring (home) and the receiving barangay fold their
-      // assessment into the resident's medical history, so recent findings from
-      // a cross-barangay consult become part of the permanent medical record
-      // and are visible to everyone caring for this referred patient.
       syncHistory = true;
 
       const homeResident = await db.resident.findFirst({
@@ -190,10 +186,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Append this assessment (findings, notes, medical advice) to the medical
-      // history so it becomes part of the resident's permanent medical record —
-      // shown in the Medical tab and carried in referral snapshots, so a
-      // receiving barangay can read the recent findings after a referral.
       const findingLabels = finalConditions.map((k) => CONDITION_FIELDS[k]?.label ?? k);
       const dateStr = new Date().toISOString().slice(0, 10);
       const centerName =
@@ -221,10 +213,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Medical records are append-only and tamper-proof: a new authorised
-      // finding re-seals the updated medical record as a fresh immutable
-      // version on-chain (older versions are kept). Fire-and-forget so the
-      // response is not blocked; a no-op when the blockchain is disabled.
       const updatedFull = await db.resident.findUnique({
         where: { id: effectiveResidentId },
         include: { medicalHistory: true },
@@ -233,11 +221,6 @@ export async function POST(req: Request) {
         updatedFull as unknown as ResidentWithHistories
       ).medical_history;
       if (medicalRecord) {
-        // Await the submission (not the confirmation) so the tx is actually
-        // broadcast before this serverless function returns — otherwise Vercel
-        // can freeze the instance and the anchor never happens. It mines within a
-        // block or two; the Medical tab's short "not anchored" cache then picks up
-        // the new block number. Wrapped so a chain hiccup never fails the save.
         try {
           await anchorRecord(
             effectiveResidentId,

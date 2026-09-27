@@ -33,7 +33,6 @@ function bandOf(age: number | null | undefined): Band {
   return "b2049";
 }
 
-// Acceptor category from the FP client type.
 function catOf(clientType: string): Cat {
   switch (clientType) {
     case "New Acceptor":
@@ -46,13 +45,11 @@ function catOf(clientType: string): Cat {
     case "Restart":
     case "Other":
       return "oa";
-    // Current User (and anything unset but with a method) = current user.
     default:
       return "cu";
   }
 }
 
-// Report method rows, keyed by the exact value stored in fpa_method.
 const METHODS: [string, string][] = [
   ["FSTR / BTL", "1. FSTR / BTL"],
   ["MSTR / NSV", "2. MSTR / NSV"],
@@ -99,7 +96,6 @@ export async function GET() {
       },
     });
 
-    // counts[methodValue][band] -> Quad
     const counts: Record<string, Record<Band, Quad>> = {};
     for (const [m] of METHODS) {
       counts[m] = {
@@ -113,7 +109,7 @@ export async function GET() {
     for (const rec of records) {
       const d = (rec.data as Data) || {};
       const method = s(d.fpa_method);
-      if (!counts[method]) continue; // no FP method recorded → not an FP client
+      if (!counts[method]) continue;
       const band = bandOf(displayAge(rec.resident?.birthDate, rec.resident?.age));
       const cat = catOf(s(d.fpa_client_type));
       counts[method][band][cat] += 1;

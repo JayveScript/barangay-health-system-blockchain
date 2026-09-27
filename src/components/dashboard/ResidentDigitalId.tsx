@@ -94,8 +94,6 @@ export function ResidentDigitalId({
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
   const qrLoading = qrImageUrl === null;
-  // Larger render of the same live token for the "View QR" modal — QR codes stay
-  // crisp when the server generates them at a bigger size instead of upscaling.
   const bigQrUrl = qrImageUrl
     ? qrImageUrl.replace("size=220x220", "size=600x600")
     : null;
@@ -104,9 +102,6 @@ export function ResidentDigitalId({
     toDataUrl("/images/davao-logo.png").then(setLogoDataUrl);
   }, []);
 
-  // The QR encodes a signed, time-limited token. For a resident viewing their
-  // OWN ID it is short-lived and rotates, so a screenshot expires and becomes
-  // unscannable. Staff/admin (allowDownload) get a durable token for printing.
   useEffect(() => {
     let active = true;
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -262,7 +257,6 @@ export function ResidentDigitalId({
         </div>
       </div>
 
-      {/* View QR — opens a big, easy-to-scan QR (great on phones) */}
       <div className="mt-4 w-full max-w-[340px] sm:max-w-[500px] lg:max-w-[760px]">
         <button
           type="button"

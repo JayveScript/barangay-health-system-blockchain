@@ -127,10 +127,8 @@ model Resident {
   familyHistory         ResidentFamilyHistory?
   personalSocialHistory ResidentPersonalSocialHistory?
 
-  // PhilPEN NCD risk assessment (Part I + Part II), a flat key-value blob.
   philpenData Json?
 
-  // Child Immunization ITR (for residents 5 years old and below), key-value blob.
   immunizationData Json?
 
   appointments Appointment[]
@@ -420,9 +418,6 @@ model Announcement {
   content     String
   imageUrl    String?
   publishDate DateTime
-  // Approval workflow: staff posts start PENDING; an admin publishes them.
-  // Defaults to PUBLISHED so existing announcements stay visible after this
-  // column is added. Values: PENDING | PUBLISHED | ARCHIVED.
   status      String   @default("PUBLISHED")
   authorId    String?
   authorName  String?

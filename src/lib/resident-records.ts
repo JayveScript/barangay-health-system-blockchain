@@ -1,9 +1,5 @@
 import type { RecordType } from "@/lib/blockchain";
 
-// Canonical shapes for the resident records that get sealed on-chain. Both the
-// anchoring step (at registration) and the verification step build the record
-// objects with THIS function, reading the same database row — so an untampered
-// record always hashes identically and only a real edit shows as "changed".
 
 type HistoryLike = Record<string, unknown> | null | undefined;
 
@@ -30,9 +26,6 @@ export const RESIDENT_RECORD_LABELS: Record<string, string> = {
   personal_social: "Personal / Social History",
 };
 
-// Only the medical records are sealed on-chain and kept tamper-proof.
-// Identity (name / address / profile) is intentionally NOT sealed so it stays
-// freely editable for legitimate corrections.
 export const MEDICAL_RECORD_ORDER: RecordType[] = [
   "medical_history",
   "family_history",

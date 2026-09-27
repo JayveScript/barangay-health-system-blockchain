@@ -9,17 +9,14 @@ type Row = {
   indent?: number;
   header?: boolean;
   isData?: boolean;
-  // maternal shape
   b1014?: number;
   b1519?: number;
   b2049?: number;
   total?: number;
-  // family-planning shape
   na?: number;
   oa?: number;
   do?: number;
   cu?: number;
-  // NCD / PhilPEN shape
   m?: number;
   f?: number;
   t?: number;
@@ -119,7 +116,6 @@ export function ReportsTab() {
 
   useEffect(() => {
     load(current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   const mode = current.columns;
@@ -128,7 +124,6 @@ export function ReportsTab() {
 
   return (
     <div className="space-y-5 pb-4">
-      {/* Report picker */}
       <div className="flex flex-wrap gap-2">
         {REPORTS.map((r) => (
           <button
@@ -148,7 +143,6 @@ export function ReportsTab() {
       </div>
 
       <div className="print-area space-y-5">
-        {/* Header card */}
         <div className="overflow-hidden rounded-[28px] border border-[#BFDBFE] bg-gradient-to-br from-[#0F172A] to-[#1E3A8A] p-5 text-white shadow-sm sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -185,7 +179,6 @@ export function ReportsTab() {
           )}
         </div>
 
-        {/* Table card */}
         <div className="overflow-hidden rounded-[28px] border border-[#BFDBFE] bg-white shadow-sm">
           {loading ? (
             <div className="flex min-h-[240px] items-center justify-center gap-3 text-sm font-semibold text-[#2563EB]">

@@ -58,7 +58,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-// EPI schedule: which age columns are applicable (a date can be entered) per vaccine.
 const AGES: [string, string][] = [
   ["24hrs", "24 hrs"], ["6wks", "6 wks"], ["10wks", "10 wks"],
   ["14wks", "14 wks"], ["9mos", "9 mos"], ["12mos", "12 mos"], ["12plus", "12 mos & above"],

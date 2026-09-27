@@ -44,11 +44,6 @@ export type RecordType =
   | "referral";
 
 
-// Master kill-switch. Blockchain anchoring/audit is ON by default (so the
-// demo and production stay tamper-proof). To load-test without spending the
-// free chain's rate limit, set BLOCKCHAIN_ENABLED=false in the environment;
-// every write becomes an instant no-op and every read returns a safe default.
-// Remove the var (or set it to true) to turn anchoring back on for the demo.
 export function isBlockchainEnabled(): boolean {
   const v = String(process.env.BLOCKCHAIN_ENABLED ?? "").trim().toLowerCase();
   return !["false", "0", "off", "no", "disabled"].includes(v);
@@ -111,14 +106,8 @@ export async function anchorRecord(
   const { registry } = getBlockchainClient();
   const tx = await registry.anchorRecord(residentId, recordHash, recordType);
 
-  // Drop any cached anchor lookup for this resident so the Medical tab re-reads
-  // the fresh state once the tx mines (instead of serving the stale "not
-  // anchored" result). The transaction is already broadcast at this point, so it
-  // will mine even if the serverless function returns immediately.
   invalidateAnchorCache(residentId);
 
-  // For latency-sensitive callers (e.g. saving a diagnosis) we only need the tx
-  // broadcast, not confirmed — awaiting the submission is enough for durability.
   if (opts?.waitForReceipt === false) {
     return { txHash: tx.hash, recordHash };
   }
@@ -129,11 +118,6 @@ export async function anchorRecord(
 
 export type BackfillEntry = { residentId: string; recordType: RecordType; data: object };
 
-// One-time backfill: anchors many resident medical records at once. Submits
-// transactions with explicit sequential nonces (parallel, no per-tx wait) so it
-// finishes in seconds; the txns then confirm on-chain within a block or two.
-// Residents that already have any anchored record are skipped, so re-running is
-// safe and doesn't waste gas.
 export async function anchorRecordsBatch(
   entries: BackfillEntry[]
 ): Promise<{ submitted: number; skipped: number; failed: number; total: number }> {
@@ -143,7 +127,6 @@ export async function anchorRecordsBatch(
   }
   const { provider, registry, wallet } = getBlockchainClient();
 
-  // Skip residents that already have on-chain records.
   const uniqueResidents = [...new Set(entries.map((e) => e.residentId))];
   const alreadyAnchored = new Set<string>();
   for (const rid of uniqueResidents) {
@@ -151,7 +134,6 @@ export async function anchorRecordsBatch(
       const count = Number(await registry.getRecordCount(rid));
       if (count > 0) alreadyAnchored.add(rid);
     } catch {
-      // treat as not-anchored on read error
     }
   }
   const todo = entries.filter((e) => !alreadyAnchored.has(e.residentId));
@@ -165,7 +147,6 @@ export async function anchorRecordsBatch(
   );
   const failed = results.filter((r) => r.status === "rejected").length;
 
-  // Drop cached anchor lookups so the Medical tab re-reads once they confirm.
   anchorCache.clear();
 
   return { submitted: todo.length - failed, skipped, failed, total };
@@ -316,10 +297,7 @@ export async function isBlockchainReachable(): Promise<boolean> {
   }
 }
 
-// Rough gas used by one anchorRecord call (string + bytes32 + string, array
-// push, event). Used only to estimate how many anchors the balance covers.
 const GAS_PER_ANCHOR = BigInt(150000);
-// Warn once the wallet can afford fewer than this many more anchors.
 const LOW_TX_THRESHOLD = 25;
 
 export type WalletBalance = {
@@ -331,9 +309,6 @@ export type WalletBalance = {
   low?: boolean;
 };
 
-// Reads the anchoring wallet's balance and estimates how many more anchoring
-// transactions it can afford. Works even when anchoring is disabled, so the
-// super admin can keep an eye on the testnet balance during testing.
 export async function getWalletBalance(): Promise<WalletBalance> {
   const rpcUrl = process.env.BLOCKCHAIN_RPC_URL;
   const privateKey = process.env.BLOCKCHAIN_PRIVATE_KEY;
@@ -346,7 +321,7 @@ export async function getWalletBalance(): Promise<WalletBalance> {
       provider.getBalance(wallet.address),
       provider.getFeeData(),
     ]);
-    const gasPrice = feeData.gasPrice ?? BigInt(1000000000); // 1 gwei fallback
+    const gasPrice = feeData.gasPrice ?? BigInt(1000000000);
     const costPerTx = gasPrice * GAS_PER_ANCHOR;
     const estTxLeft = costPerTx > BigInt(0) ? Number(balance / costPerTx) : 0;
 
@@ -363,12 +338,11 @@ export async function getWalletBalance(): Promise<WalletBalance> {
   }
 }
 
-// ── Per-resident medical-record blockchain anchor lookup ────────────────────
 export type MedicalAnchor = {
   configured: boolean;
   anchored: boolean;
   recordHash?: string;
-  timestamp?: number; // unix seconds (block time of the anchor)
+  timestamp?: number;
   blockNumber?: number;
   txHash?: string;
   contractAddress?: string;
@@ -378,23 +352,13 @@ export type MedicalAnchor = {
 
 const anchorCache = new Map<string, { data: MedicalAnchor; expiresAt: number }>();
 const ANCHOR_CACHE_MS = 5 * 60 * 1000;
-// A "not anchored yet" answer is cached only briefly, so that right after a
-// diagnosis re-anchors a record (which mines within a block or two) the Medical
-// tab picks up the new block number quickly instead of waiting out the full TTL.
 const ANCHOR_NEG_CACHE_MS = 15 * 1000;
 const EXPLORER_BASE = "https://sepolia.etherscan.io";
 
-// Drop a resident's cached anchor lookup (e.g. right after re-anchoring) so the
-// next read fetches fresh chain state.
 export function invalidateAnchorCache(residentId: string): void {
   anchorCache.delete(residentId);
 }
 
-// Looks up where a resident's medical_history record is anchored on-chain.
-// Reads work regardless of the write kill-switch (BLOCKCHAIN_ENABLED) — an
-// existing anchor stays readable even while new anchoring is paused. The block
-// number / tx hash come from the RecordAnchored event, scanned newest-first in
-// 10k-block windows (Infura's eth_getLogs cap) and cached.
 export async function getMedicalRecordAnchor(residentId: string): Promise<MedicalAnchor> {
   const cached = anchorCache.get(residentId);
   if (cached && cached.expiresAt > Date.now()) return cached.data;
@@ -419,13 +383,12 @@ export async function getMedicalRecordAnchor(residentId: string): Promise<Medica
         explorer: { address: `${EXPLORER_BASE}/address/${registryAddress}` },
       };
     } else {
-      // Find the anchoring tx's block via the indexed event, newest-first.
       let blockNumber: number | undefined;
       let txHash: string | undefined;
       try {
         const latest = await provider.getBlockNumber();
         const CHUNK = 9900;
-        const MAX_CHUNKS = 16; // ~158k blocks (~3 weeks on Sepolia)
+        const MAX_CHUNKS = 16;
         const filter = registry.filters.RecordAnchored(residentId);
         for (let i = 0; i < MAX_CHUNKS; i++) {
           const to = latest - i * CHUNK;
@@ -444,7 +407,6 @@ export async function getMedicalRecordAnchor(residentId: string): Promise<Medica
           if (from === 0) break;
         }
       } catch {
-        // Event scan is best-effort; the anchor status/hash below still stand.
       }
 
       result = {

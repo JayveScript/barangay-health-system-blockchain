@@ -23,7 +23,6 @@ export function BlockchainBalanceWarning({ className = "" }: { className?: strin
         const json = (await res.json().catch(() => null)) as Balance | null;
         if (active && res.ok) setData(json);
       } catch {
-        /* ignore — a balance read failure should never block the dashboard */
       }
     })();
     return () => {
@@ -31,7 +30,6 @@ export function BlockchainBalanceWarning({ className = "" }: { className?: strin
     };
   }, []);
 
-  // Nothing to show until we have a configured wallet reading.
   if (!data || !data.configured) return null;
 
   const eth = (data.balanceEth ?? 0).toFixed(5);

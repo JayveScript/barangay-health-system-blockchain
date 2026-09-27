@@ -4,11 +4,6 @@ import type { NextRequest } from "next/server";
 
 type RateLimitEntry = { count: number; resetAt: number };
 
-// Keep the counter map on globalThis so it survives module re-evaluation within
-// a single serverless instance. NOTE: this is still per-instance. For limits
-// that hold across ALL Vercel instances (the fully robust version), back this
-// with Vercel KV / Upstash Redis (edge-compatible over fetch) and swap the
-// Map calls below for KV reads/writes.
 const globalForRateLimit = globalThis as unknown as {
   __rateLimitStore?: Map<string, RateLimitEntry>;
 };
@@ -22,7 +17,6 @@ function rateLimit(
 ): { allowed: boolean; retryAfterSec: number } {
   const now = Date.now();
 
-  // Opportunistic cleanup so the map can't grow without bound.
   if (store.size > 5000) {
     for (const [k, v] of store) {
       if (now > v.resetAt) store.delete(k);
@@ -45,11 +39,6 @@ function rateLimit(
   return { allowed: true, retryAfterSec: 0 };
 }
 
-// Shared, cross-instance limiter backed by Upstash Redis (edge-compatible over
-// its REST API — no SDK needed). It activates automatically when
-// UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set in the environment;
-// otherwise, and on any Redis error, it falls back to the per-instance
-// in-memory limiter so requests are never blocked by an infra problem.
 async function rateLimitShared(
   key: string,
   maxRequests: number,
@@ -66,7 +55,6 @@ async function rateLimitShared(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        // INCR the counter, set the window TTL only on first hit (NX), read TTL.
         body: JSON.stringify([
           ["INCR", key],
           ["PEXPIRE", key, String(windowMs), "NX"],
@@ -84,7 +72,6 @@ async function rateLimitShared(
         return { allowed: true, retryAfterSec: 0 };
       }
     } catch {
-      // fall through to the in-memory limiter
     }
   }
 
@@ -100,7 +87,6 @@ const LIMITS: Record<string, { max: number; windowMs: number }> = {
   "/api/register":                     { max: 10, windowMs: 60 * 60 * 1000 },
   "/api/admin/verify-password":        { max: 5,  windowMs: 15 * 60 * 1000 },
   "/api/verify-password":              { max: 10, windowMs: 15 * 60 * 1000 },
-  // Gmail OTP sends — throttle to stop email spam / abuse.
   "/api/admin/create-user/send-code":  { max: 4,  windowMs: 15 * 60 * 1000 },
   "/api/me/change-password/send-code": { max: 4,  windowMs: 15 * 60 * 1000 },
 };
@@ -110,21 +96,12 @@ export async function middleware(req: NextRequest) {
   const limit = LIMITS[pathname];
 
   if (limit) {
-    // Rate limit PER DEVICE, not per network. A household/clinic puts many
-    // devices behind one public IP (NAT), so IP-only limiting made a PC hitting
-    // the limit also block a phone on the same Wi-Fi. We key on a per-device
-    // cookie instead; a device is throttled on its own without affecting others.
-    // If the cookie is missing (first request) we mint one and set it below, and
-    // fall back to the IP so a cookie-less client is still limited.
     const xff = req.headers.get("x-forwarded-for");
     const ip =
       req.headers.get("x-real-ip")?.trim() ||
       xff?.split(",").map((s) => s.trim()).filter(Boolean).pop() ||
       "unknown";
 
-    // Per-device id set client-side (see DeviceIdInit). When present, each
-    // device gets its own bucket even behind the same NAT/public IP; when
-    // absent (e.g. JS disabled), we fall back to the IP so it's still limited.
     const deviceId = req.cookies.get("did")?.value;
     const key = deviceId
       ? `rl:${pathname}:dev:${deviceId}`

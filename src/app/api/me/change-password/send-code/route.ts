@@ -5,8 +5,6 @@ import { sendOtpEmail } from "@/lib/mail";
 
 export const runtime = "nodejs";
 
-// Any authenticated user requests a Gmail verification code to change their own
-// password. The code is sent to their account email.
 export async function POST() {
   try {
     const authed = await getCurrentApiUser();

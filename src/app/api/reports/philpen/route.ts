@@ -43,8 +43,8 @@ export async function GET() {
       const pd = (r.philpenData as PD) || {};
       if (!pd || Object.keys(pd).length === 0) continue;
       const age = displayAge(r.birthDate, r.age);
-      if (age == null || age < 20) continue; // PhilPEN is 20+
-      const grp = age <= 59 ? "ad" : "sr"; // Adults 20-59 vs Senior 60+
+      if (age == null || age < 20) continue;
+      const grp = age <= 59 ? "ad" : "sr";
       const sex = String(r.sex || "");
       assessedTotal += 1;
 
@@ -57,7 +57,6 @@ export async function GET() {
       if (pd.p1_bmi_class === "Overweight") add(`${grp}_overweight`, sex);
       if (pd.p1_bmi_class === "Obese") add(`${grp}_obese`, sex);
 
-      // Cardiovascular / Hypertension
       const htn = pd.p1_htn === "Yes";
       const htnMeds = htn && pd.p1_htn_meds === "Yes";
       if (htn) add(`${grp}_htn`, sex);
@@ -65,7 +64,6 @@ export async function GET() {
       if (htnMeds && pd.p2_med_provided === "Provided by facility") add(`${grp}_htn_fac`, sex);
       if (htnMeds && pd.p2_med_provided === "Out of pocket") add(`${grp}_htn_oop`, sex);
 
-      // Diabetes (Type II)
       const dm = pd.p1_dm === "Yes";
       const dmMeds = dm && pd.p1_dm_meds === "Yes";
       if (dm) add(`${grp}_dm`, sex);

@@ -4,7 +4,6 @@ import { getCurrentApiUser, isSuperAdmin, canManageBarangay } from "@/lib/tenant
 
 export const runtime = "nodejs";
 
-// Part I: BHW / Midwife / Nurse. Part II: Nurse / Doctor. Both save to one blob.
 const ALLOWED_ROLES = ["BHW", "MIDWIFE", "NURSE", "DOCTOR"];
 
 async function guard(residentId: string) {
@@ -12,8 +11,6 @@ async function guard(residentId: string) {
   const role = String(user?.role || "");
   const ok = !!user && (ALLOWED_ROLES.includes(role) || canManageBarangay(user) || isSuperAdmin(user));
   if (!ok) return { error: "Unauthorized", status: 401 as const, user: null };
-  // Not barangay-scoped: PhilPEN is a clinical assessment reachable via QR scans
-  // and cross-barangay referrals, like the resident's medical history.
   const resident = await prisma.resident.findUnique({
     where: { id: residentId },
     select: { id: true },

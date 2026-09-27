@@ -5,8 +5,6 @@ import { getCurrentApiUser, isSuperAdmin } from "@/lib/tenant-auth";
 
 export const runtime = "nodejs";
 
-// Super-admin only, password-confirmed. Delete one specific resident (and their
-// login) or one specific staff user. Admin accounts cannot be deleted here.
 export async function POST(req: Request) {
   try {
     const user = await getCurrentApiUser();
@@ -43,7 +41,6 @@ export async function POST(req: Request) {
       if (!resident) {
         return NextResponse.json({ error: "Resident not found." }, { status: 404 });
       }
-      // Delete the resident (cascades histories/diagnoses/etc.), then its login.
       await prisma.resident.delete({ where: { id: residentId } });
       if (resident.userId) {
         const linked = await prisma.user.findUnique({
@@ -57,7 +54,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, deleted: "resident" });
     }
 
-    // userId branch
     const target = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },

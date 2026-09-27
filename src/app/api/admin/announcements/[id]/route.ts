@@ -5,9 +5,6 @@ import { sendAnnouncementEmail } from "@/lib/mail";
 
 export const runtime = "nodejs";
 
-// Admin-only management of a single announcement: approve/publish, edit,
-// archive, or restore. Super admins can act on any barangay; barangay admins
-// only on their own.
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -45,7 +42,6 @@ export async function PATCH(
 
     const updated = await prisma.announcement.update({ where: { id }, data });
 
-    // Email residents only the first time an announcement becomes published.
     if (becomingPublished) {
       const barangay = await prisma.barangay.findUnique({
         where: { id: updated.barangayId },

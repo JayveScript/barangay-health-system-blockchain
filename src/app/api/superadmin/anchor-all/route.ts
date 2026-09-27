@@ -11,8 +11,6 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// Super-admin one-time backfill: anchor every existing resident's medical
-// records (medical / family / personal-social) that aren't on-chain yet.
 export async function POST() {
   try {
     const user = await getCurrentApiUser();

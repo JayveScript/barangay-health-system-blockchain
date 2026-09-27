@@ -2099,7 +2099,6 @@ function ResidentMedicalHistoryTab({
           />
         </div>
 
-        {/* Blockchain anchor — where your medical record is sealed on-chain */}
         <BlockchainAnchorCard endpoint="/api/residents/me/blockchain" />
 
         {error && (

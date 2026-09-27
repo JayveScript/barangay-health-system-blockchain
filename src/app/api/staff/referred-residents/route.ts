@@ -298,7 +298,6 @@ function formatReferral(referral: {
 }) {
   return {
     id: referral.id,
-    // Needed by the view modal to load this resident's assessments.
     residentId: referral.residentId,
     status: referral.status,
     reason: referral.reason,
@@ -573,7 +572,6 @@ export async function POST(req: Request) {
       "referral"
     ).catch(err => console.error("[blockchain] referral anchor failed:", err));
 
-    // Email the receiving barangay's clinical staff (fire-and-forget).
     (async () => {
       try {
         const recipients = await db.user.findMany({

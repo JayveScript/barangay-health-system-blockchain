@@ -4,8 +4,6 @@ import { getCurrentResidentUser } from "@/lib/current-user";
 
 export const runtime = "nodejs";
 
-// BHW manages appointments in their own barangay: accept, reject, or add a
-// suggestion/note. Scoped to the BHW's barangay (not to a specific doctor).
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }

@@ -5,7 +5,6 @@ import { formatRoleLabel } from "@/lib/role-labels";
 
 type MaternalData = Record<string, string> | null | undefined;
 
-// Age of Gestation is derived live from LMP + today's date.
 function liveGestation(lmp: string | undefined): string {
   if (!lmp) return "";
   const start = new Date(lmp);
@@ -18,7 +17,6 @@ function liveGestation(lmp: string | undefined): string {
   return `${weeks} week${weeks === 1 ? "" : "s"} ${days} day${days === 1 ? "" : "s"}`;
 }
 
-// Age of Gestation at a specific prenatal visit = (Date of Visit - LMP).
 function gestationBetween(lmp: string | undefined, visitDate: string | undefined): string {
   if (!lmp || !visitDate) return "";
   const start = new Date(lmp);
@@ -168,7 +166,6 @@ const POSTNATAL_SECTIONS: Section[] = [
   },
 ];
 
-// Repeating visit definitions (read-only rendering).
 const PRENATAL_VISIT_FIELDS: [string, string][] = [
   ["date", "Date of Visit"], ["weight", "Weight (kg)"], ["bp", "Blood Pressure"],
   ["fundal", "Fundal Height (cm)"], ["fht", "Fetal Heart Tone"], ["remarks", "Findings / Remarks"],
@@ -231,8 +228,6 @@ export function MaternalRecordView({
     );
   };
 
-  // Read-only card for one repeating visit (prenatal month / postnatal day).
-  // `aog`, when given, is rendered right after the Date of Visit chip.
   const renderVisit = (
     title: string,
     prefix: string,

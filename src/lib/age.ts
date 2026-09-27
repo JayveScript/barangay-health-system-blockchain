@@ -1,6 +1,3 @@
-// Live age from a birth date, recomputed every time it's read (so it advances
-// on the resident's birthday without needing the stored `age` to be updated).
-// Falls back to null when there is no usable birth date.
 export function computeAge(
   birthDate: Date | string | null | undefined
 ): number | null {
@@ -15,7 +12,6 @@ export function computeAge(
   return age;
 }
 
-// Live age when possible, otherwise the stored value (for records with no birth date).
 export function displayAge(
   birthDate: Date | string | null | undefined,
   storedAge?: number | null

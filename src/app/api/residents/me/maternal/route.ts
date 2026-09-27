@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { resolveAuthedUser } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 
-// GET: the resident's own pregnancy status + maternal record (if a health
-// worker has filled one). POST: the resident self-declares as pregnant.
 async function getResident() {
   const user = await resolveAuthedUser({ resident: true });
   if (!user || String(user.role) !== "RESIDENT" || !user.resident) return null;

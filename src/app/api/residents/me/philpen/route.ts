@@ -4,7 +4,6 @@ import { getCurrentResidentUser } from "@/lib/current-user";
 
 export const runtime = "nodejs";
 
-// The signed-in resident's OWN PhilPEN record (read-only in the portal).
 export async function GET() {
   try {
     const user = await getCurrentResidentUser();

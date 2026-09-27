@@ -6,8 +6,6 @@ export const runtime = "nodejs";
 
 const RESIDENT_TTL_SECONDS = 20;
 
-// A resident fetches a short-lived token for their OWN live Digital ID QR.
-// The QR rotates on the client, so a screenshot becomes unscannable within ~20s.
 export async function GET() {
   try {
     const user = await resolveAuthedUser({ resident: true });

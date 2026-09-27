@@ -7,8 +7,6 @@ export const runtime = "nodejs";
 
 const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH", "NUTRITIONIST"];
 
-// 10 years — a durable token for admins/staff who download/print a resident's
-// official Digital ID card. Residents cannot reach this endpoint.
 const DOWNLOAD_TTL_SECONDS = 60 * 60 * 24 * 365 * 10;
 
 export async function GET(

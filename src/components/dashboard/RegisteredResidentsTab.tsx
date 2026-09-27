@@ -303,7 +303,6 @@ export function RegisteredResidentsTab({
         </div>
       ) : (
         <>
-          {/* Mobile compact list */}
           <div className="md:hidden">
             <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               Resident Name
@@ -328,7 +327,6 @@ export function RegisteredResidentsTab({
             </div>
           </div>
 
-          {/* Desktop table */}
           <div className="hidden overflow-x-auto md:block">
             <table className="min-w-full w-full table-fixed border-separate border-spacing-y-2">
               <thead>
@@ -471,9 +469,6 @@ export function RegisteredResidentsTab({
             onSaved={() => {
               setEditResident(null);
               setEditPassword("");
-              // Clear any active search so the just-edited resident (whose name
-              // may no longer match the filter) stays visible, and refresh the
-              // list in place without blanking it.
               setSearch("");
               load({ silent: true });
             }}
@@ -498,7 +493,6 @@ type ViewDiagnosis = {
   } | null;
 };
 
-// Medical-history condition flags, in display order, with their diagnosis keys.
 const MEDICAL_CONDITIONS: { key: string; label: string }[] = [
   { key: "hasHypertension", label: "Hypertension" },
   { key: "hasDiabetes", label: "Diabetes" },
@@ -560,15 +554,12 @@ export function ResidentViewModal({
   const fh = resident.familyHistory;
   const ph = resident.personalSocialHistory;
 
-  // Most-recent diagnosis that flagged each condition (diagnoses are newest-first).
   const conditionAuthors: Record<string, ViewDiagnosis> = {};
   for (const d of diagnoses) {
     for (const c of d.conditions ?? []) {
       if (!conditionAuthors[c]) conditionAuthors[c] = d;
     }
   }
-  // Resident-declared previous illnesses, with the auto-appended assessment log
-  // blocks stripped out (those are shown as cards in the Assessment History).
   const declaredPrevIllness = String(mh?.previousIllnessesSurgeries ?? "")
     .split("\n\n")
     .filter((chunk: string) => !chunk.trimStart().startsWith("── Assessment"))
@@ -693,12 +684,10 @@ export function ResidentViewModal({
             <div className="space-y-6">
               <SectionTitle title="Medical History" />
 
-              {/* Blockchain anchor — where this medical record is sealed on-chain */}
               <BlockchainAnchorCard
                 endpoint={`/api/residents/${resident.id}/blockchain`}
               />
 
-              {/* Recorded conditions — tap a "Yes" to see who recorded it */}
               <div>
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
@@ -757,7 +746,6 @@ export function ResidentViewModal({
                 </div>
               </div>
 
-              {/* Condition details + declared previous illnesses */}
               {(mh?.allergiesDetails ||
                 mh?.cancerDetails ||
                 mh?.otherConditionsDetails ||
@@ -772,7 +760,6 @@ export function ResidentViewModal({
                 </div>
               )}
 
-              {/* Assessment history — modern cards with author at the bottom */}
               {diagnoses.length > 0 && (
                 <div>
                   <div className="mb-3 flex items-center gap-2">
@@ -943,9 +930,6 @@ export function ResidentViewModal({
 }
 
 
-// Field context + component are MODULE level so their identity is stable across
-// renders. Defining the field inside EditModal remounted every input on each
-// keystroke, dropping focus and scrolling the modal back to the top on mobile.
 const EditFormCtx = createContext<{
   form: Record<string, string>;
   set: (k: string, v: string) => void;

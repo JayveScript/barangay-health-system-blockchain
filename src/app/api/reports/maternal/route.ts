@@ -39,8 +39,6 @@ function bandOf(age: number | null | undefined): Band {
   return "b2049";
 }
 
-// Auto-classify pregnancy outcome from gestational age (delivery − LMP), DOH/WHO:
-// <20 wks Abortion · fetus dead ≥20 wks Fetal Death · 20–<37 Preterm · ≥37 Full Term.
 function computeOutcome(lmp: string, delivery: string, newbornSex: string): string {
   if (!lmp || !delivery) return "";
   const a = new Date(lmp);
@@ -103,7 +101,7 @@ export async function GET() {
       const parity = parseInt(s(d.ob_p), 10);
       const completed8 = monthDates >= 8;
 
-      const cls = s(d.client_class); // Resident | Trans-in | Trans-out
+      const cls = s(d.client_class);
       const isRes = cls === "Resident";
       const isTin = cls === "Trans-in";
       const isTout = cls === "Trans-out";
@@ -111,8 +109,6 @@ export async function GET() {
       const delivered = has(d.post_delivery_date);
       const tracked = has(d.lmp) || monthDates > 0;
 
-      // ── I. PRENATAL ──────────────────────────────────────────────
-      // 1. 8ANC (delivered women)
       if (delivered && completed8) add("anc8", band);
       if (delivered && completed8 && isRes) add("anc8_a1", band);
       if (delivered && completed8 && isTin) add("anc8_a2", band);
@@ -120,55 +116,42 @@ export async function GET() {
       if (delivered && tracked && isRes) add("anc8_b1", band);
       if (delivered && tracked && isTin) add("anc8_b2", band);
       if (isTout) add("anc8_b3", band);
-      // 2. Nutritional status (1st trimester BMI)
       if (d.nutrition_bmi === "Normal BMI") add("bmi_normal", band);
       if (d.nutrition_bmi === "Low BMI") add("bmi_low", band);
       if (d.nutrition_bmi === "High BMI") add("bmi_high", band);
-      // 3. Td vaccination
       if ((Number.isFinite(parity) ? parity : 0) === 0 && ttCount >= 2) add("td_first", band);
       if (Number.isFinite(parity) && parity >= 1 && ttCount >= 3) add("td_multi", band);
-      // 4. Supplementation
       if (d.iron_supplement === "Yes" || d.prenatal_supplement === "Folic Acid") add("supp_iron", band);
       if (d.prenatal_supplement === "Micronutrient") add("supp_mms", band);
       if (d.prenatal_supplement === "Calcium Carbonate") add("supp_cal", band);
       if (d.prenatal_supplement === "Deworming Tablet") add("supp_deworm", band);
-      // 5. Anemia
       if (has(d.pre_cbc_result) || months.some((n) => has(d[`pn${n}_cbc_result`]))) add("anemia_tested", band);
       if (d.pre_anemia === "Yes" || months.some((n) => d[`pn${n}_anemia`] === "Yes")) add("anemia_diag", band);
-      // 6. GDM
       if (has(d.pre_gdm_screen_result) || months.some((n) => has(d[`pn${n}_gdm_screen_result`]))) add("gdm_screened", band);
       if (d.pre_diabetes === "Yes" || months.some((n) => d[`pn${n}_diabetes`] === "Yes")) add("gdm_positive", band);
-      // 7. ANC BP
       if (completed8 && monthBp >= 8) add("anc_bp", band);
       if (anyMonthHighBp) add("anc_high_bp", band);
       if (d.anc_referred === "Yes") add("anc_referred", band);
 
-      // ── II. INTRAPARTUM & NEWBORN ────────────────────────────────
       const outcome =
         s(d.post_pregnancy_outcome) ||
         computeOutcome(s(d.lmp), s(d.post_delivery_date), s(d.post_newborn_sex));
       const isAbortion = outcome === "Abortion / Miscarriage";
       const isFetalDeath = outcome === "Fetal Death";
       const isLiveBirth = outcome === "Full Term" || outcome === "Preterm";
-      // 1. Total deliveries (exclude abortion/miscarriage)
       if (delivered && !isAbortion) add("deliveries", band);
-      // 2. Skilled Health Professional
       if (delivered && d.post_attendant_type === "Physician") add("shp_physician", band);
       if (delivered && d.post_attendant_type === "Nurse") add("shp_nurse", band);
       if (delivered && d.post_attendant_type === "Midwife") add("shp_midwife", band);
-      // 3. Facility Based Delivery
       if (delivered && d.post_facility_sector === "Public") add("fbd_public", band);
       if (delivered && d.post_facility_sector === "Private") add("fbd_private", band);
-      // 4. Delivery type
       if (delivered && d.post_type === "Normal") add("dtype_vaginal", band);
       if (delivered && d.post_type === "Caesarean Section") add("dtype_cesarean", band);
       if (delivered && d.post_type === "Combined Vaginal-Cesarean") add("dtype_combined", band);
-      // 5. Outcome
       if (outcome === "Full Term") add("outcome_fullterm", band);
       if (outcome === "Preterm") add("outcome_preterm", band);
       if (isFetalDeath) add("outcome_fetaldeath", band);
       if (isAbortion) add("outcome_abortion", band);
-      // 6. Live births by birth weight & sex
       if (isLiveBirth && (d.post_newborn_sex === "Male" || d.post_newborn_sex === "Female")) {
         const sex = d.post_newborn_sex === "Male" ? "male" : "female";
         const g = birthGrams(s(d.post_birthweight));
@@ -176,16 +159,14 @@ export async function GET() {
         add(`bw_${cat}_${sex}`, band);
       }
 
-      // ── III. POSTPARTUM ──────────────────────────────────────────
       const pncDays = [0, 3, 7, 42];
       const pnc4 = pncDays.every((day) => has(d[`postd${day}_date`]));
       const pncBp = pncDays.every((day) => has(d[`postd${day}_bp`]));
-      const pncCls = s(d.pnc_class) || cls; // fall back to prenatal classification
+      const pncCls = s(d.pnc_class) || cls;
       const pncRes = pncCls === "Resident";
       const pncTin = pncCls === "Trans-in";
       const pncTout = pncCls === "Trans-out";
       const dueForPnc = delivered && !isAbortion;
-      // 1. 4PNC
       if (pnc4) add("pnc4", band);
       if (pnc4 && pncRes) add("pnc4_a1", band);
       if (pnc4 && pncTin) add("pnc4_a2", band);
@@ -193,10 +174,8 @@ export async function GET() {
       if (dueForPnc && pncRes) add("pnc4_b1", band);
       if (dueForPnc && pncTin) add("pnc4_b2", band);
       if (pncTout) add("pnc4_b3", band);
-      // 2. Postpartum supplementation
       if (d.post_iron_folic === "Yes") add("pp_iron", band);
       if (d.post_vitamin_a === "Yes") add("pp_vitamin_a", band);
-      // 3. PNC BP
       if (pnc4 && pncBp) add("pnc_bp", band);
       if (pncDays.some((day) => isHighBp(d[`postd${day}_bp`])) || isHighBp(d.post_bp)) add("pnc_high_bp", band);
       if (d.pnc_referred === "Yes") add("pnc_referred", band);
@@ -221,7 +200,7 @@ export async function GET() {
       ...cell(flag),
     });
     const H = (label: string): Row => ({ label, header: true });
-    const G = (label: string, indent = 0): Row => ({ label, indent }); // group heading, no numbers
+    const G = (label: string, indent = 0): Row => ({ label, indent });
 
     const rows: Row[] = [
       H("I. PRENATAL CARE SERVICES"),

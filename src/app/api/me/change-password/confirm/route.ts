@@ -5,7 +5,6 @@ import { getCurrentApiUser } from "@/lib/tenant-auth";
 
 export const runtime = "nodejs";
 
-// Verify the emailed code and set the new password for the current user.
 export async function POST(req: Request) {
   try {
     const authed = await getCurrentApiUser();
