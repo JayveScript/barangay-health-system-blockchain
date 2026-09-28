@@ -35,7 +35,7 @@ import { ResidentMaternalTab } from "@/components/dashboard/ResidentMaternalTab"
 import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { ImmunizationTab } from "@/components/dashboard/ImmunizationTab";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
-import { displayAge } from "@/lib/age";
+import { displayAge, ageLabel } from "@/lib/age";
 import { Baby } from "lucide-react";
 import { formatRoleLabel } from "@/lib/role-labels";
 import {
@@ -3101,7 +3101,7 @@ function ResidentIdentityCard({
       icon: <UserIcon className="h-4 w-4" />,
       fields: [
         { label: "Full Name", value: fullName },
-        { label: "Age", value: displayAge(resident.birthDate, resident.age) ?? resident.age },
+        { label: "Age", value: ageLabel(resident.birthDate, resident.age) || String(displayAge(resident.birthDate, resident.age) ?? resident.age ?? "") },
         { label: "Sex", value: resident.sex, options: ["MALE", "FEMALE"], onChange: (v) => onChange("sex", v) },
         { label: "Birthday", value: resident.birthDate?.slice(0, 10), type: "date", onChange: (v) => onChange("birthDate", v) },
         { label: "Civil Status", value: resident.civilStatus, onChange: (v) => onChange("civilStatus", v) },

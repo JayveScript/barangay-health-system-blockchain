@@ -121,6 +121,21 @@ function avgBp(a: string, b: string): string {
   const dia = Math.round((+pa[2] + +pb[2]) / 2);
   return `${sys}/${dia}`;
 }
+// A first reading is "normal" when systolic < 140 and diastolic < 90.
+function isNormalBp(v: string): boolean {
+  const p = v.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+  if (!p) return false;
+  return +p[1] < 140 && +p[2] < 90;
+}
+// If the 1st reading is normal, proceed straight to it as the average — no need
+// for 2nd/3rd readings. Otherwise average the 2nd & 3rd readings.
+function resolveBp(bp1: string, bp2: string, bp3: string): string {
+  if (isNormalBp(bp1)) {
+    const p = bp1.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+    return p ? `${+p[1]}/${+p[2]}` : "";
+  }
+  return avgBp(bp2, bp3);
+}
 
 export function PhilPenTab({
   residentId,
@@ -184,8 +199,8 @@ export function PhilPenTab({
         ...form,
         p1_bmi: bmi,
         p1_bmi_class: cls,
-        p1_bp_avg: avgBp(form.p1_bp2 ?? "", form.p1_bp3 ?? ""),
-        p2_bp_avg: avgBp(form.p2_bp2 ?? "", form.p2_bp3 ?? ""),
+        p1_bp_avg: resolveBp(form.p1_bp1 ?? "", form.p1_bp2 ?? "", form.p1_bp3 ?? ""),
+        p2_bp_avg: resolveBp(form.p2_bp1 ?? "", form.p2_bp2 ?? "", form.p2_bp3 ?? ""),
       };
       const res = await fetch(`/api/philpen/${residentId}`, {
         method: "PUT",
@@ -279,8 +294,13 @@ export function PhilPenTab({
                 <Row label="1st Reading (mmHg)"><Text k="p1_bp1" ph="e.g. 120/80" /></Row>
                 <Row label="2nd Reading (mmHg)"><Text k="p1_bp2" ph="e.g. 120/80" /></Row>
                 <Row label="3rd Reading (mmHg)"><Text k="p1_bp3" ph="e.g. 120/80" /></Row>
-                <Row label="Average of 2nd & 3rd"><ReadOnly value={avgBp(form.p1_bp2 ?? "", form.p1_bp3 ?? "")} /></Row>
+                <Row label="Average"><ReadOnly value={resolveBp(form.p1_bp1 ?? "", form.p1_bp2 ?? "", form.p1_bp3 ?? "")} /></Row>
               </div>
+              {isNormalBp(form.p1_bp1 ?? "") && (
+                <p className="text-xs font-semibold text-emerald-700">
+                  1st reading is normal (&lt;140/90) — proceeding to average. 2nd &amp; 3rd readings not required.
+                </p>
+              )}
             </Section>
 
             <Section title="Lifestyle">
@@ -331,8 +351,13 @@ export function PhilPenTab({
                 <Row label="1st Reading (mmHg)"><Text k="p2_bp1" ph="e.g. 120/80" /></Row>
                 <Row label="2nd Reading (mmHg)"><Text k="p2_bp2" ph="e.g. 120/80" /></Row>
                 <Row label="3rd Reading (mmHg)"><Text k="p2_bp3" ph="e.g. 120/80" /></Row>
-                <Row label="Average of 2nd & 3rd"><ReadOnly value={avgBp(form.p2_bp2 ?? "", form.p2_bp3 ?? "")} /></Row>
+                <Row label="Average"><ReadOnly value={resolveBp(form.p2_bp1 ?? "", form.p2_bp2 ?? "", form.p2_bp3 ?? "")} /></Row>
               </div>
+              {isNormalBp(form.p2_bp1 ?? "") && (
+                <p className="text-xs font-semibold text-emerald-700">
+                  1st reading is normal (&lt;140/90) — proceeding to average. 2nd &amp; 3rd readings not required.
+                </p>
+              )}
             </Section>
 
             <Section title="Blood Sugar">
@@ -358,6 +383,7 @@ export function PhilPenTab({
               <Row label="Medication source"><YesNo k="p2_med_provided" options={["Provided by facility", "Out of pocket"]} /></Row>
               <Row label="Date of Follow-up"><DateI k="p2_followup" /></Row>
               <Row label="Physician's Name"><Text k="p2_physician" ph="Physician name" /></Row>
+              <Row label="Nurse's Name"><Text k="p2_nurse" ph="Nurse name" /></Row>
             </Section>
           </>
         )}

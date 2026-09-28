@@ -104,7 +104,7 @@ export async function POST(req: Request) {
       !body.completeAddress ||
       !String(body.contactNumber || "").trim() ||
       Number.isNaN(age) ||
-      age <= 0 ||
+      age < 0 ||
       Number.isNaN(birthDate.getTime())
     ) {
       return NextResponse.json(

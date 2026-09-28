@@ -124,7 +124,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (Number.isNaN(parsedAge) || parsedAge <= 0) {
+    if (Number.isNaN(parsedAge) || parsedAge < 0) {
       return NextResponse.json(
         { error: "Please enter a valid age." },
         { status: 400 }

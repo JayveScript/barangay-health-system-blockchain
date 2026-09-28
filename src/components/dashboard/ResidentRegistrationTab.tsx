@@ -13,6 +13,7 @@ import {
   EDUCATIONAL_ATTAINMENT_OPTIONS,
   RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
+import { ageLabel } from "@/lib/age";
 
 type ResidentRegistrationForm = {
   lastName: string;
@@ -351,7 +352,7 @@ function RegistrationModal({
                 updateField("birthDate", v);
                 updateField("age", computeAge(v));
               }} />
-              <ModalInput label="Age (auto)" value={form.age} onChange={() => {}} readOnly />
+              <ModalInput label="Age (auto)" value={ageLabel(form.birthDate) || form.age} onChange={() => {}} readOnly />
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase text-slate-500">Sex *</label>
                 <select
@@ -500,7 +501,7 @@ function RegistrationModal({
                     .trim()}
                 />
                 <SummaryItem label="Birthday" value={form.birthDate} />
-                <SummaryItem label="Age" value={form.age} />
+                <SummaryItem label="Age" value={ageLabel(form.birthDate) || form.age} />
                 <SummaryItem label="Sex" value={form.sex} />
                 <SummaryItem label="Civil Status" value={form.civilStatus} />
                 <SummaryItem label="Religion" value={form.religion} />

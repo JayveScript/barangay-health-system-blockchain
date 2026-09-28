@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ageLabel } from "@/lib/age";
 import {
   ArrowLeft,
   ArrowRight,
@@ -608,7 +609,7 @@ export default function RegisterPage() {
                         required
                         readOnly
                         placeholder="Auto from birthday"
-                        value={form.age}
+                        value={ageLabel(form.birthDate) || form.age}
                         onChange={() => {}}
                         helper="Auto-calculated from birthday"
                         error={errors.age}
