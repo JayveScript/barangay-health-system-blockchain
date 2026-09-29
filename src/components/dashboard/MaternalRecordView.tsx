@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { formatRoleLabel } from "@/lib/role-labels";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 
 type MaternalData = Record<string, string> | null | undefined;
 
@@ -180,10 +181,12 @@ export function MaternalRecordView({
   data,
   updatedBy,
   updatedAt,
+  blockchainEndpoint,
 }: {
   data: MaternalData;
   updatedBy?: { fullName?: string | null; role?: string | null } | null;
   updatedAt?: string | null;
+  blockchainEndpoint?: string;
 }) {
   const d = data || {};
   const has = (k: string) => (d[k] ?? "").toString().trim() !== "";
@@ -302,6 +305,8 @@ export function MaternalRecordView({
 
   return (
     <div className="space-y-4">
+      {blockchainEndpoint && <BlockchainAnchorCard endpoint={blockchainEndpoint} />}
+
       {(updatedBy || updatedAt) && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3">
           <p className="text-sm font-bold text-[#2563EB]">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import {
   ArrowLeftRight,
   CalendarCheck,
@@ -745,6 +746,10 @@ function PatientSummary({
         ) : (
           <p className="mt-1 text-xs font-semibold text-slate-400">No recorded conditions yet.</p>
         )}
+      </div>
+
+      <div className="mt-3">
+        <BlockchainAnchorCard endpoint={`/api/residents/${patient.id}/blockchain`} />
       </div>
     </div>
   );

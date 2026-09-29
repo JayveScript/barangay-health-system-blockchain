@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import {
   Baby,
   CheckCircle2,
@@ -744,6 +745,9 @@ function MaternalFormModal({
             </div>
           ) : (
             <div className="space-y-5">
+              <BlockchainAnchorCard
+                endpoint={`/api/residents/${resident.id}/blockchain`}
+              />
               <div className="flex gap-1 rounded-2xl bg-[#EFF6FF] p-1.5">
                 {([
                   ["obgyne", "OB-Gyne History"],

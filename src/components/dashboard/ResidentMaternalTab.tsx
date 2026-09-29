@@ -142,6 +142,7 @@ export function ResidentMaternalTab() {
         data={state.record.data}
         updatedBy={state.record.updatedBy}
         updatedAt={state.record.updatedAt}
+        blockchainEndpoint="/api/residents/me/blockchain"
       />
     </div>
   );

@@ -77,21 +77,21 @@ export function BlockchainAnchorCard({
 
   return (
     <div
-      className={`rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4 shadow-sm ${className}`}
+      className={`w-full max-w-full overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-3 shadow-sm sm:p-4 ${className}`}
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white">
           <Blocks className="h-4 w-4" />
         </span>
-        <h4 className="text-sm font-black uppercase tracking-wide text-indigo-900">
+        <h4 className="text-[13px] font-black uppercase tracking-wide text-indigo-900 sm:text-sm">
           Secured on Blockchain
         </h4>
         <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-indigo-700">
           {anchor.network ?? "sepolia"}
         </span>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="min-w-0 rounded-xl border border-indigo-100 bg-white px-3 py-2">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
             Block Number
           </p>
@@ -100,9 +100,9 @@ export function BlockchainAnchorCard({
               href={anchor.explorer?.block}
               target="_blank"
               rel="noreferrer"
-              className="mt-0.5 inline-flex items-center gap-1 text-sm font-black text-indigo-700 hover:underline"
+              className="mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-sm font-black text-indigo-700 hover:underline"
             >
-              #{anchor.blockNumber} <ExternalLink className="h-3 w-3" />
+              #{anchor.blockNumber} <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           ) : (
             <p className="mt-0.5 text-sm font-semibold text-slate-400">
@@ -110,7 +110,7 @@ export function BlockchainAnchorCard({
             </p>
           )}
         </div>
-        <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+        <div className="min-w-0 rounded-xl border border-indigo-100 bg-white px-3 py-2">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
             Transaction
           </p>
@@ -119,7 +119,7 @@ export function BlockchainAnchorCard({
               href={anchor.explorer?.tx}
               target="_blank"
               rel="noreferrer"
-              className="mt-0.5 inline-flex items-center gap-1 break-all text-sm font-bold text-indigo-700 hover:underline"
+              className="mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-sm font-bold text-indigo-700 hover:underline"
             >
               {shortHash(anchor.txHash)}{" "}
               <ExternalLink className="h-3 w-3 shrink-0" />
@@ -128,7 +128,7 @@ export function BlockchainAnchorCard({
             <p className="mt-0.5 text-sm font-semibold text-slate-400">—</p>
           )}
         </div>
-        <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+        <div className="min-w-0 rounded-xl border border-indigo-100 bg-white px-3 py-2">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
             Record Hash
           </p>
@@ -136,11 +136,11 @@ export function BlockchainAnchorCard({
             {shortHash(anchor.recordHash ?? "")}
           </p>
         </div>
-        <div className="rounded-xl border border-indigo-100 bg-white px-3 py-2">
+        <div className="min-w-0 rounded-xl border border-indigo-100 bg-white px-3 py-2">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
             Anchored
           </p>
-          <p className="mt-0.5 text-sm font-semibold text-slate-800">
+          <p className="mt-0.5 break-words text-sm font-semibold text-slate-800">
             {anchor.timestamp
               ? new Date(anchor.timestamp * 1000).toLocaleString()
               : "—"}
@@ -152,9 +152,9 @@ export function BlockchainAnchorCard({
           href={anchor.explorer.address}
           target="_blank"
           rel="noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:underline"
+          className="mt-3 inline-flex max-w-full items-center gap-1 break-all text-xs font-black text-indigo-600 hover:underline"
         >
-          View registry contract <ExternalLink className="h-3 w-3" />
+          View registry contract <ExternalLink className="h-3 w-3 shrink-0" />
         </a>
       )}
     </div>
