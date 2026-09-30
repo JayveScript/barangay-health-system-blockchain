@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw } from "lucide-react";
+import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
 
 type Row = {
@@ -87,13 +87,51 @@ const REPORTS: {
   },
 ];
 
+function currentPeriodLabel() {
+  return new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
 export function ReportsTab() {
   const [active, setActive] = useState<ReportId>("maternal");
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Report metadata for the printout / export header & signatories.
+  const [period, setPeriod] = useState(currentPeriodLabel());
+  const [preparedBy, setPreparedBy] = useState("");
+  const [preparedByTitle, setPreparedByTitle] = useState("");
+  const [notedBy, setNotedBy] = useState("");
+  const [notedByTitle, setNotedByTitle] = useState("");
+
   const current = REPORTS.find((r) => r.id === active)!;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/users/me", { cache: "no-store" });
+        if (!res.ok) return;
+        const me = await res.json().catch(() => null);
+        if (me?.fullName) setPreparedBy(String(me.fullName));
+        if (me?.role) setPreparedByTitle(roleTitle(String(me.role)));
+      } catch {
+        /* non-fatal */
+      }
+    })();
+  }, []);
+
+  const exportCsv = () => {
+    if (!data) return;
+    const csv = buildCsv(current, data, {
+      period,
+      preparedBy,
+      preparedByTitle,
+      notedBy,
+      notedByTitle,
+    });
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(csv, `${current.id}-report-${stamp}.csv`);
+  };
 
   const load = async (report = current) => {
     try {
@@ -166,13 +204,23 @@ export function ReportsTab() {
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </button>
+              <button
+                type="button"
+                onClick={exportCsv}
+                disabled={!data}
+                className="no-print inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/20 disabled:opacity-50"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Export CSV
+              </button>
               <ExportPdfButton fileName={`${current.id}-report`} />
             </div>
           </div>
 
           {data && (
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <StatTile label="Coverage" value={data.scope} />
+              <EditableStatTile label="Reporting Period" value={period} onChange={setPeriod} />
               <StatTile label={current.countLabel} value={String(data.totalRecords)} />
               <StatTile label="Generated" value={new Date().toLocaleDateString()} />
             </div>
@@ -279,6 +327,28 @@ export function ReportsTab() {
         </div>
 
         <p className="text-xs font-semibold text-slate-400">{current.note}</p>
+
+        <div className="rounded-[28px] border border-[#BFDBFE] bg-white p-5 shadow-sm sm:p-6">
+          <p className="mb-4 text-xs font-black uppercase tracking-wide text-slate-500">
+            Certification
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <SignatureBlock
+              role="Prepared by"
+              name={preparedBy}
+              onName={setPreparedBy}
+              title={preparedByTitle}
+              onTitle={setPreparedByTitle}
+            />
+            <SignatureBlock
+              role="Noted by"
+              name={notedBy}
+              onName={setNotedBy}
+              title={notedByTitle}
+              onTitle={setNotedByTitle}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -315,4 +385,150 @@ function Num({ v, total }: { v?: number; total?: boolean }) {
       {n}
     </td>
   );
+}
+
+function EditableStatTile({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/10 px-4 py-3">
+      <p className="text-[11px] font-bold uppercase tracking-wide text-white/60">{label}</p>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-0.5 w-full bg-transparent text-base font-black text-white outline-none placeholder:text-white/40"
+        placeholder="e.g. September 2026"
+      />
+    </div>
+  );
+}
+
+function SignatureBlock({
+  role,
+  name,
+  onName,
+  title,
+  onTitle,
+}: {
+  role: string;
+  name: string;
+  onName: (v: string) => void;
+  title: string;
+  onTitle: (v: string) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">{role}</p>
+      <input
+        value={name}
+        onChange={(e) => onName(e.target.value)}
+        placeholder="Full name"
+        className="w-full border-b-2 border-slate-300 bg-transparent px-1 pb-1 text-center text-sm font-black uppercase tracking-wide text-slate-800 outline-none focus:border-[#2563EB]"
+      />
+      <input
+        value={title}
+        onChange={(e) => onTitle(e.target.value)}
+        placeholder="Designation"
+        className="mt-1 w-full bg-transparent px-1 text-center text-xs font-semibold text-slate-500 outline-none"
+      />
+    </div>
+  );
+}
+
+function roleTitle(role: string): string {
+  const map: Record<string, string> = {
+    DOCTOR: "Physician",
+    NURSE: "Nurse",
+    MIDWIFE: "Midwife",
+    BHW: "Barangay Health Worker",
+    PHARMACIST: "Pharmacist",
+    MEDTECH: "Medical Technologist",
+    NUTRITIONIST: "Nutritionist",
+    BARANGAY_ADMIN: "Barangay Health Center Admin",
+    SUPER_ADMIN: "System Administrator",
+  };
+  return map[role] ?? "";
+}
+
+type ReportMeta = {
+  period: string;
+  preparedBy: string;
+  preparedByTitle: string;
+  notedBy: string;
+  notedByTitle: string;
+};
+
+function csvCell(v: string | number | undefined | null): string {
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function buildCsv(
+  current: (typeof REPORTS)[number],
+  data: ReportData,
+  meta: ReportMeta
+): string {
+  const mode = current.columns;
+  const numCols =
+    mode === "fp"
+      ? ["NA", "OA", "DO", "CU"]
+      : mode === "ncd"
+      ? ["Male", "Female", "Total"]
+      : ["10-14", "15-19", "20-49", "Total"];
+
+  const valuesFor = (row: Row): (number | "")[] => {
+    if (mode === "fp") return [row.na ?? 0, row.oa ?? 0, row.do ?? 0, row.cu ?? 0];
+    if (mode === "ncd") return [row.m ?? 0, row.f ?? 0, row.t ?? 0];
+    return [row.b1014 ?? 0, row.b1519 ?? 0, row.b2049 ?? 0, row.total ?? 0];
+  };
+
+  const lines: string[] = [];
+  const push = (cells: (string | number)[]) => lines.push(cells.map(csvCell).join(","));
+
+  push([current.title]);
+  push([current.subtitle]);
+  push([]);
+  push(["Coverage", data.scope]);
+  push(["Reporting Period", meta.period]);
+  push([current.countLabel, data.totalRecords]);
+  push(["Generated", new Date().toLocaleString()]);
+  push([]);
+
+  const indicatorHeader = mode === "fp" ? "Method / Age Group" : "Indicator";
+  push([indicatorHeader, ...numCols]);
+
+  for (const row of data.rows) {
+    if (row.header || !row.isData) {
+      push([row.label]);
+      continue;
+    }
+    const indent = "  ".repeat(row.indent ?? 0);
+    push([`${indent}${row.label}`, ...valuesFor(row)]);
+  }
+
+  push([]);
+  push([]);
+  push(["Prepared by", meta.preparedBy, meta.preparedByTitle]);
+  push(["Noted by", meta.notedBy, meta.notedByTitle]);
+
+  return lines.join("\r\n");
+}
+
+function downloadCsv(csv: string, fileName: string) {
+  // BOM so Excel opens UTF-8 correctly.
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
