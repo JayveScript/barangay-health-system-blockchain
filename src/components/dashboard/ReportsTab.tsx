@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet } from "lucide-react";
-import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
+import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet, Download } from "lucide-react";
 import type { Cell } from "exceljs";
+import type { jsPDF as JsPDFType } from "jspdf";
 
 type Row = {
   label: string;
@@ -121,6 +121,30 @@ export function ReportsTab() {
     })();
   }, []);
 
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const exportPdf = async () => {
+    if (!data || exportingPdf) return;
+    setExportingPdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+      const doc = buildPdf(jsPDF, autoTable, current, data, {
+        period,
+        preparedBy,
+        preparedByTitle,
+        notedBy,
+        notedByTitle,
+      });
+      const stamp = new Date().toISOString().slice(0, 10);
+      doc.save(`${current.id}-report-${stamp}.pdf`);
+    } catch (e) {
+      console.error("EXPORT_PDF_ERROR", e);
+      setError("Couldn't build the PDF. Please try again.");
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   const [exporting, setExporting] = useState(false);
   const exportExcel = async () => {
     if (!data || exporting) return;
@@ -223,7 +247,15 @@ export function ReportsTab() {
                 <FileSpreadsheet className="h-4 w-4" />
                 {exporting ? "Preparing…" : "Export Excel"}
               </button>
-              <ExportPdfButton fileName={`${current.id}-report`} />
+              <button
+                type="button"
+                onClick={exportPdf}
+                disabled={!data || exportingPdf}
+                className="no-print inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/20 disabled:opacity-50"
+              >
+                <Download className="h-4 w-4" />
+                {exportingPdf ? "Preparing…" : "Download PDF"}
+              </button>
             </div>
           </div>
 
@@ -656,4 +688,150 @@ function downloadXlsx(buffer: ArrayBuffer, fileName: string) {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// --- PDF export, same DOH Summary Table format as the Excel ---
+function buildPdf(
+  JsPDF: typeof import("jspdf").jsPDF,
+  autoTable: typeof import("jspdf-autotable").default,
+  current: (typeof REPORTS)[number],
+  data: ReportData,
+  meta: ReportMeta
+): JsPDFType {
+  const mode = current.columns;
+  const subCols =
+    mode === "fp"
+      ? ["NA", "OA", "DO", "CU"]
+      : mode === "ncd"
+      ? ["M", "F", "T"]
+      : ["10-14", "15-19", "20-49", "TOTAL"];
+  const n = subCols.length;
+  const valuesFor = (row: Row): number[] => {
+    if (mode === "fp") return [row.na ?? 0, row.oa ?? 0, row.do ?? 0, row.cu ?? 0];
+    if (mode === "ncd") return [row.m ?? 0, row.f ?? 0, row.t ?? 0];
+    return [row.b1014 ?? 0, row.b1519 ?? 0, row.b2049 ?? 0, row.total ?? 0];
+  };
+
+  const doc = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  let y = 14;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.text("Summary Table", pageW / 2, y, { align: "center" });
+  y += 7;
+  doc.setFontSize(11);
+  doc.text(current.title, pageW / 2, y, { align: "center" });
+  y += 5;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(110);
+  doc.text(current.subtitle, pageW / 2, y, { align: "center" });
+  y += 6;
+  doc.setTextColor(20);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  for (const line of [
+    `Coverage: ${data.scope}`,
+    `Reporting Period: ${meta.period}`,
+    `${current.countLabel}: ${data.totalRecords}`,
+    `Generated: ${new Date().toLocaleString()}`,
+  ]) {
+    doc.text(line, margin, y);
+    y += 4.5;
+  }
+  y += 2;
+
+  const head = [
+    [
+      {
+        content: mode === "fp" ? "METHOD / INDICATOR" : "INDICATORS",
+        rowSpan: 2,
+        styles: { valign: "middle", halign: "center" },
+      },
+      { content: String(meta.period || "").toUpperCase(), colSpan: n, styles: { halign: "center" } },
+    ],
+    subCols.map((s) => ({ content: s, styles: { halign: "center" } })),
+  ];
+
+  const body: unknown[] = [];
+  for (const row of data.rows) {
+    if (row.header) {
+      body.push([{ content: row.label, colSpan: n + 1, styles: { fontStyle: "bold", fillColor: [252, 228, 214] } }]);
+    } else if (!row.isData) {
+      body.push([{ content: row.label, colSpan: n + 1, styles: { fontStyle: "bold", fillColor: [245, 245, 245] } }]);
+    } else {
+      const indent = "    ".repeat(row.indent ?? 0);
+      const vals = valuesFor(row);
+      body.push([
+        { content: indent + row.label },
+        ...vals.map((v, i) => ({
+          content: String(v),
+          styles: { halign: "center", fontStyle: i === n - 1 ? "bold" : "normal" },
+        })),
+      ]);
+    }
+  }
+
+  const valW = 18;
+  const colStyles: Record<number, { cellWidth: number; halign: "left" | "center" }> = {
+    0: { cellWidth: pageW - margin * 2 - n * valW, halign: "left" },
+  };
+  for (let i = 1; i <= n; i++) colStyles[i] = { cellWidth: valW, halign: "center" };
+
+  autoTable(doc, {
+    startY: y,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    head: head as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    body: body as any,
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 8,
+      cellPadding: 1.3,
+      lineColor: [191, 191, 191],
+      lineWidth: 0.1,
+      textColor: [20, 20, 20],
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    headStyles: {
+      fillColor: [242, 242, 242],
+      textColor: [20, 20, 20],
+      fontStyle: "bold",
+      halign: "center",
+      lineColor: [191, 191, 191],
+      lineWidth: 0.1,
+    },
+    columnStyles: colStyles,
+    margin: { left: margin, right: margin },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let yEnd = ((doc as any).lastAutoTable?.finalY ?? y) + 12;
+  if (yEnd > pageH - 30) {
+    doc.addPage();
+    yEnd = 20;
+  }
+
+  const colW = (pageW - margin * 2) / 2;
+  const sig = (x: number, role: string, name: string, title: string) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(20);
+    doc.text(role, x, yEnd);
+    doc.setFontSize(10);
+    doc.text(name || "__________________________", x, yEnd + 8);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(110);
+    doc.text(title || "", x, yEnd + 12.5);
+  };
+  sig(margin, "Prepared by:", meta.preparedBy, meta.preparedByTitle);
+  sig(margin + colW, "Noted by:", meta.notedBy, meta.notedByTitle);
+
+  return doc;
 }
