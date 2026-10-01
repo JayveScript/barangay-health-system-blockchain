@@ -248,45 +248,46 @@ export default function PharmacistDashboardPage() {
 }
 
 function OverviewTab() {
+  const { t } = useI18n();
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard icon={<Pill className="h-5 w-5" />} label="Medicines Dispensed" value="146" />
-        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label="Prescriptions Filled" value="98" />
-        <MetricCard icon={<Package className="h-5 w-5" />} label="Low Stock Items" value="7" />
-        <MetricCard icon={<Activity className="h-5 w-5" />} label="Pending Requests" value="5" />
+        <MetricCard icon={<Pill className="h-5 w-5" />} label={t("ov.ph.medicinesDispensed")} value="146" />
+        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label={t("ov.ph.prescriptionsFilled")} value="98" />
+        <MetricCard icon={<Package className="h-5 w-5" />} label={t("ov.ph.lowStock")} value="7" />
+        <MetricCard icon={<Activity className="h-5 w-5" />} label={t("ov.ph.pendingRequests")} value="5" />
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel icon={<BarChart3 className="h-5 w-5" />} title="Dispensing Activity" subtitle="Monthly pharmacy service progress">
+        <Panel icon={<BarChart3 className="h-5 w-5" />} title={t("ov.ph.activityTitle")} subtitle={t("ov.ph.activitySub")}>
           <div className="space-y-5">
-            <ProgressBar label="Prescriptions Processed" value={88} />
-            <ProgressBar label="Medicine Releases" value={74} />
-            <ProgressBar label="Stock Replenishment" value={61} />
-            <ProgressBar label="Patient Counseling" value={52} />
+            <ProgressBar label={t("ov.ph.prescriptionsProcessed")} value={88} />
+            <ProgressBar label={t("ov.ph.medicineReleases")} value={74} />
+            <ProgressBar label={t("ov.ph.stockReplenishment")} value={61} />
+            <ProgressBar label={t("ov.ph.patientCounseling")} value={52} />
           </div>
         </Panel>
 
-        <Panel icon={<Package className="h-5 w-5" />} title="Inventory Summary" subtitle="Current medicine stock overview">
+        <Panel icon={<Package className="h-5 w-5" />} title={t("ov.ph.inventoryTitle")} subtitle={t("ov.ph.inventorySub")}>
           <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Total Medicines" value="212" />
-            <MiniStat label="Expiring Soon" value="9" />
-            <MiniStat label="Out of Stock" value="3" />
-            <MiniStat label="Restocked Today" value="14" />
+            <MiniStat label={t("ov.ph.totalMedicines")} value="212" />
+            <MiniStat label={t("ov.ph.expiringSoon")} value="9" />
+            <MiniStat label={t("ov.ph.outOfStock")} value="3" />
+            <MiniStat label={t("ov.ph.restockedToday")} value="14" />
           </div>
         </Panel>
       </div>
 
-      <Panel icon={<HeartPulse className="h-5 w-5" />} title="Pharmacy Summary" subtitle="Barangay pharmacy service overview">
+      <Panel icon={<HeartPulse className="h-5 w-5" />} title={t("ov.ph.summaryTitle")} subtitle={t("ov.ph.summarySub")}>
         <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Patients Served" value="132" />
-          <SummaryBox title="Maintenance Refills" value="47" />
-          <SummaryBox title="Generics Dispensed" value="89" />
-          <SummaryBox title="Reports Prepared" value="6" />
+          <SummaryBox title={t("ov.ph.patientsServed")} value="132" />
+          <SummaryBox title={t("ov.ph.maintenanceRefills")} value="47" />
+          <SummaryBox title={t("ov.ph.genericsDispensed")} value="89" />
+          <SummaryBox title={t("ov.reportsPrepared")} value="6" />
         </div>
       </Panel>
     </div>

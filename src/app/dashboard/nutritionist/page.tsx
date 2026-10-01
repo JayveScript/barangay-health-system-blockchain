@@ -256,45 +256,46 @@ export default function NutritionistDashboardPage() {
 }
 
 function OverviewTab() {
+  const { t } = useI18n();
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label="Assessments Done" value="134" />
-        <MetricCard icon={<Utensils className="h-5 w-5" />} label="Diet Plans Given" value="76" />
-        <MetricCard icon={<Apple className="h-5 w-5" />} label="Malnutrition Cases" value="18" />
-        <MetricCard icon={<Activity className="h-5 w-5" />} label="Follow-ups Due" value="11" />
+        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label={t("ov.nu.assessmentsDone")} value="134" />
+        <MetricCard icon={<Utensils className="h-5 w-5" />} label={t("ov.nu.dietPlansGiven")} value="76" />
+        <MetricCard icon={<Apple className="h-5 w-5" />} label={t("ov.nu.malnutritionCases")} value="18" />
+        <MetricCard icon={<Activity className="h-5 w-5" />} label={t("ov.nu.followupsDue")} value="11" />
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel icon={<BarChart3 className="h-5 w-5" />} title="Nutrition Activity" subtitle="Monthly nutrition service progress">
+        <Panel icon={<BarChart3 className="h-5 w-5" />} title={t("ov.nu.activityTitle")} subtitle={t("ov.nu.activitySub")}>
           <div className="space-y-5">
-            <ProgressBar label="Nutritional Assessments" value={84} />
-            <ProgressBar label="Diet Plan Compliance" value={71} />
-            <ProgressBar label="Growth Monitoring" value={66} />
-            <ProgressBar label="Feeding Program Support" value={57} />
+            <ProgressBar label={t("ov.nu.nutritionalAssessments")} value={84} />
+            <ProgressBar label={t("ov.nu.dietCompliance")} value={71} />
+            <ProgressBar label={t("ov.nu.growthMonitoring")} value={66} />
+            <ProgressBar label={t("ov.nu.feedingSupport")} value={57} />
           </div>
         </Panel>
 
-        <Panel icon={<Scale className="h-5 w-5" />} title="Nutrition Analytics" subtitle="Current BMI &amp; nutrition workload">
+        <Panel icon={<Scale className="h-5 w-5" />} title={t("ov.nu.analyticsTitle")} subtitle={t("ov.nu.analyticsSub")}>
           <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Underweight" value="16" />
-            <MiniStat label="Overweight" value="12" />
-            <MiniStat label="Normal BMI" value="94" />
-            <MiniStat label="Counseled" value="38" />
+            <MiniStat label={t("ov.nu.underweight")} value="16" />
+            <MiniStat label={t("ov.nu.overweight")} value="12" />
+            <MiniStat label={t("ov.nu.normalBmi")} value="94" />
+            <MiniStat label={t("ov.nu.counseled")} value="38" />
           </div>
         </Panel>
       </div>
 
-      <Panel icon={<HeartPulse className="h-5 w-5" />} title="Nutrition Summary" subtitle="Barangay nutrition program overview">
+      <Panel icon={<HeartPulse className="h-5 w-5" />} title={t("ov.nu.summaryTitle")} subtitle={t("ov.nu.summarySub")}>
         <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Children Monitored" value="63" />
-          <SummaryBox title="Pregnant Mothers" value="9" />
-          <SummaryBox title="Diet Plans Active" value="42" />
-          <SummaryBox title="Reports Prepared" value="6" />
+          <SummaryBox title={t("ov.nu.childrenMonitored")} value="63" />
+          <SummaryBox title={t("ov.nu.pregnantMothers")} value="9" />
+          <SummaryBox title={t("ov.nu.dietPlansActive")} value="42" />
+          <SummaryBox title={t("ov.reportsPrepared")} value="6" />
         </div>
       </Panel>
     </div>

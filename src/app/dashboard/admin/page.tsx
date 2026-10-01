@@ -1121,25 +1121,25 @@ export default function AdminDashboardPage() {
                 {tab === "overview" && (
                   <div className="print-area space-y-5">
                     <div className="flex items-center justify-between gap-3">
-                      <h2 className="text-lg font-black text-slate-900">Overview</h2>
+                      <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
                       <ExportPdfButton />
                     </div>
                     <div className="grid grid-cols-3 gap-2 sm:gap-4 [&>*]:min-w-0">
                       <StatCard
                         icon={<Users className="h-5 w-5" />}
-                        label="Total Residents"
+                        label={t("ov.totalResidents")}
                         value={data?.stats?.totalResidents ?? 0}
                       />
 
                       <StatCard
                         icon={<ShieldCheck className="h-5 w-5" />}
-                        label="Verified Residents"
+                        label={t("ov.verifiedResidents")}
                         value={data?.stats?.totalVerifiedResidents ?? 0}
                       />
 
                       <StatCard
                         icon={<Stethoscope className="h-5 w-5" />}
-                        label="Health Staff Users"
+                        label={t("ov.adm.healthStaffUsers")}
                         value={data?.stats?.totalStaff ?? 0}
                       />
                     </div>
@@ -1147,8 +1147,8 @@ export default function AdminDashboardPage() {
                     <div className="grid gap-5 lg:grid-cols-2">
                       <ChartCard
                         icon={<PieChartIcon className="h-5 w-5" />}
-                        title="Resident Sex Distribution"
-                        subtitle="Current registered resident demographics"
+                        title={t("ov.sexDist")}
+                        subtitle={t("ov.adm.sexDistSub")}
                       >
                         <DonutChart
                           data={sexData}
@@ -1159,8 +1159,8 @@ export default function AdminDashboardPage() {
 
                       <ChartCard
                         icon={<Users className="h-5 w-5" />}
-                        title="Age Group Distribution"
-                        subtitle="Resident population by age group"
+                        title={t("ov.ageDist")}
+                        subtitle={t("ov.ageDistSub")}
                       >
                         <BarList data={ageGroupData} />
                       </ChartCard>
@@ -1169,8 +1169,8 @@ export default function AdminDashboardPage() {
                     <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                       <ChartCard
                         icon={<Activity className="h-5 w-5" />}
-                        title="Recent Registered Residents"
-                        subtitle="Latest verified resident accounts"
+                        title={t("ov.adm.recentTitle")}
+                        subtitle={t("ov.adm.recentSub")}
                       >
                         <div className="max-h-[330px] space-y-3 overflow-y-auto pr-1">
                           {recentResidents.map((resident) => (
@@ -1184,13 +1184,12 @@ export default function AdminDashboardPage() {
                                 </p>
 
                                 <p className="truncate text-sm text-slate-500">
-                                  {resident.barangayName} • {resident.age} years
-                                  old
+                                  {resident.barangayName} • {resident.age} {t("ov.adm.yearsOld")}
                                 </p>
                               </div>
 
                               <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                {resident.user?.isVerified ? "Verified" : "Pending"}
+                                {resident.user?.isVerified ? t("ov.sa.verified") : t("ov.adm.pending")}
                               </span>
                             </div>
                           ))}
@@ -1199,8 +1198,8 @@ export default function AdminDashboardPage() {
 
                       <ChartCard
                         icon={<Stethoscope className="h-5 w-5" />}
-                        title="Staff Role Distribution"
-                        subtitle="Created health center user accounts"
+                        title={t("ov.adm.staffRoleTitle")}
+                        subtitle={t("ov.adm.staffRoleSub")}
                       >
                         <BarList data={roleData} />
                       </ChartCard>

@@ -275,31 +275,32 @@ export default function MidwifeDashboardPage() {
 }
 
 function OverviewTab() {
+  const { t } = useI18n();
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
         <MetricCard
           icon={<Users className="h-5 w-5" />}
-          label="Mothers Monitored"
+          label={t("ov.mw.mothersMonitored")}
           value="28"
         />
         <MetricCard
           icon={<Baby className="h-5 w-5" />}
-          label="Newborn Records"
+          label={t("ov.mw.newbornRecords")}
           value="12"
         />
         <MetricCard
           icon={<ClipboardList className="h-5 w-5" />}
-          label="Prenatal Follow-ups"
+          label={t("ov.mw.prenatalFollowups")}
           value="17"
         />
         <MetricCard
           icon={<CalendarDays className="h-5 w-5" />}
-          label="Scheduled Visits"
+          label={t("ov.mw.scheduledVisits")}
           value="9"
         />
       </div>
@@ -307,41 +308,41 @@ function OverviewTab() {
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <Panel
           icon={<BarChart3 className="h-5 w-5" />}
-          title="Maternal Health Activity"
-          subtitle="Monthly midwife service progress"
+          title={t("ov.mw.activityTitle")}
+          subtitle={t("ov.mw.activitySub")}
         >
           <div className="space-y-5">
-            <ProgressBar label="Prenatal Monitoring" value={86} />
-            <ProgressBar label="Postnatal Follow-ups" value={72} />
-            <ProgressBar label="Newborn Record Updates" value={68} />
-            <ProgressBar label="Family Planning Support" value={55} />
+            <ProgressBar label={t("ov.mw.prenatalMonitoring")} value={86} />
+            <ProgressBar label={t("ov.mw.postnatalFollowups")} value={72} />
+            <ProgressBar label={t("ov.mw.newbornUpdates")} value={68} />
+            <ProgressBar label={t("ov.mw.fpSupport")} value={55} />
           </div>
         </Panel>
 
         <Panel
           icon={<Activity className="h-5 w-5" />}
-          title="Midwife Service Analytics"
-          subtitle="Current maternal health workload summary"
+          title={t("ov.mw.analyticsTitle")}
+          subtitle={t("ov.mw.analyticsSub")}
         >
           <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="High-Risk Cases" value="4" />
-            <MiniStat label="Pending Visits" value="9" />
-            <MiniStat label="Completed Checkups" value="31" />
-            <MiniStat label="Updated Records" value="44" />
+            <MiniStat label={t("ov.mw.highRisk")} value="4" />
+            <MiniStat label={t("ov.mw.pendingVisits")} value="9" />
+            <MiniStat label={t("ov.mw.completedCheckups")} value="31" />
+            <MiniStat label={t("ov.mw.updatedRecords")} value="44" />
           </div>
         </Panel>
       </div>
 
       <Panel
         icon={<HeartPulse className="h-5 w-5" />}
-        title="Maternal Health Summary"
-        subtitle="Barangay midwife monitoring overview"
+        title={t("ov.mw.summaryTitle")}
+        subtitle={t("ov.mw.summarySub")}
       >
         <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Pregnant Residents" value="7" />
-          <SummaryBox title="Postpartum Mothers" value="6" />
-          <SummaryBox title="Infant Follow-ups" value="12" />
-          <SummaryBox title="Reports Prepared" value="8" />
+          <SummaryBox title={t("ov.mw.pregnantResidents")} value="7" />
+          <SummaryBox title={t("ov.mw.postpartumMothers")} value="6" />
+          <SummaryBox title={t("ov.mw.infantFollowups")} value="12" />
+          <SummaryBox title={t("ov.reportsPrepared")} value="8" />
         </div>
       </Panel>
     </div>

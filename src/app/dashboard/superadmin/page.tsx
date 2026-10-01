@@ -276,6 +276,7 @@ function SidebarInner({
 }
 
 function OverviewTab() {
+  const { t } = useI18n();
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -286,20 +287,20 @@ function OverviewTab() {
         const res = await fetch("/api/superadmin/summary");
         const json = await res.json();
         if (!res.ok) {
-          setError(json.error || "Failed to load summary.");
+          setError(json.error || t("ov.sa.errSummary"));
           return;
         }
         setData(json);
       } catch {
-        setError("Unable to connect to the server.");
+        setError(t("ov.errConnect"));
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t]);
 
   if (loading) {
-    return <InlineLoader label="Loading system overview..." />;
+    return <InlineLoader label={t("ov.sa.loadingOverview")} />;
   }
   if (error) {
     return <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>;
@@ -309,14 +310,14 @@ function OverviewTab() {
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">System Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.sa.systemOverview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
-        <StatCard icon={<Building2 className="h-5 w-5" />} label="Barangays" value={data.totals.barangays} />
-        <StatCard icon={<Users className="h-5 w-5" />} label="Total Residents" value={data.totals.residents} />
-        <StatCard icon={<Stethoscope className="h-5 w-5" />} label="Total Staff" value={data.totals.staff} />
-        <StatCard icon={<ShieldCheck className="h-5 w-5" />} label="Barangay Admins" value={data.totals.admins} />
+        <StatCard icon={<Building2 className="h-5 w-5" />} label={t("ov.sa.barangays")} value={data.totals.barangays} />
+        <StatCard icon={<Users className="h-5 w-5" />} label={t("ov.totalResidents")} value={data.totals.residents} />
+        <StatCard icon={<Stethoscope className="h-5 w-5" />} label={t("ov.sa.totalStaff")} value={data.totals.staff} />
+        <StatCard icon={<ShieldCheck className="h-5 w-5" />} label={t("nav.barangayAdmins")} value={data.totals.admins} />
       </div>
 
       <div className="rounded-[24px] border border-sky-200 bg-white p-4 sm:p-5">
@@ -325,8 +326,8 @@ function OverviewTab() {
             <MapPin className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 sm:text-xl">Per-Barangay Breakdown</h3>
-            <p className="text-sm text-slate-500">Residents, staff, and the assigned admin for each sitio.</p>
+            <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{t("ov.sa.breakdownTitle")}</h3>
+            <p className="text-sm text-slate-500">{t("ov.sa.breakdownSub")}</p>
           </div>
         </div>
 
@@ -337,7 +338,7 @@ function OverviewTab() {
                 <div className="min-w-0">
                   <h4 className="truncate text-sm font-black text-slate-900">{b.name}</h4>
                   <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                    {b.admin ? b.admin.username : "No admin assigned"}
+                    {b.admin ? b.admin.username : t("ov.sa.noAdmin")}
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700">
@@ -345,9 +346,9 @@ function OverviewTab() {
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2">
-                <MiniStat label="Residents" value={b.residents} />
-                <MiniStat label="Verified" value={b.verified} />
-                <MiniStat label="Staff" value={b.staff} />
+                <MiniStat label={t("nav.residentsShort")} value={b.residents} />
+                <MiniStat label={t("ov.sa.verified")} value={b.verified} />
+                <MiniStat label={t("nav.staff")} value={b.staff} />
               </div>
             </div>
           ))}
@@ -601,6 +602,7 @@ function CreateBarangayTab() {
 }
 
 function AdminsListTab() {
+  const { t } = useI18n();
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [resetFor, setResetFor] = useState<{ id: string; username: string } | null>(null);
@@ -646,7 +648,7 @@ function AdminsListTab() {
                   <div className="min-w-0">
                     <p className="text-sm font-black text-slate-900">{b.name}</p>
                     <p className="text-xs font-semibold text-slate-500">
-                      {b.admin ? b.admin.username : "No admin assigned"}
+                      {b.admin ? b.admin.username : t("ov.sa.noAdmin")}
                     </p>
                   </div>
                 </div>

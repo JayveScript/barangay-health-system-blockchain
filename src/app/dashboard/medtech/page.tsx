@@ -256,45 +256,46 @@ export default function MedTechDashboardPage() {
 }
 
 function OverviewTab() {
+  const { t } = useI18n();
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-4 items-start gap-2 sm:gap-4">
-        <MetricCard icon={<TestTube className="h-5 w-5" />} label="Tests Processed" value="184" />
-        <MetricCard icon={<FlaskConical className="h-5 w-5" />} label="Samples Collected" value="121" />
-        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label="Reports Released" value="97" />
-        <MetricCard icon={<Activity className="h-5 w-5" />} label="Pending Results" value="12" />
+        <MetricCard icon={<TestTube className="h-5 w-5" />} label={t("ov.mt.testsProcessed")} value="184" />
+        <MetricCard icon={<FlaskConical className="h-5 w-5" />} label={t("ov.mt.samplesCollected")} value="121" />
+        <MetricCard icon={<ClipboardList className="h-5 w-5" />} label={t("ov.mt.reportsReleased")} value="97" />
+        <MetricCard icon={<Activity className="h-5 w-5" />} label={t("ov.mt.pendingResults")} value="12" />
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <Panel icon={<BarChart3 className="h-5 w-5" />} title="Laboratory Activity" subtitle="Monthly lab service progress">
+        <Panel icon={<BarChart3 className="h-5 w-5" />} title={t("ov.mt.activityTitle")} subtitle={t("ov.mt.activitySub")}>
           <div className="space-y-5">
-            <ProgressBar label="Blood Chemistry" value={83} />
-            <ProgressBar label="Urinalysis / Fecalysis" value={76} />
-            <ProgressBar label="Hematology" value={69} />
-            <ProgressBar label="Rapid Test Screening" value={58} />
+            <ProgressBar label={t("ov.mt.bloodChem")} value={83} />
+            <ProgressBar label={t("ov.mt.urinalysis")} value={76} />
+            <ProgressBar label={t("ov.mt.hematology")} value={69} />
+            <ProgressBar label={t("ov.mt.rapidTest")} value={58} />
           </div>
         </Panel>
 
-        <Panel icon={<Microscope className="h-5 w-5" />} title="Test Analytics" subtitle="Current laboratory workload summary">
+        <Panel icon={<Microscope className="h-5 w-5" />} title={t("ov.mt.analyticsTitle")} subtitle={t("ov.mt.analyticsSub")}>
           <div className="grid items-start gap-4 md:grid-cols-2">
-            <MiniStat label="Abnormal Results" value="14" />
-            <MiniStat label="Repeat Tests" value="6" />
-            <MiniStat label="Completed Panels" value="88" />
-            <MiniStat label="Referred to Doctor" value="9" />
+            <MiniStat label={t("ov.mt.abnormalResults")} value="14" />
+            <MiniStat label={t("ov.mt.repeatTests")} value="6" />
+            <MiniStat label={t("ov.mt.completedPanels")} value="88" />
+            <MiniStat label={t("ov.mt.referredToDoctor")} value="9" />
           </div>
         </Panel>
       </div>
 
-      <Panel icon={<HeartPulse className="h-5 w-5" />} title="Laboratory Summary" subtitle="Barangay diagnostic service overview">
+      <Panel icon={<HeartPulse className="h-5 w-5" />} title={t("ov.mt.summaryTitle")} subtitle={t("ov.mt.summarySub")}>
         <div className="grid items-start gap-4 md:grid-cols-4">
-          <SummaryBox title="Patients Tested" value="152" />
-          <SummaryBox title="Screening Programs" value="5" />
-          <SummaryBox title="Positive Findings" value="11" />
-          <SummaryBox title="Reports Prepared" value="7" />
+          <SummaryBox title={t("ov.mt.patientsTested")} value="152" />
+          <SummaryBox title={t("ov.mt.screeningPrograms")} value="5" />
+          <SummaryBox title={t("ov.mt.positiveFindings")} value="11" />
+          <SummaryBox title={t("ov.reportsPrepared")} value="7" />
         </div>
       </Panel>
     </div>
