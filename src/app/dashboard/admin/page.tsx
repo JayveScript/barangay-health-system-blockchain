@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { createPortal } from "react-dom";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
 import { BlockchainStatusBadge } from "@/components/dashboard/BlockchainStatusBadge";
@@ -215,6 +217,7 @@ import { ProfileInfoPanel } from "@/components/dashboard/ProfileInfoPanel";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export default function AdminDashboardPage() {
+  const { t } = useI18n();
   const [tab, setTab] = useState<
   | "overview"
   | "personal"
@@ -984,19 +987,19 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-col space-y-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-            <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label="Overview" onClick={() => { setTab("overview"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label="Reports" onClick={() => { setTab("reports"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label="Announcements" onClick={() => { setTab("announcements"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label="Registered Residents" onClick={() => { setTab("residents"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "registration"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Add Resident" onClick={() => { setTab("registration"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label="Scan QR" onClick={() => { setTab("scan-qr"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-6 w-6 shrink-0" />} label="Manage Announcements" onClick={() => { setTab("manage-announcements"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label="Archived Residents" onClick={() => { setTab("archive"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Create User" onClick={() => { setTab("create-user"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label="Staff Users" onClick={() => { setTab("staff-users"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label="Activity Logs" onClick={() => { setTab("activity-logs"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label="Personal Info" onClick={() => { setTab("personal"); setMobileSidebarOpen(false); }} />
-            <SidebarButton active={tab === "change-password"} icon={<KeyRound className="h-5 w-5 shrink-0" />} label="Change Password" onClick={() => { setTab("change-password"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label={t("nav.overview")} onClick={() => { setTab("overview"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label={t("nav.reports")} onClick={() => { setTab("reports"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label={t("nav.announcements")} onClick={() => { setTab("announcements"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label={t("nav.residents")} onClick={() => { setTab("residents"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "registration"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label={t("nav.addResident")} onClick={() => { setTab("registration"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label={t("nav.scanQr")} onClick={() => { setTab("scan-qr"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-6 w-6 shrink-0" />} label={t("nav.manageAnnouncements")} onClick={() => { setTab("manage-announcements"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label={t("nav.archivedResidents")} onClick={() => { setTab("archive"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label={t("nav.createUser")} onClick={() => { setTab("create-user"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label={t("nav.staffUsers")} onClick={() => { setTab("staff-users"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label={t("nav.activityLogs")} onClick={() => { setTab("activity-logs"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label={t("nav.personal")} onClick={() => { setTab("personal"); setMobileSidebarOpen(false); }} />
+            <SidebarButton active={tab === "change-password"} icon={<KeyRound className="h-5 w-5 shrink-0" />} label={t("nav.changePassword")} onClick={() => { setTab("change-password"); setMobileSidebarOpen(false); }} />
           </div>
         </aside>
 
@@ -1014,19 +1017,19 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex flex-col space-y-3">
-              <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label="Overview" onClick={() => setTab("overview")} />
-              <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label="Reports" onClick={() => setTab("reports")} />
-              <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label="Announcements" onClick={() => setTab("announcements")} />
-              <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label="Registered Residents" onClick={() => setTab("residents")} />
-              <SidebarButton active={tab === "registration"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Add Resident" onClick={() => setTab("registration")} />
-              <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label="Scan QR" onClick={() => setTab("scan-qr")} />
-              <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-5 w-5 shrink-0" />} label="Manage Announcements" onClick={() => setTab("manage-announcements")} />
-              <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label="Archived Residents" onClick={() => setTab("archive")} />
-              <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label="Create User" onClick={() => setTab("create-user")} />
-              <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label="Staff Users" onClick={() => setTab("staff-users")} />
-              <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label="Activity Logs" onClick={() => setTab("activity-logs")} />
-              <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label="Personal Info" onClick={() => setTab("personal")} />
-              <SidebarButton active={tab === "change-password"} icon={<KeyRound className="h-5 w-5 shrink-0" />} label="Change Password" onClick={() => setTab("change-password")} />
+              <SidebarButton active={tab === "overview"} icon={<Activity className="h-5 w-5 shrink-0" />} label={t("nav.overview")} onClick={() => setTab("overview")} />
+              <SidebarButton active={tab === "reports"} icon={<FileBarChart2 className="h-5 w-5 shrink-0" />} label={t("nav.reports")} onClick={() => setTab("reports")} />
+              <SidebarButton active={tab === "announcements"} icon={<Megaphone className="h-6 w-6 shrink-0" />} label={t("nav.announcements")} onClick={() => setTab("announcements")} />
+              <SidebarButton active={tab === "residents"} icon={<Users className="h-5 w-5 shrink-0" />} label={t("nav.residents")} onClick={() => setTab("residents")} />
+              <SidebarButton active={tab === "registration"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label={t("nav.addResident")} onClick={() => setTab("registration")} />
+              <SidebarButton active={tab === "scan-qr"} icon={<ScanLine className="h-5 w-5 shrink-0" />} label={t("nav.scanQr")} onClick={() => setTab("scan-qr")} />
+              <SidebarButton active={tab === "manage-announcements"} icon={<ShieldCheck className="h-5 w-5 shrink-0" />} label={t("nav.manageAnnouncements")} onClick={() => setTab("manage-announcements")} />
+              <SidebarButton active={tab === "archive"} icon={<Archive className="h-5 w-5 shrink-0" />} label={t("nav.archivedResidents")} onClick={() => setTab("archive")} />
+              <SidebarButton active={tab === "create-user"} icon={<UserPlus className="h-5 w-5 shrink-0" />} label={t("nav.createUser")} onClick={() => setTab("create-user")} />
+              <SidebarButton active={tab === "staff-users"} icon={<Stethoscope className="h-5 w-5 shrink-0" />} label={t("nav.staffUsers")} onClick={() => setTab("staff-users")} />
+              <SidebarButton active={tab === "activity-logs"} icon={<ClipboardList className="h-5 w-5 shrink-0" />} label={t("nav.activityLogs")} onClick={() => setTab("activity-logs")} />
+              <SidebarButton active={tab === "personal"} icon={<UserRound className="h-5 w-5 shrink-0" />} label={t("nav.personal")} onClick={() => setTab("personal")} />
+              <SidebarButton active={tab === "change-password"} icon={<KeyRound className="h-5 w-5 shrink-0" />} label={t("nav.changePassword")} onClick={() => setTab("change-password")} />
             </div>
           </div>
         </aside>
@@ -1089,6 +1092,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <LanguageSwitcher />
                   <BlockchainStatusBadge />
                   <button
                     onClick={async () => {
@@ -1098,7 +1102,7 @@ export default function AdminDashboardPage() {
                     className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                   >
                     <LogOut className="h-4 w-4" />
-                    Log Out
+                    {t("nav.logout")}
                   </button>
                 </div>
               </div>

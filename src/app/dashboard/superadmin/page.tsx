@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PortalLoader } from "@/components/PortalLoader";
 import { InlineLoader } from "@/components/dashboard/InlineLoader";
@@ -82,6 +84,7 @@ type Me = {
 type Tab = "overview" | "residents" | "staff" | "create-barangay" | "admins" | "announcements" | "reports" | "change-password";
 
 export default function SuperAdminDashboard() {
+  const { t } = useI18n();
   const [me, setMe] = useState<Me | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [loading, setLoading] = useState(true);
@@ -111,14 +114,14 @@ export default function SuperAdminDashboard() {
   if (loading) return <PortalLoader label="Loading super admin console..." />;
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "overview", label: "Overview", icon: <Activity className="h-5 w-5" /> },
-    { id: "reports", label: "Reports", icon: <FileBarChart2 className="h-5 w-5" /> },
-    { id: "announcements", label: "Announcements", icon: <Megaphone className="h-5 w-5" /> },
-    { id: "residents", label: "Residents", icon: <Users className="h-5 w-5" /> },
-    { id: "staff", label: "Staff", icon: <Stethoscope className="h-5 w-5" /> },
-    { id: "create-barangay", label: "Create Barangay", icon: <UserPlus className="h-5 w-5" /> },
-    { id: "admins", label: "Barangay Admins", icon: <ShieldCheck className="h-5 w-5" /> },
-    { id: "change-password", label: "Change Password", icon: <KeyRound className="h-5 w-5" /> },
+    { id: "overview", label: t("nav.overview"), icon: <Activity className="h-5 w-5" /> },
+    { id: "reports", label: t("nav.reports"), icon: <FileBarChart2 className="h-5 w-5" /> },
+    { id: "announcements", label: t("nav.announcements"), icon: <Megaphone className="h-5 w-5" /> },
+    { id: "residents", label: t("nav.residentsShort"), icon: <Users className="h-5 w-5" /> },
+    { id: "staff", label: t("nav.staff"), icon: <Stethoscope className="h-5 w-5" /> },
+    { id: "create-barangay", label: t("nav.createBarangay"), icon: <UserPlus className="h-5 w-5" /> },
+    { id: "admins", label: t("nav.barangayAdmins"), icon: <ShieldCheck className="h-5 w-5" /> },
+    { id: "change-password", label: t("nav.changePassword"), icon: <KeyRound className="h-5 w-5" /> },
   ];
 
   return (
@@ -181,12 +184,13 @@ export default function SuperAdminDashboard() {
 
                 <div className="flex items-center gap-2 self-start md:self-center">
                   <BlockchainStatusBadge />
+                  <LanguageSwitcher />
                   <button
                     onClick={handleLogout}
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
                   >
                     <LogOut className="h-4 w-4" />
-                    Log Out
+                    {t("nav.logout")}
                   </button>
                 </div>
               </div>
