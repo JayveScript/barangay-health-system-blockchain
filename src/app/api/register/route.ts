@@ -76,6 +76,7 @@ export async function POST(req: Request) {
       username,
       email,
       password,
+      force,
     } = body;
 
     const normalizedEmail = String(email || "").trim().toLowerCase();
@@ -184,6 +185,31 @@ export async function POST(req: Request) {
           municipality: DEFAULT_BARANGAY_CITY,
         },
       }));
+
+    // Soft duplicate check: same name + birth date in the same barangay.
+    if (!force) {
+      const dup = await db.resident.findFirst({
+        where: {
+          barangayId: barangay.id,
+          isArchived: false,
+          firstName: { equals: String(firstName).trim(), mode: "insensitive" },
+          lastName: { equals: String(lastName).trim(), mode: "insensitive" },
+          birthDate: parsedBirthDate,
+        },
+        select: { id: true },
+      });
+      if (dup) {
+        return NextResponse.json(
+          {
+            error: "duplicate",
+            duplicate: true,
+            message:
+              "A resident with the same name and birth date already exists in this barangay.",
+          },
+          { status: 409 }
+        );
+      }
+    }
 
     const passwordHash = await hash(password, 12);
     const otp = generateOtp();

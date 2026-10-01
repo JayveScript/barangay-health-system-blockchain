@@ -3,6 +3,8 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   Download,
   Eye,
@@ -18,6 +20,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
+  const { t } = useI18n();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [serverError, setServerError] = useState("");
@@ -296,18 +299,22 @@ function LoginForm() {
               </div>
             </div>
 
+            <div className="mb-3 flex justify-end">
+              <LanguageSwitcher />
+            </div>
+
             <div className="mb-4 text-center lg:hidden">
               <h2 className="text-4xl font-extrabold text-[#0EA5E9]">
-                Welcome
+                {t("login.welcome")}
               </h2>
               <p className="mt-1 text-base text-slate-500">
-                Log in to your health center account
+                {t("login.subtitle")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-2 space-y-4">
               <Input
-                label="Username or Email"
+                label={t("login.username")}
                 icon={<User className="h-5 w-5" />}
                 value={identifier}
                 onChange={setIdentifier}
@@ -316,7 +323,7 @@ function LoginForm() {
               />
 
               <Input
-                label="Password"
+                label={t("login.password")}
                 type="password"
                 icon={<Lock className="h-5 w-5" />}
                 value={password}
@@ -335,7 +342,7 @@ function LoginForm() {
                   href="/forgot-password"
                   className="inline-block rounded-lg px-1 text-sm font-medium text-slate-500 transition hover:text-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-sky-300"
                 >
-                  Forgot password?
+                  {t("login.forgot")}
                 </Link>
               </div>
 
@@ -344,7 +351,7 @@ function LoginForm() {
                 disabled={loading}
                 className="w-full rounded-2xl bg-[#0EA5E9] px-5 py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-sky-500/25 transition duration-300 hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-xl hover:shadow-sky-500/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? t("login.signingIn") : t("login.signIn")}
               </button>
 
               <div className="flex items-center gap-4">
@@ -354,12 +361,12 @@ function LoginForm() {
               </div>
 
               <p className="text-center text-sm text-slate-500">
-                Don&apos;t have an account?{" "}
+                {t("login.noAccount")}{" "}
                 <Link
                   href="/register"
                   className="font-semibold text-[#0EA5E9] transition hover:text-sky-600"
                 >
-                  Register Now
+                  {t("login.register")}
                 </Link>
               </p>
 

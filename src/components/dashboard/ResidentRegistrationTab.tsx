@@ -14,6 +14,7 @@ import {
   RELATIONSHIP_OPTIONS,
 } from "@/lib/barangay-options";
 import { ageLabel } from "@/lib/age";
+import { ConsentNotice } from "@/components/ConsentNotice";
 
 type ResidentRegistrationForm = {
   lastName: string;
@@ -205,6 +206,9 @@ function RegistrationModal({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<ResidentRegistrationForm>(initialForm);
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+  const [dupPrompt, setDupPrompt] = useState(false);
 
   const updateField = <K extends keyof ResidentRegistrationForm>(
     key: K,
@@ -257,10 +261,15 @@ function RegistrationModal({
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const submit = async () => {
+  const submit = async (force = false) => {
     setError("");
     setMessage("");
     if (!validateStep()) return;
+    if (!consent) {
+      setConsentError(true);
+      setError("Please read and agree to the Data Privacy consent before registering.");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -271,10 +280,15 @@ function RegistrationModal({
           ...form,
           age: Number(form.age),
           completeAddress: form.completeAddress,
+          force,
         }),
       });
 
       const json = await res.json();
+      if (res.status === 409 && json?.duplicate) {
+        setDupPrompt(true);
+        return;
+      }
       if (!res.ok) {
         setError(json.error || "Failed to register resident.");
         return;
@@ -282,6 +296,7 @@ function RegistrationModal({
 
       setMessage("Resident registered successfully.");
       setForm(initialForm);
+      setConsent(false);
       setStep(1);
       setTimeout(() => onClose(), 800);
     } catch (err) {
@@ -550,6 +565,15 @@ function RegistrationModal({
                 <SummaryItem label="Takes Illicit Drugs" value={yesNoText(form.takesIllicitDrugs)} />
                 <SummaryItem label="Illicit Drug Details" value={form.illicitDrugsDetails} />
               </SummaryCard>
+
+              <ConsentNotice
+                checked={consent}
+                onChange={(v) => {
+                  setConsent(v);
+                  if (v) setConsentError(false);
+                }}
+                showError={consentError}
+              />
             </div>
           )}
         </div>
@@ -584,7 +608,7 @@ function RegistrationModal({
             ) : (
               <button
                 type="button"
-                onClick={submit}
+                onClick={() => submit()}
                 disabled={submitting}
                 className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
               >
@@ -594,6 +618,38 @@ function RegistrationModal({
           </div>
         </div>
       </div>
+
+      {dupPrompt && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-6 shadow-2xl">
+            <h4 className="text-lg font-black text-slate-900">Possible duplicate resident</h4>
+            <p className="mt-2 text-sm font-semibold text-slate-600">
+              A resident with the same name and birth date already exists in this
+              barangay. Please check before registering again.
+            </p>
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDupPrompt(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => {
+                  setDupPrompt(false);
+                  submit(true);
+                }}
+                className="rounded-2xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              >
+                Register anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

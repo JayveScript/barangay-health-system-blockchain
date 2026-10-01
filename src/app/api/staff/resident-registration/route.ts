@@ -71,6 +71,7 @@ type Body = {
   alcoholBottlesPerDay?: string;
   takesIllicitDrugs?: boolean;
   illicitDrugsDetails?: string;
+  force?: boolean;
 };
 
 async function getApiUser() {
@@ -111,6 +112,31 @@ export async function POST(req: Request) {
         { error: "Please complete all required fields, including contact number." },
         { status: 400 }
       );
+    }
+
+    // Soft duplicate check: same name + birth date in the same barangay.
+    if (!body.force) {
+      const existing = await db.resident.findFirst({
+        where: {
+          barangayId,
+          isArchived: false,
+          firstName: { equals: body.firstName.trim(), mode: "insensitive" },
+          lastName: { equals: body.lastName.trim(), mode: "insensitive" },
+          birthDate,
+        },
+        select: { id: true },
+      });
+      if (existing) {
+        return NextResponse.json(
+          {
+            error: "duplicate",
+            duplicate: true,
+            message:
+              "A resident with the same name and birth date already exists in this barangay.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const now = Date.now();

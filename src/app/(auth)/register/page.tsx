@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ageLabel } from "@/lib/age";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ConsentNotice } from "@/components/ConsentNotice";
 import {
   ArrowLeft,
   ArrowRight,
@@ -196,6 +199,10 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState("");
   const [serverMessage, setServerMessage] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+  const [dupPrompt, setDupPrompt] = useState(false);
+  const { t: tr } = useI18n();
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -346,12 +353,18 @@ export default function RegisterPage() {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSendOtp = async () => {
+  const handleSendOtp = async (force = false) => {
     setServerError("");
     setServerMessage("");
 
     if (!validateCurrentStep()) {
       setServerError("Please complete the required account fields.");
+      return;
+    }
+
+    if (!consent) {
+      setConsentError(true);
+      setServerError(tr("consent.required"));
       return;
     }
 
@@ -381,10 +394,16 @@ export default function RegisterPage() {
           username: buildFullUsername(form.username),
           contactNumber: form.contactNumber.trim(),
           barangayName: form.barangayName,
+          force,
         }),
       });
 
       const data = await res.json();
+
+      if (res.status === 409 && data?.duplicate) {
+        setDupPrompt(true);
+        return;
+      }
 
       if (!res.ok) {
         if (data.field === "email" || data.field === "username") {
@@ -482,13 +501,16 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <Link
-                href="/login"
-                className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-bold text-sky-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-200"
-              >
-                <LogIn className="h-4 w-4" />
-                <span className="hidden sm:inline">Login</span>
-              </Link>
+              <div className="flex shrink-0 items-center gap-2">
+                <LanguageSwitcher />
+                <Link
+                  href="/login"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-bold text-sky-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-200"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -959,11 +981,22 @@ export default function RegisterPage() {
       </div>
     </FormSection>
 
+    {!otpSent && (
+      <ConsentNotice
+        checked={consent}
+        onChange={(v) => {
+          setConsent(v);
+          if (v) setConsentError(false);
+        }}
+        showError={consentError}
+      />
+    )}
+
     <FormSection title="Send Verification Code">
       {!otpSent ? (
         <button
           type="button"
-          onClick={handleSendOtp}
+          onClick={() => handleSendOtp()}
           disabled={loading}
           className="w-full rounded-2xl bg-[#0EA5E9] hover:bg-sky-600 px-5 py-4 text-base font-black text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-600 hover:to-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -1013,7 +1046,7 @@ export default function RegisterPage() {
               <span className="text-emerald-700/80">Didn&apos;t get the code?</span>
               <button
                 type="button"
-                onClick={handleSendOtp}
+                onClick={() => handleSendOtp(true)}
                 disabled={loading || cooldown > 0}
                 className="font-black text-emerald-700 underline underline-offset-2 transition hover:text-emerald-800 disabled:cursor-not-allowed disabled:text-emerald-700/50 disabled:no-underline"
               >
@@ -1146,6 +1179,35 @@ export default function RegisterPage() {
                 className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-base font-extrabold text-white shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:shadow-xl active:scale-95"
               >
                 Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {dupPrompt && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-6 shadow-2xl">
+            <h2 className="text-lg font-black text-slate-900">{tr("dup.title")}</h2>
+            <p className="mt-2 text-sm font-semibold text-slate-600">{tr("dup.body")}</p>
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDupPrompt(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700"
+              >
+                {tr("dup.cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => {
+                  setDupPrompt(false);
+                  handleSendOtp(true);
+                }}
+                className="rounded-2xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              >
+                {tr("dup.proceed")}
               </button>
             </div>
           </div>

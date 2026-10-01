@@ -36,6 +36,8 @@ import { PhilPenTab } from "@/components/dashboard/PhilPenTab";
 import { ImmunizationTab } from "@/components/dashboard/ImmunizationTab";
 import { BlockchainAnchorCard } from "@/components/dashboard/BlockchainAnchorCard";
 import { displayAge, ageLabel } from "@/lib/age";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Baby } from "lucide-react";
 import { formatRoleLabel } from "@/lib/role-labels";
 import {
@@ -571,6 +573,7 @@ const appointmentReasons = [
 ];
 
 export default function ResidentDashboard() {
+  const { t } = useI18n();
   const [resident, setResident] = useState<ResidentData | null>(null);
   const [residentError, setResidentError] = useState("");
   const [activeTab, setActiveTab] = useState("identifying");
@@ -648,13 +651,13 @@ export default function ResidentDashboard() {
   const currentBarangayName = resident.barangayName || "Assigned Barangay";
 
   const residentBottomNavItems = [
-    { id: "personal",       label: "Profile",      icon: <UserRound className="h-5 w-5" /> },
-    { id: "medical-history",label: "Medical",      icon: <Stethoscope className="h-5 w-5" /> },
-    { id: "appointments",   label: "Appointments", icon: <CalendarCheck className="h-5 w-5" /> },
-    { id: "notifications",  label: "Alerts",       icon: <Bell className="h-5 w-5" /> },
-    { id: "complaints",     label: "Concern",      icon: <MessageSquareText className="h-5 w-5" /> },
-    { id: "announcements",  label: "News",         icon: <Megaphone className="h-6 w-6" /> },
-    { id: "digital",        label: "Digital ID",   icon: <IdCard className="h-5 w-5" /> },
+    { id: "personal",       label: t("nav.personal"),      icon: <UserRound className="h-5 w-5" /> },
+    { id: "medical-history",label: t("nav.medical"),       icon: <Stethoscope className="h-5 w-5" /> },
+    { id: "appointments",   label: t("nav.appointments"),  icon: <CalendarCheck className="h-5 w-5" /> },
+    { id: "notifications",  label: t("nav.notifications"), icon: <Bell className="h-5 w-5" /> },
+    { id: "complaints",     label: t("nav.concern"),       icon: <MessageSquareText className="h-5 w-5" /> },
+    { id: "announcements",  label: t("nav.announcements"), icon: <Megaphone className="h-6 w-6" /> },
+    { id: "digital",        label: t("nav.digitalId"),     icon: <IdCard className="h-5 w-5" /> },
   ];
 
   return (
@@ -707,7 +710,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <Megaphone className="h-6 w-6 shrink-0" />
-                Announcements
+                {t("nav.announcements")}
               </button>
 
               <button
@@ -723,7 +726,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <Stethoscope className="h-5 w-5 shrink-0 stroke-[2.8]" />
-                Medical History
+                {t("nav.medical")}
               </button>
 
               {resident.sex === "FEMALE" && (
@@ -740,7 +743,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <Baby className="h-5 w-5 shrink-0" />
-                  Maternal Records
+                  {t("nav.maternal")}
                 </button>
               )}
 
@@ -758,7 +761,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <ShieldCheck className="h-5 w-5 shrink-0" />
-                  PhilPEN
+                  {t("nav.philpen")}
                 </button>
               )}
 
@@ -776,7 +779,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <Syringe className="h-5 w-5 shrink-0" />
-                  Immunization
+                  {t("nav.immunization")}
                 </button>
               )}
 
@@ -793,7 +796,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <CalendarCheck className="h-5 w-5 shrink-0" />
-                Appointments
+                {t("nav.appointments")}
               </button>
 
               <button
@@ -809,7 +812,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <Bell className="h-5 w-5 shrink-0" />
-                Notifications
+                {t("nav.notifications")}
               </button>
 
               <button
@@ -825,7 +828,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <MessageSquareText className="h-5 w-5 shrink-0" />
-                Health Concern
+                {t("nav.concern")}
               </button>
 
               <button
@@ -841,7 +844,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <IdCardIcon className="h-5 w-5 shrink-0" />
-                Digital ID
+                {t("nav.digitalId")}
               </button>
 
               <button
@@ -857,7 +860,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <UserIcon className="h-5 w-5 shrink-0" />
-                Personal Info
+                {t("nav.personal")}
               </button>
 
               <button
@@ -873,7 +876,7 @@ export default function ResidentDashboard() {
                 }`}
               >
                 <KeyRound className="h-5 w-5 shrink-0" />
-                Change Password
+                {t("nav.changePassword")}
               </button>
             </div>
           </aside>
@@ -904,7 +907,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <Megaphone className="h-6 w-6 shrink-0" />
-                  Announcements
+                  {t("nav.announcements")}
                 </button>
 
                 <button
@@ -917,7 +920,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <Stethoscope className="h-5 w-5 shrink-0 stroke-[2.8]" />
-                  Medical History
+                  {t("nav.medical")}
                 </button>
 
                 {resident.sex === "FEMALE" && (
@@ -931,7 +934,7 @@ export default function ResidentDashboard() {
                     }`}
                   >
                     <Baby className="h-5 w-5 shrink-0" />
-                    Maternal Records
+                    {t("nav.maternal")}
                   </button>
                 )}
 
@@ -946,7 +949,7 @@ export default function ResidentDashboard() {
                     }`}
                   >
                     <ShieldCheck className="h-5 w-5 shrink-0" />
-                    PhilPEN
+                    {t("nav.philpen")}
                   </button>
                 )}
 
@@ -961,7 +964,7 @@ export default function ResidentDashboard() {
                     }`}
                   >
                     <Syringe className="h-5 w-5 shrink-0" />
-                    Immunization
+                    {t("nav.immunization")}
                   </button>
                 )}
 
@@ -975,7 +978,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <CalendarCheck className="h-5 w-5 shrink-0" />
-                  Appointments
+                  {t("nav.appointments")}
                 </button>
 
                 <button
@@ -988,7 +991,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <Bell className="h-5 w-5 shrink-0" />
-                  Notifications
+                  {t("nav.notifications")}
                 </button>
 
                 <button
@@ -1001,7 +1004,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <MessageSquareText className="h-5 w-5 shrink-0" />
-                  Health Concern
+                  {t("nav.concern")}
                 </button>
 
                 <button
@@ -1014,7 +1017,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <IdCardIcon className="h-5 w-5 shrink-0" />
-                  Digital ID
+                  {t("nav.digitalId")}
                 </button>
 
                 <button
@@ -1027,7 +1030,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <UserIcon className="h-5 w-5 shrink-0" />
-                  Personal Info
+                  {t("nav.personal")}
                 </button>
 
                 <button
@@ -1040,7 +1043,7 @@ export default function ResidentDashboard() {
                   }`}
                 >
                   <KeyRound className="h-5 w-5 shrink-0" />
-                  Change Password
+                  {t("nav.changePassword")}
                 </button>
               </div>
             </div>
@@ -1089,14 +1092,17 @@ export default function ResidentDashboard() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-red-200 bg-white/80 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-50 md:self-center"
-              >
-                <LogOut className="h-4 w-4" />
-                Log Out
-              </button>
+              <div className="flex items-center gap-2 self-start md:self-center">
+                <LanguageSwitcher />
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white/80 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {t("nav.logout")}
+                </button>
+              </div>
             </div>
 
             
