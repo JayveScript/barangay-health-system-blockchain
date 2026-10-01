@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet } from "lucide-react";
 import { ExportPdfButton } from "@/components/dashboard/ExportPdfButton";
+import type { Cell } from "exceljs";
 
 type Row = {
   label: string;
@@ -120,17 +121,26 @@ export function ReportsTab() {
     })();
   }, []);
 
-  const exportCsv = () => {
-    if (!data) return;
-    const csv = buildCsv(current, data, {
-      period,
-      preparedBy,
-      preparedByTitle,
-      notedBy,
-      notedByTitle,
-    });
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadCsv(csv, `${current.id}-report-${stamp}.csv`);
+  const [exporting, setExporting] = useState(false);
+  const exportExcel = async () => {
+    if (!data || exporting) return;
+    setExporting(true);
+    try {
+      const buffer = await buildWorkbook(current, data, {
+        period,
+        preparedBy,
+        preparedByTitle,
+        notedBy,
+        notedByTitle,
+      });
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadXlsx(buffer, `${current.id}-report-${stamp}.xlsx`);
+    } catch (e) {
+      console.error("EXPORT_XLSX_ERROR", e);
+      setError("Couldn't build the Excel file. Please try again.");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const load = async (report = current) => {
@@ -206,12 +216,12 @@ export function ReportsTab() {
               </button>
               <button
                 type="button"
-                onClick={exportCsv}
-                disabled={!data}
+                onClick={exportExcel}
+                disabled={!data || exporting}
                 className="no-print inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/20 disabled:opacity-50"
               >
                 <FileSpreadsheet className="h-4 w-4" />
-                Export CSV
+                {exporting ? "Preparing…" : "Export Excel"}
               </button>
               <ExportPdfButton fileName={`${current.id}-report`} />
             </div>
@@ -464,65 +474,180 @@ type ReportMeta = {
   notedByTitle: string;
 };
 
-function csvCell(v: string | number | undefined | null): string {
-  const s = String(v ?? "");
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+// --- Excel (.xlsx) export, styled to the DOH BHS Summary Table format ---
+
+const XL_FONT = "Calibri";
+const FILL_HEADER = "FFF2F2F2"; // light grey header band
+const FILL_SECTION = "FFFCE4D6"; // peach section rows (DOH style)
+const BORDER = "FFBFBFBF";
+
+type CellStyle = {
+  bold?: boolean;
+  italic?: boolean;
+  size?: number;
+  color?: string;
+  align?: "left" | "center" | "right";
+  fill?: string;
+  indent?: number;
+  wrap?: boolean;
+};
+
+function styleCell(cell: Cell, s: CellStyle) {
+  cell.font = {
+    name: XL_FONT,
+    size: s.size ?? 11,
+    bold: s.bold,
+    italic: s.italic,
+    color: s.color ? { argb: s.color } : undefined,
+  };
+  cell.alignment = {
+    horizontal: s.align ?? "left",
+    vertical: "middle",
+    indent: s.indent,
+    wrapText: s.wrap,
+  };
+  if (s.fill) {
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: s.fill } };
+  }
 }
 
-function buildCsv(
+async function buildWorkbook(
   current: (typeof REPORTS)[number],
   data: ReportData,
   meta: ReportMeta
-): string {
+): Promise<ArrayBuffer> {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Summary Table");
+
   const mode = current.columns;
-  const numCols =
+  const subCols =
     mode === "fp"
       ? ["NA", "OA", "DO", "CU"]
       : mode === "ncd"
-      ? ["Male", "Female", "Total"]
-      : ["10-14", "15-19", "20-49", "Total"];
+      ? ["M", "F", "T"]
+      : ["10-14", "15-19", "20-49", "TOTAL"];
+  const n = subCols.length;
+  const lastCol = 1 + n;
 
-  const valuesFor = (row: Row): (number | "")[] => {
+  const valuesFor = (row: Row): number[] => {
     if (mode === "fp") return [row.na ?? 0, row.oa ?? 0, row.do ?? 0, row.cu ?? 0];
     if (mode === "ncd") return [row.m ?? 0, row.f ?? 0, row.t ?? 0];
     return [row.b1014 ?? 0, row.b1519 ?? 0, row.b2049 ?? 0, row.total ?? 0];
   };
 
-  const lines: string[] = [];
-  const push = (cells: (string | number)[]) => lines.push(cells.map(csvCell).join(","));
+  ws.getColumn(1).width = 58;
+  for (let c = 2; c <= lastCol; c++) ws.getColumn(c).width = 11;
 
-  push([current.title]);
-  push([current.subtitle]);
-  push([]);
-  push(["Coverage", data.scope]);
-  push(["Reporting Period", meta.period]);
-  push([current.countLabel, data.totalRecords]);
-  push(["Generated", new Date().toLocaleString()]);
-  push([]);
+  let r = 1;
 
-  const indicatorHeader = mode === "fp" ? "Method / Age Group" : "Indicator";
-  push([indicatorHeader, ...numCols]);
+  // Title band
+  ws.mergeCells(r, 1, r, lastCol);
+  ws.getCell(r, 1).value = "Summary Table";
+  styleCell(ws.getCell(r, 1), { bold: true, size: 16, align: "center", fill: FILL_HEADER });
+  ws.getRow(r).height = 26;
+  r++;
 
+  ws.mergeCells(r, 1, r, lastCol);
+  ws.getCell(r, 1).value = current.title;
+  styleCell(ws.getCell(r, 1), { bold: true, size: 12, align: "center" });
+  r++;
+
+  ws.mergeCells(r, 1, r, lastCol);
+  ws.getCell(r, 1).value = current.subtitle;
+  styleCell(ws.getCell(r, 1), { italic: true, size: 9, align: "center", color: "FF666666" });
+  r += 2; // subtitle + blank
+
+  const metaRow = (label: string, val: string | number) => {
+    ws.getCell(r, 1).value = label;
+    styleCell(ws.getCell(r, 1), { bold: true });
+    ws.mergeCells(r, 2, r, lastCol);
+    ws.getCell(r, 2).value = val;
+    styleCell(ws.getCell(r, 2), {});
+    r++;
+  };
+  metaRow("Coverage", data.scope);
+  metaRow("Reporting Period", meta.period);
+  metaRow(current.countLabel, data.totalRecords);
+  metaRow("Generated", new Date().toLocaleString());
+  r++; // blank
+
+  // Header (2 rows): INDICATORS (merged down) + period group over sub-columns
+  const tableStart = r;
+  const hdr1 = r;
+  const hdr2 = r + 1;
+  ws.mergeCells(hdr1, 1, hdr2, 1);
+  ws.getCell(hdr1, 1).value = mode === "fp" ? "METHOD / INDICATOR" : "INDICATORS";
+  styleCell(ws.getCell(hdr1, 1), { bold: true, align: "center", fill: FILL_HEADER });
+  ws.mergeCells(hdr1, 2, hdr1, lastCol);
+  ws.getCell(hdr1, 2).value = String(meta.period || "").toUpperCase();
+  styleCell(ws.getCell(hdr1, 2), { bold: true, align: "center", fill: FILL_HEADER });
+  subCols.forEach((s, i) => {
+    const cell = ws.getCell(hdr2, 2 + i);
+    cell.value = s;
+    styleCell(cell, { bold: true, align: "center", fill: FILL_HEADER });
+  });
+  ws.getRow(hdr1).height = 18;
+  ws.getRow(hdr2).height = 18;
+  r = hdr2 + 1;
+
+  // Data rows
   for (const row of data.rows) {
-    if (row.header || !row.isData) {
-      push([row.label]);
-      continue;
+    const cellA = ws.getCell(r, 1);
+    if (row.header) {
+      ws.mergeCells(r, 1, r, lastCol);
+      cellA.value = row.label;
+      styleCell(cellA, { bold: true, fill: FILL_SECTION, align: "left" });
+    } else if (!row.isData) {
+      ws.mergeCells(r, 1, r, lastCol);
+      cellA.value = row.label;
+      styleCell(cellA, { bold: true, align: "left" });
+    } else {
+      cellA.value = row.label;
+      styleCell(cellA, { align: "left", indent: row.indent ?? 0, wrap: true });
+      valuesFor(row).forEach((v, i) => {
+        const c = ws.getCell(r, 2 + i);
+        c.value = v;
+        styleCell(c, { align: "center", bold: i === n - 1 });
+      });
     }
-    const indent = "  ".repeat(row.indent ?? 0);
-    push([`${indent}${row.label}`, ...valuesFor(row)]);
+    r++;
+  }
+  const tableEnd = r - 1;
+
+  // Borders across the whole table region (header + data), incl. merged cells
+  const thin = { style: "thin" as const, color: { argb: BORDER } };
+  for (let rr = tableStart; rr <= tableEnd; rr++) {
+    for (let cc = 1; cc <= lastCol; cc++) {
+      ws.getCell(rr, cc).border = { top: thin, left: thin, bottom: thin, right: thin };
+    }
   }
 
-  push([]);
-  push([]);
-  push(["Prepared by", meta.preparedBy, meta.preparedByTitle]);
-  push(["Noted by", meta.notedBy, meta.notedByTitle]);
+  r += 2; // blank spacer
 
-  return lines.join("\r\n");
+  // Signatories
+  const sig = (role: string, name: string, title: string) => {
+    ws.getCell(r, 1).value = role;
+    styleCell(ws.getCell(r, 1), { bold: true });
+    ws.mergeCells(r, 2, r, lastCol);
+    ws.getCell(r, 2).value = name;
+    styleCell(ws.getCell(r, 2), { bold: true });
+    r++;
+    ws.mergeCells(r, 2, r, lastCol);
+    ws.getCell(r, 2).value = title;
+    styleCell(ws.getCell(r, 2), { italic: true, size: 9, color: "FF666666" });
+    r++;
+  };
+  sig("Prepared by:", meta.preparedBy, meta.preparedByTitle);
+  sig("Noted by:", meta.notedBy, meta.notedByTitle);
+
+  return (await wb.xlsx.writeBuffer()) as ArrayBuffer;
 }
 
-function downloadCsv(csv: string, fileName: string) {
-  // BOM so Excel opens UTF-8 correctly.
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+function downloadXlsx(buffer: ArrayBuffer, fileName: string) {
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
