@@ -6,6 +6,7 @@ import {
   canManageBarangay,
 } from "@/lib/tenant-auth";
 import { displayAge } from "@/lib/age";
+import { monthRange } from "@/lib/report-period";
 
 export const runtime = "nodejs";
 
@@ -59,7 +60,7 @@ function birthGrams(v: string): number | null {
   return num < 100 ? Math.round(num * 1000) : Math.round(num);
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const user = await getCurrentApiUser();
     const role = s(user?.role);
@@ -69,8 +70,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const range = monthRange(new URL(req.url).searchParams.get("month"));
+
     const records = await prisma.maternalRecord.findMany({
       where: {
+        ...(range ? { updatedAt: { gte: range.start, lt: range.end } } : {}),
         resident: {
           isArchived: false,
           ...(isSuperAdmin(user) ? {} : { barangayId: user!.barangayId ?? undefined }),

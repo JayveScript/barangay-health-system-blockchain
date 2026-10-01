@@ -6,6 +6,7 @@ import {
   canManageBarangay,
 } from "@/lib/tenant-auth";
 import { displayAge } from "@/lib/age";
+import { inMonth } from "@/lib/report-period";
 
 export const runtime = "nodejs";
 
@@ -14,13 +15,15 @@ const STAFF_ROLES = ["DOCTOR", "NURSE", "BHW", "MIDWIFE", "PHARMACIST", "MEDTECH
 type PD = Record<string, string>;
 type MFT = { m: number; f: number; t: number };
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const user = await getCurrentApiUser();
     const role = String(user?.role || "");
     const allowed =
       !!user && (STAFF_ROLES.includes(role) || canManageBarangay(user) || isSuperAdmin(user));
     if (!allowed) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const month = new URL(req.url).searchParams.get("month");
 
     const residents = await prisma.resident.findMany({
       where: {
@@ -42,6 +45,7 @@ export async function GET() {
     for (const r of residents) {
       const pd = (r.philpenData as PD) || {};
       if (!pd || Object.keys(pd).length === 0) continue;
+      if (!inMonth(pd.__savedAt, month)) continue;
       const age = displayAge(r.birthDate, r.age);
       if (age == null || age < 20) continue;
       const grp = age <= 59 ? "ad" : "sr";

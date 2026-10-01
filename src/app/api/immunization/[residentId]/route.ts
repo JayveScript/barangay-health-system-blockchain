@@ -43,6 +43,8 @@ export async function PUT(
     if (!g.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await req.json().catch(() => ({}));
     const data = body?.data && typeof body.data === "object" ? body.data : {};
+    // Stamp the input month so monthly reports can bucket this record.
+    (data as Record<string, unknown>).__savedAt = new Date().toISOString();
     const exists = await prisma.resident.findUnique({ where: { id: residentId }, select: { id: true } });
     if (!exists) return NextResponse.json({ error: "Resident not found" }, { status: 404 });
     await prisma.resident.update({ where: { id: residentId }, data: { immunizationData: data } });

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet, Download } from "lucide-react";
+import { FileBarChart2, Baby, HeartHandshake, ShieldPlus, Syringe, RefreshCw, FileSpreadsheet, Download, CalendarDays } from "lucide-react";
 import type { Cell } from "exceljs";
 import type { jsPDF as JsPDFType } from "jspdf";
+import { monthLabel } from "@/lib/report-period";
 
 type Row = {
   label: string;
@@ -88,10 +89,6 @@ const REPORTS: {
   },
 ];
 
-function currentPeriodLabel() {
-  return new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" });
-}
-
 export function ReportsTab() {
   const [active, setActive] = useState<ReportId>("maternal");
   const [data, setData] = useState<ReportData | null>(null);
@@ -99,7 +96,9 @@ export function ReportsTab() {
   const [error, setError] = useState("");
 
   // Report metadata for the printout / export header & signatories.
-  const [period, setPeriod] = useState(currentPeriodLabel());
+  // monthValue: "" = all months, otherwise "YYYY-MM".
+  const [monthValue, setMonthValue] = useState("");
+  const period = monthLabel(monthValue);
   const [preparedBy, setPreparedBy] = useState("");
   const [preparedByTitle, setPreparedByTitle] = useState("");
   const [notedBy, setNotedBy] = useState("");
@@ -172,7 +171,8 @@ export function ReportsTab() {
       setLoading(true);
       setError("");
       setData(null);
-      const res = await fetch(report.endpoint, { cache: "no-store" });
+      const qs = monthValue ? `?month=${encodeURIComponent(monthValue)}` : "";
+      const res = await fetch(report.endpoint + qs, { cache: "no-store" });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error || "Failed to load report.");
@@ -188,11 +188,19 @@ export function ReportsTab() {
 
   useEffect(() => {
     load(current);
-  }, [active]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, monthValue]);
 
   const mode = current.columns;
   const isFp = mode === "fp";
   const isNcd = mode === "ncd";
+  const valueCols = isNcd ? 3 : 4;
+  const span = valueCols + 1;
+  const subColLabels = isFp
+    ? ["NA", "OA", "DO", "CU"]
+    : isNcd
+    ? ["M", "F", "T"]
+    : ["10–14", "15–19", "20–49", "Total"];
 
   return (
     <div className="space-y-5 pb-4">
@@ -229,7 +237,28 @@ export function ReportsTab() {
                 <p className="mt-0.5 text-sm text-white/80">{current.subtitle}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="no-print inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-3 py-2 text-sm font-bold text-white">
+                <CalendarDays className="h-4 w-4" />
+                <input
+                  type="month"
+                  value={monthValue}
+                  onChange={(e) => setMonthValue(e.target.value)}
+                  className="bg-transparent text-sm font-bold text-white outline-none [color-scheme:dark]"
+                  aria-label="Report month"
+                />
+                {monthValue ? (
+                  <button
+                    type="button"
+                    onClick={() => setMonthValue("")}
+                    className="rounded-lg bg-white/15 px-2 py-0.5 text-xs font-bold hover:bg-white/25"
+                  >
+                    All months
+                  </button>
+                ) : (
+                  <span className="rounded-lg bg-white/15 px-2 py-0.5 text-xs font-bold">All months</span>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => load(current)}
@@ -262,7 +291,7 @@ export function ReportsTab() {
           {data && (
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <StatTile label="Coverage" value={data.scope} />
-              <EditableStatTile label="Reporting Period" value={period} onChange={setPeriod} />
+              <StatTile label="Reporting Period" value={period} />
               <StatTile label={current.countLabel} value={String(data.totalRecords)} />
               <StatTile label="Generated" value={new Date().toLocaleDateString()} />
             </div>
@@ -279,42 +308,44 @@ export function ReportsTab() {
             <div className="p-6 text-sm font-semibold text-red-600">{error}</div>
           ) : data ? (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] border-collapse text-sm">
+              <table className="w-full min-w-[640px] border-collapse text-sm [&_td]:border [&_td]:border-slate-300 [&_th]:border [&_th]:border-slate-300">
                 <thead>
-                  <tr className="bg-[#EFF6FF] text-[#1E3A8A]">
-                    <th className="sticky left-0 z-10 bg-[#EFF6FF] px-4 py-3 text-left text-xs font-black uppercase tracking-wide">
-                      {isFp ? "Method / Age Group" : "Indicator"}
+                  <tr>
+                    <th
+                      colSpan={span}
+                      className="bg-[#1E3A8A] px-4 py-2.5 text-center text-base font-black uppercase tracking-wide text-white"
+                    >
+                      Summary Table
                     </th>
-                    {isFp ? (
-                      <>
-                        <Th title="New Acceptor">NA</Th>
-                        <Th title="Other Acceptor">OA</Th>
-                        <Th title="Drop-out">DO</Th>
-                        <Th title="Current User">CU</Th>
-                      </>
-                    ) : isNcd ? (
-                      <>
-                        <Th title="Male">M</Th>
-                        <Th title="Female">F</Th>
-                        <Th title="Total">T</Th>
-                      </>
-                    ) : (
-                      <>
-                        <Th>10–14</Th>
-                        <Th>15–19</Th>
-                        <Th>20–49</Th>
-                        <Th>Total</Th>
-                      </>
-                    )}
+                  </tr>
+                  <tr className="bg-[#EFF6FF] text-[#1E3A8A]">
+                    <th
+                      rowSpan={2}
+                      className="sticky left-0 z-10 bg-[#EFF6FF] px-4 py-2 text-left text-xs font-black uppercase tracking-wide align-middle"
+                    >
+                      {isFp ? "Method / Indicator" : "INDICATORS"}
+                    </th>
+                    <th
+                      colSpan={valueCols}
+                      className="px-3 py-2 text-center text-xs font-black uppercase tracking-wide"
+                    >
+                      {(period || "").toUpperCase()}
+                    </th>
+                  </tr>
+                  <tr className="bg-[#EFF6FF] text-[#1E3A8A]">
+                    {subColLabels.map((s) => (
+                      <th key={s} className="px-3 py-2 text-center text-xs font-black uppercase tracking-wide">
+                        {s}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {data.rows.map((row, i) => {
-                    const span = isNcd ? 4 : 5;
                     if (row.header) {
                       return (
                         <tr key={i}>
-                          <td colSpan={span} className="bg-[#2563EB] px-4 py-2.5 text-sm font-black uppercase tracking-wide text-white">
+                          <td colSpan={span} className="bg-[#FCE4D6] px-4 py-2 text-sm font-black text-slate-800">
                             {row.label}
                           </td>
                         </tr>
@@ -322,8 +353,8 @@ export function ReportsTab() {
                     }
                     if (!row.isData) {
                       return (
-                        <tr key={i} className="border-t border-slate-100 bg-[#F8FAFC]">
-                          <td colSpan={span} className="px-4 py-2 text-sm font-black text-slate-800">
+                        <tr key={i} className="bg-[#F2F2F2]">
+                          <td colSpan={span} className="px-4 py-2 text-sm font-bold text-slate-800">
                             {row.label}
                           </td>
                         </tr>
@@ -331,9 +362,9 @@ export function ReportsTab() {
                     }
                     const pad = 16 + (row.indent ?? 0) * 18;
                     return (
-                      <tr key={i} className="border-t border-slate-100 hover:bg-[#F8FAFC]">
+                      <tr key={i} className="hover:bg-[#F8FAFC]">
                         <td
-                          className="sticky left-0 z-10 bg-white px-4 py-2 font-semibold text-slate-700"
+                          className="bg-white px-4 py-2 font-semibold text-slate-700"
                           style={{ paddingLeft: pad }}
                         >
                           {row.label}
@@ -396,17 +427,6 @@ export function ReportsTab() {
   );
 }
 
-function Th({ children, title }: { children: React.ReactNode; title?: string }) {
-  return (
-    <th
-      title={title}
-      className="px-3 py-3 text-center text-xs font-black uppercase tracking-wide"
-    >
-      {children}
-    </th>
-  );
-}
-
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-white/10 px-4 py-3">
@@ -426,28 +446,6 @@ function Num({ v, total }: { v?: number; total?: boolean }) {
     >
       {n}
     </td>
-  );
-}
-
-function EditableStatTile({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="rounded-2xl bg-white/10 px-4 py-3">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-white/60">{label}</p>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-0.5 w-full bg-transparent text-base font-black text-white outline-none placeholder:text-white/40"
-        placeholder="e.g. September 2026"
-      />
-    </div>
   );
 }
 

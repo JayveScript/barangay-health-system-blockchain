@@ -5,6 +5,7 @@ import {
   isSuperAdmin,
   canManageBarangay,
 } from "@/lib/tenant-auth";
+import { inMonth } from "@/lib/report-period";
 
 export const runtime = "nodejs";
 
@@ -14,13 +15,15 @@ type D = Record<string, string>;
 type MFT = { m: number; f: number; t: number };
 const has = (v: unknown) => String(v ?? "").trim().length > 0;
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const user = await getCurrentApiUser();
     const role = String(user?.role || "");
     const allowed =
       !!user && (STAFF_ROLES.includes(role) || canManageBarangay(user) || isSuperAdmin(user));
     if (!allowed) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const month = new URL(req.url).searchParams.get("month");
 
     const residents = await prisma.resident.findMany({
       where: {
@@ -42,6 +45,7 @@ export async function GET() {
     for (const r of residents) {
       const d = (r.immunizationData as D) || {};
       if (!d || Object.keys(d).length === 0) continue;
+      if (!inMonth(d.__savedAt, month)) continue;
       const sex = String(r.sex || "");
       children += 1;
 
