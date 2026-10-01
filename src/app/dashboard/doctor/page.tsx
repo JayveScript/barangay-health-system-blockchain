@@ -816,6 +816,7 @@ type DoctorDashboardData = {
 type OverviewResident = NonNullable<DoctorAppointment["resident"]>;
 
 function OverviewTab() {
+  const { t } = useI18n();
   const [dashboardData, setDashboardData] = useState<DoctorDashboardData | null>(
     null
   );
@@ -858,83 +859,83 @@ function OverviewTab() {
   };
 
   const genderData = [
-    { label: "Male", value: dashboardData?.gender.male ?? 0 },
-    { label: "Female", value: dashboardData?.gender.female ?? 0 },
-    { label: "Other / Not Set", value: dashboardData?.gender.other ?? 0 },
+    { label: t("ov.male"), value: dashboardData?.gender.male ?? 0 },
+    { label: t("ov.female"), value: dashboardData?.gender.female ?? 0 },
+    { label: t("ov.otherNotSet"), value: dashboardData?.gender.other ?? 0 },
   ];
 
   const appointmentData = [
-    { label: "Pending", value: stats.pending },
-    { label: "Accepted", value: stats.accepted },
-    { label: "Rejected", value: stats.rejected },
+    { label: t("ov.statusPending"), value: stats.pending },
+    { label: t("ov.statusAccepted"), value: stats.accepted },
+    { label: t("ov.statusRejected"), value: stats.rejected },
   ];
 
   const slotData = [
-    { label: "Booked Slots", value: stats.bookedSlots },
-    { label: "Open Slots", value: stats.remainingSlots },
+    { label: t("ov.doc.bookedSlots"), value: stats.bookedSlots },
+    { label: t("ov.doc.openSlots"), value: stats.remainingSlots },
   ];
 
   const conditionData = [
     {
-      label: "Hypertension",
+      label: t("ov.hypertension"),
       value: dashboardData?.conditions.hypertension ?? 0,
     },
     {
-      label: "Diabetes",
+      label: t("ov.diabetes"),
       value: dashboardData?.conditions.diabetes ?? 0,
     },
     {
-      label: "Heart Disease",
+      label: t("ov.heartDisease"),
       value: dashboardData?.conditions.heartDisease ?? 0,
     },
     {
-      label: "Tuberculosis",
+      label: t("ov.tuberculosis"),
       value: dashboardData?.conditions.tuberculosis ?? 0,
     },
     {
-      label: "Allergies",
+      label: t("ov.allergies"),
       value: dashboardData?.conditions.allergies ?? 0,
     },
     {
-      label: "Cancer",
+      label: t("ov.cancer"),
       value: dashboardData?.conditions.cancer ?? 0,
     },
   ];
 
   if (loading) {
     return (
-      <InlineLoader label="Loading overview data..." />
+      <InlineLoader label={t("ov.loadingOverview")} />
     );
   }
 
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-4 items-stretch gap-2 sm:gap-4">
         <MetricCard
           icon={<Users className="h-5 w-5" />}
-          label="Total Residents"
+          label={t("ov.totalResidents")}
           value={String(stats.totalResidents)}
         />
 
         <MetricCard
           icon={<ClipboardList className="h-5 w-5" />}
-          label="Medical Records"
+          label={t("ov.doc.medicalRecords")}
           value={String(stats.medicalRecords)}
         />
 
         <MetricCard
           icon={<CalendarDays className="h-5 w-5" />}
-          label="Total Appointments"
+          label={t("ov.doc.totalAppointments")}
           value={String(stats.totalAppointments)}
         />
 
         <MetricCard
           icon={<CalendarClock className="h-5 w-5" />}
-          label="Open Slots"
+          label={t("ov.doc.openSlots")}
           value={String(stats.remainingSlots)}
         />
       </div>
@@ -942,16 +943,16 @@ function OverviewTab() {
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <Panel
           icon={<Activity className="h-5 w-5" />}
-          title="Resident Gender Overview"
-          subtitle="Male, female, and other resident records"
+          title={t("ov.doc.genderTitle")}
+          subtitle={t("ov.doc.genderSub")}
         >
           <DonutChart data={genderData} />
         </Panel>
 
         <Panel
           icon={<BarChart3 className="h-5 w-5" />}
-          title="Appointment Status"
-          subtitle="Pending, accepted, and rejected appointment requests"
+          title={t("ov.doc.apptTitle")}
+          subtitle={t("ov.doc.apptSub")}
         >
           <BarList data={appointmentData} />
         </Panel>
@@ -960,16 +961,16 @@ function OverviewTab() {
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <Panel
           icon={<HeartPulse className="h-5 w-5" />}
-          title="Common Medical Conditions"
-          subtitle="Based on resident medical history records"
+          title={t("ov.doc.condTitle")}
+          subtitle={t("ov.doc.condSub")}
         >
           <BarList data={conditionData} />
         </Panel>
 
         <Panel
           icon={<Stethoscope className="h-5 w-5" />}
-          title="Slot Usage Overview"
-          subtitle="Booked and available doctor appointment slots"
+          title={t("ov.doc.slotTitle")}
+          subtitle={t("ov.doc.slotSub")}
         >
           <DonutChart data={slotData} />
         </Panel>
@@ -977,17 +978,17 @@ function OverviewTab() {
 
       <Panel
         icon={<CalendarCheck className="h-5 w-5" />}
-        title="Health Center Clinical Summary"
-        subtitle="Connected doctor monitoring overview"
+        title={t("ov.doc.clinicalTitle")}
+        subtitle={t("ov.doc.clinicalSub")}
       >
         <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryBox
-            title="Posted Schedules"
+            title={t("ov.doc.postedSchedules")}
             value={String(stats.postedSchedules)}
           />
-          <SummaryBox title="Total Slots" value={String(stats.totalSlots)} />
-          <SummaryBox title="Open Slots" value={String(stats.remainingSlots)} />
-          <SummaryBox title="Booked Slots" value={String(stats.bookedSlots)} />
+          <SummaryBox title={t("ov.doc.totalSlots")} value={String(stats.totalSlots)} />
+          <SummaryBox title={t("ov.doc.openSlots")} value={String(stats.remainingSlots)} />
+          <SummaryBox title={t("ov.doc.bookedSlots")} value={String(stats.bookedSlots)} />
         </div>
       </Panel>
     </div>

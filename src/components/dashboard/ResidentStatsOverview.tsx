@@ -18,6 +18,7 @@ import {
 import { DonutChart, BarList } from "./Charts";
 import { InlineLoader } from "./InlineLoader";
 import { ExportPdfButton } from "./ExportPdfButton";
+import { useI18n } from "@/lib/i18n";
 
 const SEX_COLORS = ["#075985", "#7DD3FC", "#94A3B8"];
 
@@ -41,6 +42,7 @@ type OverviewResponse = {
 };
 
 export function ResidentStatsOverview() {
+  const { t } = useI18n();
   const [data, setData] = useState<StatsResponse | null>(null);
   const [overview, setOverview] = useState<OverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ export function ResidentStatsOverview() {
         const statsJson = await statsRes.json();
         if (!statsRes.ok) {
           if (!cancelled)
-            setError(statsJson.error || "Failed to load statistics.");
+            setError(statsJson.error || t("ov.errStats"));
           return;
         }
         if (!cancelled) setData(statsJson as StatsResponse);
@@ -69,7 +71,7 @@ export function ResidentStatsOverview() {
           if (!cancelled) setOverview(overviewJson as OverviewResponse);
         }
       } catch {
-        if (!cancelled) setError("Unable to connect to the server.");
+        if (!cancelled) setError(t("ov.errConnect"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -80,7 +82,7 @@ export function ResidentStatsOverview() {
   }, []);
 
   if (loading) {
-    return <InlineLoader label="Loading resident statistics..." />;
+    return <InlineLoader label={t("ov.loadingStats")} />;
   }
 
   if (error) {
@@ -96,23 +98,23 @@ export function ResidentStatsOverview() {
   return (
     <div className="print-area space-y-5 pb-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">Overview</h2>
+        <h2 className="text-lg font-black text-slate-900">{t("ov.overview")}</h2>
         <ExportPdfButton />
       </div>
       <div className="grid grid-cols-3 gap-2 sm:gap-4 [&>*]:min-w-0">
         <StatCard
           icon={<Users className="h-5 w-5" />}
-          label="Total Residents"
+          label={t("ov.totalResidents")}
           value={data.stats.totalResidents}
         />
         <StatCard
           icon={<ShieldCheck className="h-5 w-5" />}
-          label="Verified Residents"
+          label={t("ov.verifiedResidents")}
           value={data.stats.verifiedResidents}
         />
         <StatCard
           icon={<UserRound className="h-5 w-5" />}
-          label="Other / Not Set"
+          label={t("ov.otherNotSet")}
           value={data.stats.other}
         />
       </div>
@@ -120,16 +122,16 @@ export function ResidentStatsOverview() {
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <ChartCard
           icon={<PieChartIcon className="h-5 w-5" />}
-          title="Resident Sex Distribution"
-          subtitle="Male, female, and other registered residents"
+          title={t("ov.sexDist")}
+          subtitle={t("ov.sexDistSub")}
         >
           <DonutChart data={data.sex} colors={SEX_COLORS} />
         </ChartCard>
 
         <ChartCard
           icon={<BarChart3 className="h-5 w-5" />}
-          title="Age Group Distribution"
-          subtitle="Resident population by age group"
+          title={t("ov.ageDist")}
+          subtitle={t("ov.ageDistSub")}
         >
           <BarList data={data.ageGroups} />
         </ChartCard>
@@ -143,11 +145,10 @@ export function ResidentStatsOverview() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 sm:text-xl">
-                Health Center Activity
+                {t("ov.activity")}
               </h3>
               <p className="text-sm text-slate-500">
-                A summary across registration, referrals, logbook, BMI, and
-                announcements.
+                {t("ov.activitySub")}
               </p>
             </div>
           </div>
@@ -155,39 +156,39 @@ export function ResidentStatsOverview() {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 [&>*]:min-w-0">
             <StatCard
               icon={<UserPlus className="h-5 w-5" />}
-              label="Pending Registrations"
+              label={t("ov.pendingReg")}
               value={overview.pendingRegistrations}
-              detail="Awaiting verification"
+              detail={t("ov.awaitingVerification")}
             />
             <StatCard
               icon={<ArrowDownLeft className="h-5 w-5" />}
-              label="Referrals Received"
+              label={t("ov.referralsReceived")}
               value={overview.referralsReceived}
-              detail={`${overview.pendingReferrals} pending`}
+              detail={`${overview.pendingReferrals} ${t("ov.pending")}`}
             />
             <StatCard
               icon={<ArrowUpRight className="h-5 w-5" />}
-              label="Referrals Sent"
+              label={t("ov.referralsSent")}
               value={overview.referralsSent}
-              detail="To other barangays"
+              detail={t("ov.toOtherBarangays")}
             />
             <StatCard
               icon={<BookOpen className="h-5 w-5" />}
-              label="Logbook Visits"
+              label={t("ov.logbookVisits")}
               value={overview.logbookTotal}
-              detail={`${overview.logbookToday} today`}
+              detail={`${overview.logbookToday} ${t("ov.today")}`}
             />
             <StatCard
               icon={<Scale className="h-5 w-5" />}
-              label="BMI Records"
+              label={t("ov.bmiRecords")}
               value={overview.bmiTotal}
-              detail={`${overview.bmiToday} today`}
+              detail={`${overview.bmiToday} ${t("ov.today")}`}
             />
             <StatCard
               icon={<Megaphone className="h-5 w-5" />}
-              label="Announcements"
+              label={t("ov.announcements")}
               value={overview.announcements}
-              detail="Posted in barangay"
+              detail={t("ov.postedInBarangay")}
             />
           </div>
         </div>
