@@ -4,14 +4,16 @@ import React, { useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { QrCode, AlertCircle, CheckCircle2, Lock, Shield } from "lucide-react";
 import { normalizeScannedQrUrl } from "@/lib/normalize-qr-url";
+import { useI18n } from "@/lib/i18n";
 
 export function QrScannerTab() {
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleScan = (text: string) => {
     if (text) {
-      setSuccess("QR detected! Opening secure verification...");
+      setSuccess(t("qr.detected"));
       setError(null);
 
       setTimeout(() => {
@@ -21,7 +23,7 @@ export function QrScannerTab() {
           return;
         }
         setSuccess(null);
-        setError("Unrecognized QR code. Please scan a valid resident Digital ID.");
+        setError(t("qr.unrecognized"));
       }, 900);
     }
   };
@@ -52,9 +54,9 @@ export function QrScannerTab() {
           <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-[20px] bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200">
             <QrCode className="h-8 w-8" />
           </div>
-          <h2 className="text-2xl font-black text-slate-900">Scan Resident QR</h2>
+          <h2 className="text-2xl font-black text-slate-900">{t("qr.title")}</h2>
           <p className="mt-2 text-sm text-slate-500">
-            Point your camera at the resident&apos;s Digital ID QR code. You will verify your password before any health data is shown.
+            {t("qr.subtitle")}
           </p>
           <div className="mt-3 flex items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-wider text-blue-600">
             <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> AES-256</span>
@@ -104,7 +106,7 @@ export function QrScannerTab() {
 
         <div className="bg-slate-50 p-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Powered by Barangay Health Portal
+            {t("qr.poweredBy")}
           </p>
         </div>
       </div>

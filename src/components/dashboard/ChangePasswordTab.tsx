@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { KeyRound, Mail, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export function ChangePasswordTab() {
+  const { t } = useI18n();
   const [step, setStep] = useState<"request" | "verify" | "done">("request");
   const [maskedEmail, setMaskedEmail] = useState("");
   const [code, setCode] = useState("");
@@ -19,13 +21,13 @@ export function ChangePasswordTab() {
       const res = await fetch("/api/me/change-password/send-code", { method: "POST" });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "Unable to send the code.");
+        setError(json.error || t("cp.errSend"));
         return;
       }
       setMaskedEmail(json.email || "your email");
       setStep("verify");
     } catch {
-      setError("Unable to connect to the server.");
+      setError(t("cp.errConnect"));
     } finally {
       setLoading(false);
     }
@@ -34,15 +36,15 @@ export function ChangePasswordTab() {
   const confirm = async () => {
     setError("");
     if (!code.trim()) {
-      setError("Enter the verification code from your email.");
+      setError(t("cp.errCode"));
       return;
     }
     if (newPassword.length < 8) {
-      setError("New password must be at least 8 characters.");
+      setError(t("cp.errPwLen"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("cp.errPwMatch"));
       return;
     }
     try {
@@ -54,12 +56,12 @@ export function ChangePasswordTab() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "Unable to change your password.");
+        setError(json.error || t("cp.errChange"));
         return;
       }
       setStep("done");
     } catch {
-      setError("Unable to connect to the server.");
+      setError(t("cp.errConnect"));
     } finally {
       setLoading(false);
     }
@@ -73,9 +75,9 @@ export function ChangePasswordTab() {
             <KeyRound className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900">Change Password</h3>
+            <h3 className="text-xl font-black text-slate-900">{t("cp.title")}</h3>
             <p className="text-sm text-slate-500">
-              Verify with a code sent to your Gmail, then set a new password.
+              {t("cp.subtitle")}
             </p>
           </div>
         </div>
@@ -89,7 +91,7 @@ export function ChangePasswordTab() {
             <div className="flex items-start gap-3 rounded-2xl border border-sky-100 bg-sky-50/60 px-4 py-3">
               <Mail className="mt-0.5 h-5 w-5 shrink-0 text-sky-600" />
               <p className="text-sm font-semibold text-slate-600">
-                We&apos;ll email a 6-digit verification code to the Gmail on your account. You&apos;ll need it to set a new password.
+                {t("cp.info")}
               </p>
             </div>
             <button
@@ -99,7 +101,7 @@ export function ChangePasswordTab() {
               className="inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white shadow-md shadow-sky-500/20 transition hover:bg-sky-600 disabled:opacity-60"
             >
               <Mail className="h-4 w-4" />
-              {loading ? "Sending code..." : "Send Code to My Gmail"}
+              {loading ? t("cp.sending") : t("cp.send")}
             </button>
           </div>
         )}
@@ -109,37 +111,37 @@ export function ChangePasswordTab() {
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
               <p className="text-sm font-semibold text-emerald-700">
-                Code sent to <span className="font-black">{maskedEmail}</span>. Enter it below.
+                {t("cp.sentPrefix")} <span className="font-black">{maskedEmail}</span>. {t("cp.sentSuffix")}
               </p>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">Verification Code</label>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">{t("cp.code")}</label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="6-digit code"
+                placeholder={t("cp.codePh")}
                 className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold tracking-widest text-slate-900 outline-none focus:border-sky-500"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">New Password</label>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">{t("cp.newPw")}</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t("cp.newPwPh")}
                 className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">Confirm New Password</label>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-slate-500">{t("cp.confirmPw")}</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
+                placeholder={t("cp.confirmPwPh")}
                 className="min-h-[48px] w-full rounded-2xl border border-sky-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500"
               />
             </div>
@@ -151,7 +153,7 @@ export function ChangePasswordTab() {
                 disabled={loading}
                 className="min-h-[48px] rounded-2xl border border-sky-200 bg-white px-5 text-sm font-bold text-sky-700 transition hover:bg-sky-50 disabled:opacity-60"
               >
-                Resend code
+                {t("cp.resend")}
               </button>
               <button
                 type="button"
@@ -159,7 +161,7 @@ export function ChangePasswordTab() {
                 disabled={loading}
                 className="min-h-[48px] flex-1 rounded-2xl bg-[#0EA5E9] px-6 text-sm font-bold text-white transition hover:bg-sky-600 disabled:opacity-60"
               >
-                {loading ? "Saving..." : "Change Password"}
+                {loading ? t("cp.saving") : t("cp.submit")}
               </button>
             </div>
           </div>
@@ -171,9 +173,9 @@ export function ChangePasswordTab() {
               <CheckCircle2 className="h-9 w-9" />
             </div>
             <div>
-              <h4 className="text-lg font-black text-slate-900">Password changed</h4>
+              <h4 className="text-lg font-black text-slate-900">{t("cp.doneTitle")}</h4>
               <p className="mt-1 text-sm text-slate-500">
-                For security, please log in again with your new password.
+                {t("cp.doneBody")}
               </p>
             </div>
             <button
@@ -184,7 +186,7 @@ export function ChangePasswordTab() {
               }}
               className="min-h-[48px] rounded-2xl bg-[#0EA5E9] px-8 text-sm font-bold text-white transition hover:bg-sky-600"
             >
-              Go to Login
+              {t("cp.goLogin")}
             </button>
           </div>
         )}
