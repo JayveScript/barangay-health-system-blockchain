@@ -129,7 +129,7 @@ export async function POST(req: Request) {
           birthDate: pending.birthDate,
           religion: pending.religion,
           completeAddress: pending.completeAddress,
-          barangayName: pending.barangayName,
+          barangayName: barangay.name,
           city: pending.city || DEFAULT_BARANGAY_CITY,
           civilStatus: pending.civilStatus,
           contactNumber: pending.contactNumber,
