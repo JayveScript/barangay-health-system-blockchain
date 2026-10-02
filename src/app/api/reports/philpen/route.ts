@@ -125,7 +125,7 @@ export async function GET(req: Request) {
 
     const scope = isSuperAdmin(user)
       ? "All barangays"
-      : residents[0]?.barangayName || "Your barangay";
+      : user?.barangay?.name || residents[0]?.barangayName || "Your barangay";
 
     return NextResponse.json({ scope, totalRecords: assessedTotal, rows });
   } catch (err) {
