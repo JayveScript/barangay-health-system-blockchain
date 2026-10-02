@@ -17,6 +17,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://api.qrserver.com https://ui-avatars.com",
   "font-src 'self' data:",
+  // The QR scanner plays a short scan-confirmation beep encoded as a data: URI.
+  "media-src 'self' data:",
   // jsDelivr is where zxing-wasm fetches its .wasm binary for QR decoding.
   "connect-src 'self' https://fastly.jsdelivr.net https://cdn.jsdelivr.net",
   "frame-ancestors 'none'",
