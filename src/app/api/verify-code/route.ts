@@ -9,6 +9,18 @@ import {
   type ResidentWithHistories,
 } from "@/lib/resident-records";
 import { sendRegistrationWelcomeEmail } from "@/lib/mail";
+import {
+  checkRateLimit,
+  recordAttempt,
+  clearAttempts,
+  clientIp,
+} from "@/lib/rate-limit";
+
+// Brute-forcing a 6-digit OTP is only feasible without a cap, so limit wrong
+// attempts per email (the targeted account) and per IP (mass attempts).
+const OTP_WINDOW_MS = 15 * 60 * 1000;
+const MAX_OTP_PER_EMAIL = 5;
+const MAX_OTP_PER_IP = 30;
 
 export async function POST(req: Request) {
   try {
@@ -25,11 +37,39 @@ export async function POST(req: Request) {
     const normalizedEmail = String(email).trim().toLowerCase();
     const normalizedCode = String(code).trim();
 
+    const ip = clientIp(req);
+    const emailKey = `otp-verify:${normalizedEmail}`;
+    const ipKey = `otp-verify-ip:${ip}`;
+
+    const [emailRl, ipRl] = await Promise.all([
+      checkRateLimit(emailKey, MAX_OTP_PER_EMAIL),
+      checkRateLimit(ipKey, MAX_OTP_PER_IP),
+    ]);
+    const blocked = emailRl.blocked ? emailRl : ipRl.blocked ? ipRl : null;
+    if (blocked) {
+      return NextResponse.json(
+        {
+          error: `Too many verification attempts. Try again in ${Math.ceil(
+            blocked.retryAfterSec / 60
+          )} minute(s).`,
+        },
+        { status: 429, headers: { "Retry-After": String(blocked.retryAfterSec) } }
+      );
+    }
+
+    const recordFailure = async () => {
+      await Promise.all([
+        recordAttempt(emailKey, OTP_WINDOW_MS),
+        recordAttempt(ipKey, OTP_WINDOW_MS),
+      ]);
+    };
+
     const pending = await db.pendingRegistration.findUnique({
       where: { email: normalizedEmail },
     });
 
     if (!pending) {
+      await recordFailure();
       return NextResponse.json(
         { error: "Pending registration not found." },
         { status: 404 }
@@ -37,6 +77,7 @@ export async function POST(req: Request) {
     }
 
     if (pending.otpCode !== normalizedCode) {
+      await recordFailure();
       return NextResponse.json(
         { error: "Invalid verification code." },
         { status: 400 }
@@ -44,11 +85,15 @@ export async function POST(req: Request) {
     }
 
     if (new Date() > pending.otpExpiresAt) {
+      await recordFailure();
       return NextResponse.json(
         { error: "Verification code has expired." },
         { status: 400 }
       );
     }
+
+    // Code is valid: clear the failed-attempt counter for this email.
+    await clearAttempts(emailKey);
 
     const existingUserByEmail = await db.user.findUnique({
       where: { email: normalizedEmail },

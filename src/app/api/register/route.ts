@@ -7,10 +7,18 @@ import {
   getHealthCenterForSitio,
 } from "@/lib/barangay-options";
 import { normalizeBarangayHcmsUsername } from "@/lib/username-validation";
+import { checkRateLimit, recordAttempt, clientIp } from "@/lib/rate-limit";
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+// Each registration attempt sends an OTP email, so cap how often that can
+// happen — both per target email (inbox spam / enumeration) and per IP
+// (mass abuse of the mail-sending quota).
+const SEND_WINDOW_MS = 15 * 60 * 1000;
+const MAX_SEND_PER_EMAIL = 5;
+const MAX_SEND_PER_IP = 15;
 
 export async function POST(req: Request) {
   try {
@@ -136,6 +144,26 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Please enter a valid birth date." },
         { status: 400 }
+      );
+    }
+
+    const ip = clientIp(req);
+    const sendKey = `otp-send:${normalizedEmail}`;
+    const sendIpKey = `otp-send-ip:${ip}`;
+
+    const [emailRl, ipRl] = await Promise.all([
+      checkRateLimit(sendKey, MAX_SEND_PER_EMAIL),
+      checkRateLimit(sendIpKey, MAX_SEND_PER_IP),
+    ]);
+    const blocked = emailRl.blocked ? emailRl : ipRl.blocked ? ipRl : null;
+    if (blocked) {
+      return NextResponse.json(
+        {
+          error: `Too many verification requests. Please wait ${Math.ceil(
+            blocked.retryAfterSec / 60
+          )} minute(s) before trying again.`,
+        },
+        { status: 429, headers: { "Retry-After": String(blocked.retryAfterSec) } }
       );
     }
 
@@ -298,6 +326,12 @@ export async function POST(req: Request) {
 
     await sendOtpEmail(normalizedEmail, otp);
     console.log("OTP dispatched via EMAIL");
+
+    // Count this send only after it succeeds, so failed sends don't lock users out.
+    await Promise.all([
+      recordAttempt(sendKey, SEND_WINDOW_MS),
+      recordAttempt(sendIpKey, SEND_WINDOW_MS),
+    ]);
 
     return NextResponse.json({
       success: true,
