@@ -1091,7 +1091,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <LanguageSwitcher />
                   <BlockchainStatusBadge />
                   <button
@@ -1099,9 +1099,9 @@ export default function AdminDashboardPage() {
                       await fetch("/api/logout", { method: "POST" });
                       window.location.href = "/login";
                     }}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                    className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-4 w-4 shrink-0" />
                     {t("nav.logout")}
                   </button>
                 </div>

@@ -482,7 +482,7 @@ export default function RegisterPage() {
       <div className="auth-card mx-auto flex w-full rounded-[2rem] border border-[#DCEAF7] bg-white shadow-2xl shadow-sky-900/10">
        <div className="flex w-full flex-col rounded-[26px] border border-sky-200/80 bg-white shadow-2xl shadow-sky-900/10 backdrop-blur">
           <div className="shrink-0 border-b border-sky-200 bg-white/90 px-4 py-3 sm:px-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                   <Building2 className="h-6 w-6" />

@@ -59,11 +59,11 @@ export function BlockchainStatusBadge({ className = "" }: { className?: string }
   return (
     <span
       title="Blockchain anchoring status"
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ring-1 ${cfg.cls} ${className}`}
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-black ring-1 ${cfg.cls} ${className}`}
     >
-      <Link2 className="h-3.5 w-3.5" />
+      <Link2 className="h-3.5 w-3.5 shrink-0" />
       {cfg.label}
-      <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+      <span className={`h-2 w-2 shrink-0 rounded-full ${cfg.dot}`} />
     </span>
   );
 }
