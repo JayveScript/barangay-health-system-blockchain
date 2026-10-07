@@ -59,6 +59,16 @@ const en: Dict = {
   "consent.agree": "I Agree & Continue",
   "consent.view": "View Data Privacy Consent",
   "consent.close": "Close",
+  "consent.gateTitle": "Patient Consent & Data Privacy",
+  "consent.gateIntro":
+    "Before you register, please read the patient consent and the Data Privacy Act notice below. You must check the box to confirm you understand before you can proceed to the registration form.",
+  "consent.patientHeading": "Patient Consent",
+  "consent.patientBody":
+    "I voluntarily give my consent to the Barangay Health Center to register me as a patient; to collect my personal, demographic, and health information; to record my consultations, diagnoses, treatments, immunizations, and other health services; and to use this information to provide me with health care and to maintain my health records. I understand that authorized health center staff — doctors, nurses, midwives, and barangay health workers — may access my records to deliver my care.",
+  "consent.privacyHeading": "Data Privacy Act Notice",
+  "consent.understand":
+    "I have read and understood the Patient Consent and the Data Privacy Act notice above, and I agree to proceed.",
+  "consent.proceed": "I Understand — Proceed to Registration",
 
   // Change password
   "cp.title": "Change Password",
@@ -455,6 +465,16 @@ const ceb: Dict = {
   "consent.agree": "Mouyon Ko & Padayon",
   "consent.view": "Tan-awa ang Data Privacy Consent",
   "consent.close": "Sirado",
+  "consent.gateTitle": "Pagtugot sa Pasyente ug Data Privacy",
+  "consent.gateIntro":
+    "Sa dili pa magparehistro, palihog basaha ang pagtugot sa pasyente ug ang pahibalo sa Data Privacy Act sa ubos. Kinahanglan nimong tsekan ang kahon aron kumpirmahon nga nasabtan nimo kini una ka makapadayon sa porma sa rehistro.",
+  "consent.patientHeading": "Pagtugot sa Pasyente",
+  "consent.patientBody":
+    "Boluntaryo nakong gihatag ang akong pagtugot sa Barangay Health Center nga irehistro ako isip pasyente; sa pagkolekta sa akong personal ug panglawas nga impormasyon; sa pagrekord sa akong mga konsultasyon, diagnosis, tambal, bakuna, ug uban pang serbisyo sa panglawas; ug sa paggamit niini aron hatagan ako ug pag-atiman ug aron tipigan ang akong mga rekord. Nasabtan nako nga ang awtorisadong mga kawani sa health center — mga doktor, nurse, midwife, ug barangay health worker — mahimong motan-aw sa akong mga rekord aron ihatag ang akong pag-atiman.",
+  "consent.privacyHeading": "Pahibalo sa Data Privacy Act",
+  "consent.understand":
+    "Nabasa ug nasabtan nako ang Pagtugot sa Pasyente ug ang pahibalo sa Data Privacy Act sa ibabaw, ug mouyon ko nga mopadayon.",
+  "consent.proceed": "Nasabtan Nako — Padayon sa Pagparehistro",
 
   "cp.title": "Usba ang Password",
   "cp.subtitle": "Pag-verify gamit ang code nga ipadala sa imong Gmail, dayon pagbutang og bag-ong password.",
@@ -838,6 +858,16 @@ const fil: Dict = {
   "consent.agree": "Sumasang-ayon Ako & Magpatuloy",
   "consent.view": "Tingnan ang Data Privacy Consent",
   "consent.close": "Isara",
+  "consent.gateTitle": "Pahintulot ng Pasyente at Data Privacy",
+  "consent.gateIntro":
+    "Bago magrehistro, mangyaring basahin ang pahintulot ng pasyente at ang paunawa sa Data Privacy Act sa ibaba. Kailangan ninyong lagyan ng tsek ang kahon upang kumpirmahing naiintindihan ninyo ito bago magpatuloy sa form ng pagrehistro.",
+  "consent.patientHeading": "Pahintulot ng Pasyente",
+  "consent.patientBody":
+    "Kusang-loob kong ibinibigay ang aking pahintulot sa Barangay Health Center na irehistro ako bilang pasyente; na kolektahin ang aking personal at pangkalusugang impormasyon; na itala ang aking mga konsultasyon, diagnosis, panggagamot, pagbabakuna, at iba pang serbisyong pangkalusugan; at gamitin ang impormasyong ito upang bigyan ako ng pangangalaga at panatilihin ang aking mga rekord. Nauunawaan ko na ang mga awtorisadong kawani ng health center — mga doktor, nurse, midwife, at barangay health worker — ay maaaring tumingin sa aking mga rekord upang maibigay ang aking pangangalaga.",
+  "consent.privacyHeading": "Paunawa sa Data Privacy Act",
+  "consent.understand":
+    "Nabasa at naunawaan ko ang Pahintulot ng Pasyente at ang paunawa sa Data Privacy Act sa itaas, at sumasang-ayon akong magpatuloy.",
+  "consent.proceed": "Naiintindihan Ko — Magpatuloy sa Pagrehistro",
 
   "cp.title": "Palitan ang Password",
   "cp.subtitle": "Mag-verify gamit ang code na ipapadala sa iyong Gmail, pagkatapos ay maglagay ng bagong password.",

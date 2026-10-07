@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ageLabel } from "@/lib/age";
 import { useI18n } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ConsentNotice } from "@/components/ConsentNotice";
+import { ConsentGate } from "@/components/ConsentGate";
 import {
   ArrowLeft,
   ArrowRight,
@@ -201,6 +201,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<ErrorState>({});
   const [consent, setConsent] = useState(false);
   const [consentError, setConsentError] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const [dupPrompt, setDupPrompt] = useState(false);
   const { t: tr } = useI18n();
 
@@ -514,6 +515,23 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          {!consentAccepted ? (
+            <ConsentGate
+              checked={consent}
+              onChange={(v) => {
+                setConsent(v);
+                if (v) setConsentError(false);
+              }}
+              onProceed={() => {
+                if (!consent) {
+                  setConsentError(true);
+                  return;
+                }
+                setConsentAccepted(true);
+              }}
+            />
+          ) : (
+          <>
           <div className="shrink-0 border-b border-sky-200 bg-gradient-to-r from-white via-sky-50/40 to-white px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-3">
               <div>
@@ -981,17 +999,6 @@ export default function RegisterPage() {
       </div>
     </FormSection>
 
-    {!otpSent && (
-      <ConsentNotice
-        checked={consent}
-        onChange={(v) => {
-          setConsent(v);
-          if (v) setConsentError(false);
-        }}
-        showError={consentError}
-      />
-    )}
-
     <FormSection title="Send Verification Code">
       {!otpSent ? (
         <button
@@ -1100,6 +1107,8 @@ export default function RegisterPage() {
               )}
             </div>
           </form>
+          </>
+          )}
         </div>
       </div>
 
