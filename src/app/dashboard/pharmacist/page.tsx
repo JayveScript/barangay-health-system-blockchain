@@ -141,14 +141,14 @@ export default function PharmacistDashboardPage() {
           </div>
         </aside>
 
-        <aside className="hidden h-full w-[240px] shrink-0 rounded-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-5 text-white shadow-xl lg:flex lg:flex-col">
+        <aside className="hidden h-full w-[264px] shrink-0 rounded-[28px] bg-gradient-to-b from-[#0F172A] to-[#1E3A8A] p-4 text-white shadow-xl lg:flex lg:flex-col">
           <div className="flex min-h-0 flex-1 flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur">
             <div className="mb-6 flex shrink-0 items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                 <Pill className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Health Portal</h2>
+                <h2 className="text-lg font-bold leading-tight whitespace-nowrap">Health Portal</h2>
                 <p className="text-sm text-white/70">Pharmacist Dashboard</p>
               </div>
             </div>
@@ -168,8 +168,8 @@ export default function PharmacistDashboardPage() {
         <section className="h-full flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto [transform:translateZ(0)] [will-change:transform] [backface-visibility:hidden] rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm">
             <div className="mb-6 overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-[#F8FAFC] p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#2563EB] text-white hover:bg-blue-700"
@@ -181,8 +181,8 @@ export default function PharmacistDashboardPage() {
                     {initials}
                   </div>
 
-                  <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h1 className="max-w-full whitespace-nowrap text-lg font-extrabold text-slate-900 sm:text-3xl">
                         Dashboard
                       </h1>
@@ -196,20 +196,22 @@ export default function PharmacistDashboardPage() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 max-w-full whitespace-nowrap text-xs uppercase tracking-wide text-slate-500 sm:text-sm">
+                    <p className="mt-1 max-w-full truncate text-xs uppercase tracking-wide text-slate-500 sm:text-sm">
                       {user.fullName}
                     </p>
                   </div>
                 </div>
 
-                <LanguageSwitcher />
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
-                >
-                  <LogOut className="h-4 w-4" />
-                  {t("nav.logout")}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <LanguageSwitcher />
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    {t("nav.logout")}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -343,7 +345,7 @@ function SidebarButton({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+      className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3.5 text-left text-sm font-semibold transition ${
         active
           ? "bg-[#2563EB] text-white shadow-lg shadow-blue-900/20"
           : "text-white/80 hover:bg-white/10"

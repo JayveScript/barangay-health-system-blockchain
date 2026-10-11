@@ -1004,14 +1004,14 @@ export default function AdminDashboardPage() {
         </aside>
 
         <aside className="hidden shrink-0 rounded-[1.875rem] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[var(--sidebar-width)] lg:p-5 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-4 lg:p-5">
+          <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-3 lg:p-3">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                 <HeartPulse className="h-6 w-6" />
               </div>
 
               <div>
-                <h2 className="text-xl font-bold">Health Portal</h2>
+                <h2 className="text-lg font-bold leading-tight whitespace-nowrap">Health Portal</h2>
                 <p className="text-sm text-slate-500">Admin Navigation</p>
               </div>
             </div>
@@ -1037,8 +1037,8 @@ export default function AdminDashboardPage() {
         <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden lg:h-full">
           <div className="rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 sm:p-6">
             <div className="mb-5 rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 sm:p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#0EA5E9] text-white hover:bg-sky-600"
@@ -1050,8 +1050,8 @@ export default function AdminDashboardPage() {
                     {adminInitials}
                   </div>
 
-                  <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h1 className="max-w-full whitespace-nowrap text-lg font-extrabold text-slate-900 sm:text-2xl">
                         BARANGAY ADMIN
                       </h1>

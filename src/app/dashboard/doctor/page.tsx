@@ -271,15 +271,15 @@ export default function DoctorDashboardPage() {
           </div>
         </aside>
 
-        <aside className="hidden shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[240px] lg:p-5 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-4 lg:p-5">
+        <aside className="hidden shrink-0 rounded-[30px] border border-[#DCEAF7] bg-white p-4 text-slate-800 shadow-2xl shadow-sky-900/10 lg:block lg:h-full lg:w-[264px] lg:p-4 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          <div className="rounded-[24px] border border-sky-200 bg-sky-50/60 p-3 lg:p-3">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25">
                 <HeartPulse className="h-6 w-6" />
               </div>
 
               <div>
-                <h2 className="text-xl font-bold">Health Portal</h2>
+                <h2 className="text-lg font-bold leading-tight whitespace-nowrap">Health Portal</h2>
                 <p className="text-sm text-slate-500">Doctor Dashboard</p>
               </div>
             </div>
@@ -303,8 +303,8 @@ export default function DoctorDashboardPage() {
         <section className="flex-1 overflow-y-auto lg:h-full [transform:translateZ(0)]">
           <div className="min-h-full [transform:translateZ(0)] [will-change:transform] [backface-visibility:hidden] rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 sm:p-6">
             <div className="mb-6 overflow-hidden rounded-[24px] border border-sky-200 bg-gradient-to-br from-white to-sky-50 p-4 shadow-lg shadow-sky-900/5 sm:p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-[#0EA5E9] text-white hover:bg-sky-600"
@@ -316,8 +316,8 @@ export default function DoctorDashboardPage() {
                     {initials}
                   </div>
 
-                  <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h1 className="max-w-full whitespace-nowrap text-lg font-extrabold text-slate-900 sm:text-3xl">
                         Dashboard
                       </h1>
@@ -339,20 +339,22 @@ export default function DoctorDashboardPage() {
                       </span>
                     </div>
 
-                    <p className="mt-1 max-w-full whitespace-nowrap text-xs uppercase tracking-wide text-slate-500 sm:text-sm">
+                    <p className="mt-1 max-w-full truncate text-xs uppercase tracking-wide text-slate-500 sm:text-sm">
                       {user.fullName}
                     </p>
                   </div>
                 </div>
 
-                <LanguageSwitcher />
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
-                >
-                  <LogOut className="h-4 w-4" />
-                  {t("nav.logout")}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <LanguageSwitcher />
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    {t("nav.logout")}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1032,7 +1034,7 @@ function SidebarButton({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-left text-sm font-semibold transition ${
+      className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3.5 text-left text-sm font-semibold transition ${
         active
           ? "bg-[#0EA5E9] text-white shadow-lg shadow-sky-500/25"
           : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"
@@ -1042,7 +1044,7 @@ function SidebarButton({
         {icon}
       </span>
 
-      <span className="leading-none">{label}</span>
+      <span className="min-w-0 leading-tight">{label}</span>
     </button>
   );
 }

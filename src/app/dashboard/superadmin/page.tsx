@@ -155,8 +155,8 @@ export default function SuperAdminDashboard() {
 
           <section className="h-full overflow-y-auto rounded-[30px] border border-[#DCEAF7] bg-white p-4 shadow-2xl shadow-sky-900/10 md:p-6">
             <div className="mb-6 overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0369A1] via-[#1D4ED8] to-[#4338CA] p-5 text-white shadow-lg sm:p-6">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-4">
                   <button
                     onClick={() => setMobileSidebarOpen(true)}
                     className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/30"
@@ -182,12 +182,12 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start md:self-center">
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <BlockchainStatusBadge />
                   <LanguageSwitcher />
                   <button
                     onClick={handleLogout}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
+                    className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
                   >
                     <LogOut className="h-4 w-4" />
                     {t("nav.logout")}
